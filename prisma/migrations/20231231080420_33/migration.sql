@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `videos` ADD COLUMN `part` VARCHAR(191) NULL DEFAULT '1';

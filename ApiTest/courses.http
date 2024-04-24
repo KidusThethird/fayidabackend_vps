@@ -1,0 +1,37 @@
+
+GET http://localhost:5000/courses/
+
+###
+
+GET http://localhost:5000/courses/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+
+###
+
+POST http://localhost:5000/courses/
+Content-Type: application/json
+
+{
+    "courseName":"Chemistry2",
+    "packages":{"connect":[
+        {"id":"0487008c-1e9b-48cb-89a0-2c4a1f0a1fbf"}
+        ]}
+    
+}
+// we can replace the key word 'connect' with 'create' to create a new package with it
+###
+
+PATCH  http://localhost:5000/courses/6e1e8ea1-216d-41e7-a056-dcde825c3fbf
+Content-Type: application/json
+
+{
+  
+  "packages":{"disconnect":[
+        {"id":"048008c-1e9b-48cb-89a0-2c4a1f0a1fbf"}
+        ]}
+
+}
+
+###
+
+DELETE http://localhost:5000/courses/1e194bdf-8631-4b5f-8743-a7315f20f744
+

@@ -1,0 +1,35 @@
+GET http://localhost:5000/students/
+
+###
+
+GET http://localhost:5000/students/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+
+###
+
+POST http://localhost:5000/students/
+Content-Type: application/json
+
+{
+"firstName": "Name2",
+  "lastName": "Lname2",
+  "grandName": "Gname2",
+  "age": "33"
+ 
+ 
+}
+
+###
+
+PATCH  http://localhost:5000/students/9b2815a8-7274-4811-ae32-3bd1c0dcbe6c
+Content-Type: application/json
+
+{
+  "firstName":"MyName",
+  "sectionId": "7a53f9c9-f418-479f-a083-c864527f5b8b"
+
+}
+
+###
+
+DELETE http://localhost:5000/students/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+

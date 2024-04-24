@@ -1,0 +1,472 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Students {
+  id                 String               @id @unique @default(uuid())
+  accountType        String               @default("Student")
+  accountPrivilege   String               @default("none")
+  firstName          String?
+  lastName           String?
+  grandName          String?
+  age                String?
+  createdAt          DateTime             @default(now())
+  sectionId          String?
+  sections           Sections?            @relation(fields: [sectionId], references: [id], map: "Students_sectionId_fkey")
+  studentStatus      String?              @default("down")
+  purchaselist       PurchaseList[]
+  gread              String?
+  schoolName         String?
+  region             String?
+  city               String?
+  gender             String?
+  StudentAssessement StudentAssessement[]
+
+  code String? @default("1136")
+
+  email            String?         @unique
+  password         String?
+  phoneNumber      String?
+  profilePicture   String?
+  prefferdLanguage String?
+  Notifications    Notifications[]
+  Conversations    Conversations[]
+  StudentCourse    StudentCourse[]
+  StudentPrize     StudentPrize[]
+  points           String?         @default("0")
+  message          String?         @default("")
+
+  extra1 String?
+  extra2 String?
+
+  @@index([sectionId], map: "Students_sectionId_fkey")
+}
+
+model ExamTaker {
+  id                           String                         @id @default(uuid())
+  name                         String?
+  grade                        String?
+  region                       String?
+  gender                       String?
+  city                         String?
+  school                       String?
+  phoneNumber                  String?
+  scienceType                  String?
+  ExamTakerMockPackagePurchase ExamTakerMockPackagePurchase[]
+  createdAt                    DateTime                       @default(now())
+  extra1                       String?
+  extra2                       String?
+}
+
+model ExamTakerMockPackagePurchase {
+  id             String      @id @default(uuid())
+  mockPackage    MockPackage @relation(fields: [mockPackageId], references: [id])
+  examTaker      ExamTaker?  @relation(fields: [examTakerId], references: [id])
+  examTakerId    String?
+  mockPackageId  String
+  paymentMethod  String?
+  phoneNumber    String?
+  createdAt      DateTime    @default(now())
+  status         String?     @default("pending")
+  name           String?
+  transaction_id String?
+  price          String?
+  extra1         String?
+  extra2         String?
+}
+
+model Sections {
+  id          String     @id @default(uuid())
+  sectionName String?    @unique(map: "Sections_sectionName_key")
+  students    Students[]
+  Packages    Packages[]
+  extra1      String?
+  extra2      String?
+}
+
+model City {
+  id       Int     @id @default(autoincrement())
+  cityName String?
+  extra1   String?
+  extra2   String?
+}
+
+model Region {
+  id         Int     @id @default(autoincrement())
+  regionName String?
+  extra1     String?
+  extra2     String?
+}
+
+model PackageFolder {
+  id         Int     @id @default(autoincrement())
+  folderName String?
+  type       String?
+  index      String?
+  parent     String?
+  layer      String?
+  extra1     String?
+}
+
+model Packages {
+  id                 String          @id @default(uuid())
+  packageName        String?
+  price              String?
+  price2             String?
+  price3             String?
+  temporaryPrice     String?
+  temporaryPrice2    String?
+  temporaryPrice3    String?
+  discountStatus     Boolean?        @default(false)
+  discountExpriyDate DateTime?
+  status             Boolean?        @default(false)
+  displayOnHome      Boolean?        @default(false)
+  courses            Courses[]
+  thumbnail          String?
+  trailer            String?
+  createdAt          DateTime        @default(now())
+  packageDescription String?         @db.Text
+  purchaselist       PurchaseList[]
+  suggestedSection   Sections?       @relation(fields: [sectionsId], references: [id])
+  sectionsId         String?
+  studentCourses     StudentCourse[]
+  group              String?
+  group2             String?
+  extra1             String?
+  extra2             String?
+
+  @@map("package")
+}
+
+model MockPackage {
+  id                           String                         @id @default(uuid())
+  title                        String?                        @default("untitled")
+  description                  String?                        @default("")
+  thumbnail                    String?
+  price                        String?                        @default("free")
+  temporaryPrice               String?
+  status                       String?                        @default("inactive")
+  displayHome                  Boolean?                       @default(false)
+  discountStatus               Boolean?                       @default(false)
+  discountExpiryDate           DateTime?
+  group                        String?
+  group2                       String?
+  Exams                        Assesment[]
+  ExamTakerMockPackagePurchase ExamTakerMockPackagePurchase[]
+  extra1                       String?
+  extra2                       String?
+}
+
+model StudentCourse {
+  id      String   @id @default(uuid())
+  Student Students @relation(fields: [studentsId], references: [id])
+  Courses Courses  @relation(fields: [coursesId], references: [id])
+
+  Packages   Packages  @relation(fields: [packageId], references: [id])
+  coursesId  String
+  studentsId String
+  packageId  String
+  status     String?   @default("default")
+  progress   String?   @default("0")
+  createdAt  DateTime  @default(now())
+  expiryDate DateTime?
+  extra1     String?
+  extra2     String?
+}
+
+model StudentAssessement {
+  id             String    @id @default(uuid())
+  Student        Students  @relation(fields: [studentId], references: [id])
+  Assesment      Assesment @relation(fields: [assessmentId], references: [id])
+  assessmentId   String
+  studentId      String
+  Score          String?
+  CorrectAnswers String?
+  createdAt      DateTime  @default(now())
+  extra1         String?
+  extra2         String?
+}
+
+model PurchaseList {
+  id                  String    @id @default(uuid())
+  type                String    @default("default")
+  updatePackageStatus String    @default("off")
+  Student             Students  @relation(fields: [studentsId], references: [id])
+  Package             Packages  @relation(fields: [packagesId], references: [id])
+  paymentStatus       String?   @default("pending")
+  name                String?
+  method              String?
+  value               String?
+  transaction_id      String?
+  purchaseType        String?
+  createdAt           DateTime  @default(now())
+  studentsId          String
+  packagesId          String
+  activatedDate       DateTime?
+  timeLength          String?
+  expiryDate          DateTime?
+  extra1              String?
+  extra2              String?
+}
+
+model Courses {
+  id                      String          @id @default(uuid())
+  courseName              String?
+  courseDescription       String?         @db.Text
+  packages                Packages[]
+  createdAt               DateTime        @default(now())
+  materials               Materials[]
+  Forum                   Forum?
+  StudentCourse           StudentCourse[]
+  parts                   String?         @default("1")
+  partName                String?
+  courseIntroductionVideo String?
+  extra1                  String?
+  extra2                  String?
+}
+
+model Materials {
+  id            String     @id @default(uuid())
+  course        Courses    @relation(fields: [coursesId], references: [id])
+  materialIndex Int
+  materialType  String?
+  video         Videos?
+  assementId    Assesment?
+  part          String?    @default("1")
+
+  coursesId String
+
+  assesmentId String?
+  extra1      String?
+  extra2      String?
+}
+
+model Videos {
+  id             String   @id @unique @default(uuid())
+  vidTitle       String?
+  vidDescription String?  @db.Text
+  course         String?
+  createdAt      DateTime @default(now())
+  location       String?
+
+  language   Languages[]
+  audio      Audios[]
+  material   Materials?  @relation(fields: [materialId], references: [id])
+  materialId String?     @unique
+  extra1     String?
+  extra2     String?
+}
+
+model Assesment {
+  id             String @id @default(uuid())
+  assessmentType String @default("in-course")
+
+  assesmentIndex       String?
+  assesmentTitle       String?
+  assesmentDescription String?              @db.Text
+  question             Questions[]
+  course               String?
+  assesmentPoints      String?
+  createdAt            DateTime             @default(now())
+  material             Materials?           @relation(fields: [materialId], references: [id])
+  materialId           String?              @unique
+  duration             String               @default("30")
+  StudentAssessement   StudentAssessement[]
+  mockPackage          MockPackage[]
+  thumbnail            String?
+  extra1               String?
+  extra2               String?
+}
+
+// model Exams {
+//   id             String @id @default(uuid())
+//   examType String @default("in-exam")
+//   examTitle String?
+//   examDescrtiption String?
+// }
+
+model Audios {
+  id        String   @id @default(uuid())
+  languages String?
+  video     String?
+  createdAt DateTime @default(now())
+  Videos    Videos?  @relation(fields: [videosId], references: [id])
+  videosId  String?
+  extra1    String?
+  extra2    String?
+}
+
+model Questions {
+  id            String    @id @default(uuid())
+  questionIndex String?
+  questionType  String?
+  assesment     Assesment @relation(fields: [assesmentId], references: [id])
+
+  createdAt       DateTime @default(now())
+  assesmentId     String
+  choiseA         String?
+  choiseB         String?
+  choiseC         String?
+  choiseD         String?
+  correctChoice   String?
+  question        String?
+  correction      String?  @db.Text
+  questionImage   String?
+  correctionImage String?
+  extra1          String?
+  extra2          String?
+}
+
+model Languages {
+  id        String   @id @default(uuid())
+  shortForm String?
+  fullForm  String?
+  createdAt DateTime @default(now())
+  Videos    Videos?  @relation(fields: [videosId], references: [id])
+  videosId  String?
+  extra1    String?
+  extra2    String?
+}
+
+model Notifications {
+  notiId      String    @id @default(uuid())
+  type        String?
+  addressedTo String? //select admin or student
+  notiTo      Students? @relation(fields: [studentsId], references: [id])
+  notiHead    String?
+  notiFull    String?
+  notiLink    String? // include if any link is connected
+  createdAt   DateTime  @default(now())
+  status      String?   @default("new") // new or seen
+  studentsId  String?
+  extra1      String?
+  extra2      String?
+}
+
+model Forum {
+  id           String          @id @default(uuid())
+  course       Courses?        @relation(fields: [coursesId], references: [id])
+  conversation Conversations[]
+  coursesId    String?         @unique
+  extra1       String?
+  extra2       String?
+}
+
+model Conversations {
+  id               String    @id @default(uuid())
+  writtenBy        Students? @relation(fields: [studentsId], references: [id])
+  text             String?   @db.Text
+  mentionedStudent String?
+  createdAt        DateTime  @default(now())
+  Forum            Forum?    @relation(fields: [forumId], references: [id])
+  forumId          String?
+  studentsId       String?
+  extra1           String?
+  extra2           String?
+}
+
+model Blogs {
+  id            String   @id @default(uuid())
+  blogIndex     String   @default("0")
+  displayOnHome String   @default("false")
+  writtenBy     String?
+  title         String?  @db.Text
+  subTitle      String?  @db.Text
+  text          String?  @db.Text
+  image         String?
+  createdAt     DateTime @default(now())
+  extra1        String?
+  extra2        String?
+}
+
+model Books {
+  id          String  @id @default(uuid())
+  title       String?
+  location    String?
+  description String?
+  extra1      String?
+  extra2      String?
+}
+
+model PaymentMethods {
+  id            String  @id @default(uuid())
+  name          String?
+  userName      String?
+  accountNumber String?
+  status        String? @default("active")
+  image         String?
+  extra1        String?
+  extra2        String?
+}
+
+model Messages {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String?
+  Text      String?  @db.Text
+  createdAt DateTime @default(now())
+  status    String   @default("new")
+  extra1    String?
+  extra2    String?
+}
+
+model Prize {
+  id             String         @id @default(uuid())
+  prizeIndex     String?        @default("0")
+  itemName       String?        @default("Prize Item")
+  itemDecription String?
+  points         String?        @default("0")
+  visibleAtPoint String?        @default("0")
+  visiblity      String?        @default("inactive")
+  image          String?
+  StudentPrize   StudentPrize[]
+  extra1         String?
+  extra2         String?
+}
+
+model StudentPrize {
+  id         String   @id @default(uuid())
+  Student    Students @relation(fields: [studentsId], references: [id])
+  Prize      Prize    @relation(fields: [prizeId], references: [id])
+  prizeId    String
+  studentsId String
+  status     String?  @default("pending")
+  createdAt  DateTime @default(now())
+  extra1     String?
+  extra2     String?
+}
+
+//@id @default(autoincrement())
+model Advertisement {
+  id                 String   @id @default(uuid())
+  advertisementIndex String?
+  displayOnHome      String   @default("false")
+  title              String?
+  subtitle           String?
+  text               String?  @db.Text
+  subtext            String?  @db.Text
+  info               String?
+  type               String?
+  image              String?
+  createdAt          DateTime @default(now())
+  extra1             String?
+  extra2             String?
+}
+
+model Collection {
+  id     String  @id @default(uuid())
+  field1 String?
+  field2 String?
+  field3 String?
+  field4 String?
+  field5 Int?
+  field6 Boolean
+  field7 String? @db.Text
+  extra1 String?
+  extra2 String?
+}

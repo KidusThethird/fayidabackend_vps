@@ -1,0 +1,30 @@
+GET http://localhost:5000/sections/
+
+###
+
+GET http://localhost:5000/sections/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+
+###
+
+POST http://localhost:5000/sections/
+Content-Type: application/json
+
+{
+    "sectionName": "Gread 12"
+}
+
+###
+
+PATCH  http://localhost:5000/sections/a597f316-1358-4045-bad6-e26fb4430a01
+Content-Type: application/json
+
+{
+  
+  "sectionName": "Other"
+
+}
+
+###
+
+DELETE http://localhost:5000/sections/1e194bdf-8631-4b5f-8743-a7315f20f744
+

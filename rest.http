@@ -1,0 +1,76 @@
+GET http://localhost:5000/students/
+
+###
+
+GET http://localhost:5000/students/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+
+###
+
+POST http://localhost:5000/students/
+Content-Type: application/json
+
+{
+    "firstName": "Name2",
+  "lastName": "Lname2",
+  "grandName": "Gname2",
+  "age": "33",
+  "sectionId": "94e401ca-9387-45bb-a978-9928fc2bbf59",
+  "studentStatus": "active" 
+}
+
+###
+
+PATCH  http://localhost:5000/students/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+Content-Type: application/json
+
+{
+  
+  "grandName": "MyGName"
+
+}
+
+###
+
+DELETE http://localhost:5000/students/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+
+
+
+//////////////////////////////////////////////////////////////////////////
+
+GET http://localhost:5000/sections/
+
+###
+
+GET http://localhost:5000/students/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+
+###
+
+POST http://localhost:5000/students/
+Content-Type: application/json
+
+{
+    "firstName": "Name2",
+  "lastName": "Lname2",
+  "grandName": "Gname2",
+  "age": "33",
+  "sectionId": "94e401ca-9387-45bb-a978-9928fc2bbf59",
+  "studentStatus": "active" 
+}
+
+###
+
+PATCH  http://localhost:5000/students/a1531f38-a443-42b5-a0cc-d86ed52f4e8c
+Content-Type: application/json
+
+{
+  
+  "grandName": "MyGName"
+
+}
+
+###
+
+DELETE http://localhost:5000/students/a1531f38-a443-42b5-a0cc-
+###
+
+DELETE http://localhost:5000/videos/deleteVideoFromUploads/1697905866362.mp4

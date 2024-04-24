@@ -1,0 +1,36 @@
+GET http://localhost:5000/materials
+
+###
+
+
+POST http://localhost:5000/materials/
+Content-Type: application/json
+
+{
+
+    "materialIndex": 7,
+    "coursesId": "9ec68196-c15c-4290-afc9-2e86acd14449",
+    "assesmentId":"vidId02",
+    "materialType": "video"
+  
+
+}
+
+###
+
+PATCH  http://localhost:5000/materials/0683bf83-e5be-4b6d-aaab-502f19ebbaf9
+Content-Type: application/json
+
+{
+  
+  "assesmentId":"vidId02"
+
+}
+
+###
+GET http://localhost:5000/materials/143687ca-0764-401e-82a1-86c514939990
+
+
+
+###
+GET http:localhost:5000/materials/filtercourse/9ec68196-c15c-4290-afc9-2e86acd14449
