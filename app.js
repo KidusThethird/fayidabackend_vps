@@ -21,7 +21,7 @@ const checkNotAuthenticated = require("./routes/login_register.route");
 app.use(cors({ credentials: true, origin: true }));
 //app.use(cors({ credentials: true, origin: `${homeWebUrl}` }));
 
-app.use("/api", require("./routes/api.route"));
+app.use("/", require("./routes/api.route"));
 app.use("/students", checkAuthenticated, require("./routes/students.route"));
 app.use("/sections", require("./routes/sections.route"));
 app.use("/courses", require("./routes/courses.route"));
