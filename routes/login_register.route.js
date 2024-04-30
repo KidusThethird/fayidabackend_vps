@@ -30,7 +30,7 @@ const codeGenerator = require("./helper/codegenerator");
 // );
 router.use(
   cors({
-    origin: "*",
+    origin: ["https://fayidaacademy.com" , "https://admin.fayidaacademy.com"],
   })
 );
 //router.use(cors({ credentials: true, origin: true }));

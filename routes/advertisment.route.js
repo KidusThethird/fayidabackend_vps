@@ -88,6 +88,7 @@ router.post(
       },
     });
     blobStream.on("error", (err) => {
+console.log("Erro: "+ err)
       res.status(500).send(err);
     });
     blobStream.on("finish", async () => {

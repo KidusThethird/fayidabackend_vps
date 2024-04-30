@@ -1,7 +1,7 @@
-const homeWebUrl = "http://localhost:8080";
+const homeWebUrl = "https://fayidaacademy.com";
 
-const adminUrl = "http://localhost:3000";
-const localUrl = "http://localhost:5000";
+const adminUrl = "https://admin.fayidaacademy.com";
+const localUrl = "https://api.fayidaacademy.com";
 //const localUrl = "http://192.168.1.5:5000";
 
 const apiPort = 5000;
