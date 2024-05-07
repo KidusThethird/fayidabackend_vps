@@ -341,7 +341,7 @@ model Notifications {
   addressedTo String? //select admin or student
   notiTo      Students? @relation(fields: [studentsId], references: [id])
   notiHead    String?
-  notiFull    String?
+  notiFull    String? @db.Text
   notiLink    String? // include if any link is connected
   createdAt   DateTime  @default(now())
   status      String?   @default("new") // new or seen
@@ -391,7 +391,7 @@ model Books {
   index Int? @default(0)
   title       String?
   location    String?
-  description String?
+  description String? @db.Text
   extra1      String?
   extra2      String?
 }
@@ -423,7 +423,7 @@ model Prize {
   id             String         @id @default(uuid())
   prizeIndex     Int?        @default(0)
   itemName       String?        @default("Prize Item")
-  itemDecription String?
+  itemDecription String? @db.Text
   points         String?        @default("0")
   visibleAtPoint String?        @default("0")
   visiblity      String?        @default("inactive")
