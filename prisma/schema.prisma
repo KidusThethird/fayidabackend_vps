@@ -148,7 +148,7 @@ model Packages {
 model MockPackage {
   id                           String                         @id @default(uuid())
   title                        String?                        @default("untitled")
-  description                  String?                        @default("") @db.Text
+  description                  String?                         @db.Text
   thumbnail                    String?
   price                        String?                        @default("free")
   temporaryPrice               String?
