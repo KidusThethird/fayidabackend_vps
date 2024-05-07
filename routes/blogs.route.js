@@ -196,6 +196,7 @@ router.get("/:id", async (req, res, next) => {
 
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
+  console.log("We are in");
   if (req.isAuthenticated()) {
     if (req.user.accountType == "Admin") {
       try {
