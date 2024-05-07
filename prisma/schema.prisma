@@ -305,7 +305,7 @@ model Audios {
 
 model Questions {
   id            String    @id @default(uuid())
-  questionIndex String?
+  questionIndex Int?
   questionType  String?
   assesment     Assesment @relation(fields: [assesmentId], references: [id])
 
