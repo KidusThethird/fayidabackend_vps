@@ -100,6 +100,7 @@ router.get("/accessquestions/:id", async (req, res, next) => {
 
     res.json(questionWithSignedUrls);
   } catch (error) {
+    console.log("Error from catch: " + error);
     next(error);
   }
 });
