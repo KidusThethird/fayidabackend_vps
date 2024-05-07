@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const cors = require("cors");
 const { PrismaClient } = require("@prisma/client");
+require("dotenv").config();
 
 const prisma = new PrismaClient();
 
@@ -30,7 +31,7 @@ const codeGenerator = require("./helper/codegenerator");
 // );
 router.use(
   cors({
-    origin: ["https://fayidaacademy.com" , "https://admin.fayidaacademy.com"],
+    origin: ["https://fayidaacademy.com", "https://admin.fayidaacademy.com"],
   })
 );
 //router.use(cors({ credentials: true, origin: true }));
@@ -69,10 +70,12 @@ async function printUsers() {
 }
 
 printUsers();
-
+const secretKey = process.env.SESSION_SECRET;
+console.log("Key: " + secretKey);
 router.use(
   session({
-    secret: "secret",
+    //secret: "secret",
+    secret: secretKey,
     resave: false,
     saveUninitialized: false,
     cookie: {
