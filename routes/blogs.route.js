@@ -22,6 +22,12 @@ var fileNameSaved = "";
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 
+router.use(
+  cors({
+    origin: ["https://fayidaacademy.com", "https://admin.fayidaacademy.com"],
+  })
+);
+
 //multer storage
 const upload = multer({
   storage: multer.memoryStorage(),
