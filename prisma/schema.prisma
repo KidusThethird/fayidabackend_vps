@@ -311,12 +311,12 @@ model Questions {
 
   createdAt       DateTime @default(now())
   assesmentId     String
-  choiseA         String?
-  choiseB         String?
-  choiseC         String?
-  choiseD         String?
+  choiseA         String? @db.Text
+  choiseB         String? @db.Text
+  choiseC         String? @db.Text
+  choiseD         String? @db.Text
   correctChoice   String?
-  question        String?
+  question        String? @db.Text
   correction      String?  @db.Text
   questionImage   String?
   correctionImage String?
