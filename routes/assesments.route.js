@@ -244,6 +244,7 @@ router.post(
       var calculatedPoint = 0;
 
       calculatedPoint = exactMatches * singlequestionpoint;
+      calculatedPoint = calculatedPoint.toFixed(1);
 
       console.log("singlequestionPoint: ", singlequestionpoint);
       console.log("CalculatedPoint: ", calculatedPoint.toString());
