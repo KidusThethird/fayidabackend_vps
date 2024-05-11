@@ -3,6 +3,9 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
+const cors = require("cors");
+
+router.use(cors({ credentials: true, origin: true }));
 
 //working with students
 
@@ -14,6 +17,7 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
         const assesments = await prisma.assesment.findMany({});
         res.json(assesments);
       } catch (error) {
+        console.log("error from catch: " + error);
         next(error);
       }
     } else {

@@ -134,6 +134,7 @@ router.get("/", async (req, res, next) => {
     });
     res.json(Mock);
   } catch (error) {
+    console.log("Error from catch: " + error);
     next(error);
   }
 });
