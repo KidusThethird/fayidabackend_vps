@@ -9,7 +9,11 @@ const checkAuthenticated = require("./login_register.route");
 //Get all student
 router.get("/", async (req, res, next) => {
   try {
-    const sections = await prisma.sections.findMany({});
+    const sections = await prisma.sections.findMany({
+      orderBy: {
+        sectionName: "asc",
+      },
+    });
     res.json(sections);
   } catch (error) {
     next(error);
