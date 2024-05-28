@@ -88,7 +88,7 @@ router.post(
       },
     });
     blobStream.on("error", (err) => {
-console.log("Erro: "+ err)
+      console.log("Erro: " + err);
       res.status(500).send(err);
     });
     blobStream.on("finish", async () => {
@@ -186,7 +186,7 @@ router.get("/:id", async (req, res, next) => {
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const advertisment = await prisma.Advertisement.create({
           data: req.body,
@@ -220,7 +220,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         deleteAdvertisment = await prisma.Advertisement.delete({

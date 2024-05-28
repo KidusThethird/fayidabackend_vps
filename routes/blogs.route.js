@@ -198,7 +198,7 @@ router.get("/:id", async (req, res, next) => {
 router.post("/", checkAuthenticated, async (req, res, next) => {
   console.log("We are in");
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const blog = await prisma.blogs.create({
           data: req.body,
@@ -233,7 +233,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         deleteBlog = await prisma.Blogs.delete({

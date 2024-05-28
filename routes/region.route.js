@@ -9,7 +9,11 @@ const checkAuthenticated = require("./login_register.route");
 //Get all student
 router.get("/", async (req, res, next) => {
   try {
-    const RegionSelected = await prisma.Region.findMany({});
+    const RegionSelected = await prisma.Region.findMany({
+      orderBy: {
+        regionName: "asc",
+      },
+    });
     res.json(RegionSelected);
   } catch (error) {
     next(error);
@@ -44,7 +48,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 //Update Student
 router.patch("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         const RegionSelected = await prisma.Region.update({
@@ -68,7 +72,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         RegionSelected = await prisma.Region.delete({

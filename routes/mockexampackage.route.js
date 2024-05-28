@@ -328,7 +328,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         Mock = await prisma.MockPackage.delete({

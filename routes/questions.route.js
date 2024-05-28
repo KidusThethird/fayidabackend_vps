@@ -9,7 +9,7 @@ const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 //Get all student
 router.get("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const questions = await prisma.questions.findMany({});
         res.json(questions);
@@ -107,7 +107,7 @@ router.get("/accessquestions/:id", async (req, res, next) => {
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const question = await prisma.questions.create({
           data: req.body,
@@ -125,7 +125,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 //Update Student
 router.patch("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         const updateQuestions = await prisma.questions.update({
@@ -149,7 +149,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         deleteQuestions = await prisma.questions.delete({

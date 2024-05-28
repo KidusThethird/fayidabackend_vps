@@ -272,7 +272,11 @@ router.post(
 //Get one student
 router.get("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "Student") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Student"
+    ) {
       try {
         const { id } = req.params;
         const singleAssesment = await prisma.assesment.findUnique({
@@ -297,7 +301,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
   console.log("Printed one");
 
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         console.log("req: " + JSON.stringify(req.body));
         const assesment = await prisma.assesment.create({
@@ -318,7 +322,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 //Update Student
 router.patch("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         const updateAssesment = await prisma.assesment.update({
@@ -343,7 +347,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         deleteAssesment = await prisma.assesment.delete({

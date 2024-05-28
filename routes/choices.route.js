@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 //Get all student
 router.get("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const choices = await prisma.choices.findMany({});
         res.json(choices);
@@ -42,7 +42,7 @@ router.get("/:id", async (req, res, next) => {
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const choice = await prisma.choices.create({
           data: req.body,
@@ -60,7 +60,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 //Update Student
 router.patch("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         const updateChoices = await prisma.choices.update({
@@ -84,7 +84,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         deleteChoices = await prisma.choices.delete({
