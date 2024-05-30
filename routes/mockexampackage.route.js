@@ -192,6 +192,7 @@ router.get("/tostudent/", async (req, res, next) => {
   }
 });
 
+//get pakcages firectly form sub folder
 router.get("/tostudentselect/:foldername", async (req, res, next) => {
   const FolderName = req.params.foldername;
   console.log("Folder Name: " + FolderName);
@@ -201,6 +202,36 @@ router.get("/tostudentselect/:foldername", async (req, res, next) => {
       where: {
         status: "active",
         group2: FolderName,
+      },
+      orderBy: { price: "asc" },
+    });
+    const mocksWithSignedUrls = await Promise.all(
+      Mock.map(async (mock) => {
+        const signedUrlforFile = await generateSignedUrl(
+          "generalfilesbucket",
+          "mock_package_thumbnails",
+          mock.thumbnail
+        );
+        return { ...mock, imgUrl: signedUrlforFile };
+      })
+    );
+
+    res.json(mocksWithSignedUrls);
+  } catch (error) {
+    next(error);
+  }
+});
+
+//get pakcages firectly form main folder
+router.get("/tostudentselectmain/:foldername", async (req, res, next) => {
+  const FolderName = req.params.foldername;
+  console.log("Folder Name: " + FolderName);
+  try {
+    const Mock = await prisma.MockPackage.findMany({
+      include: { Exams: true },
+      where: {
+        status: "active",
+        group: FolderName,
       },
       orderBy: { price: "asc" },
     });
