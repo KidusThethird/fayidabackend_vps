@@ -27,7 +27,11 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
 //Get one student
 router.get("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "Student") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "Student" ||
+      req.user.accountType == "SubAdmin"
+    ) {
       try {
         const { id } = req.params;
         const singleQuestion = await prisma.questions.findUnique({
