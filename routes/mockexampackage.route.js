@@ -203,7 +203,7 @@ router.get("/tostudentselect/:foldername", async (req, res, next) => {
         status: "active",
         group2: FolderName,
       },
-      orderBy: { price: "asc" },
+      orderBy: { createdAt: "asc" },
     });
     const mocksWithSignedUrls = await Promise.all(
       Mock.map(async (mock) => {
@@ -233,7 +233,7 @@ router.get("/tostudentselectmain/:foldername", async (req, res, next) => {
         status: "active",
         group: FolderName,
       },
-      orderBy: { price: "asc" },
+      orderBy: { createdAt: "asc" },
     });
     const mocksWithSignedUrls = await Promise.all(
       Mock.map(async (mock) => {

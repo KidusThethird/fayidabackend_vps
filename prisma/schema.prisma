@@ -162,6 +162,7 @@ model MockPackage {
   ExamTakerMockPackagePurchase ExamTakerMockPackagePurchase[]
   extra1                       String?
   extra2                       String?
+  createdAt  DateTime  @default(now())
 }
 
 model StudentCourse {
