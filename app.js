@@ -22,6 +22,9 @@ app.use(cors({ credentials: true, origin: true }));
 //app.use(cors({ credentials: true, origin: `${homeWebUrl}` }));
 
 app.use("/", require("./routes/api.route"));
+
+app.use("/analysis", require("./routes/analysis.route"));
+
 app.use("/students", checkAuthenticated, require("./routes/students.route"));
 app.use("/sections", require("./routes/sections.route"));
 app.use("/courses", require("./routes/courses.route"));
@@ -55,6 +58,7 @@ app.use("/advertisment", require("./routes/advertisment.route"));
 app.use("/studentprize", require("./routes/studentprize.route"));
 app.use("/region", require("./routes/region.route"));
 app.use("/city", require("./routes/city.route"));
+
 app.use("/pacakgefolder", require("./routes/packagefolders.route"));
 app.use("/dashboarddata", require("./routes/dashboarddatafetch.route"));
 app.use("/mockexampackage", require("./routes/mockexampackage.route"));

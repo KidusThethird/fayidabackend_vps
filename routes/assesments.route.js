@@ -334,6 +334,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
         });
         res.json(updateAssesment);
       } catch (error) {
+        console.log("Error from catch: " + error);
         next(error);
       }
     } else {
