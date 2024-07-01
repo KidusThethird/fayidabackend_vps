@@ -74,9 +74,46 @@ router.get("/", async (req, res, next) => {
       },
     });
 
+    const regionsWithExamTakers = await prisma.ExamTaker.groupBy({
+      by: ["region"],
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        _count: {
+          id: "desc",
+        },
+      },
+    });
+    const gradeWithExamTakers = await prisma.ExamTaker.groupBy({
+      by: ["grade"],
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        _count: {
+          id: "desc",
+        },
+      },
+    });
+    const scienceTypeWithExamTakers = await prisma.ExamTaker.groupBy({
+      by: ["scienceType"],
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        _count: {
+          id: "desc",
+        },
+      },
+    });
+
     res.json({
       gendersWithExamTakers,
       citiesWithExamTakers,
+      regionsWithExamTakers,
+      gradeWithExamTakers,
+      scienceTypeWithExamTakers,
     });
     // res.json({ test: "test" });
   } catch (error) {
