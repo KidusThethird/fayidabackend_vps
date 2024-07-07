@@ -82,12 +82,36 @@ model ExamTakerMockPackagePurchase {
 
 model Sections {
   id          String     @id @default(uuid())
-  index Int?
+  index       Int?
   sectionName String?    @unique(map: "Sections_sectionName_key")
   students    Students[]
   Packages    Packages[]
   extra1      String?
   extra2      String?
+}
+
+model CategoriesList {
+  id              Int               @id @default(autoincrement())
+  name            String?
+  Status          Boolean?
+  index           Int?              @default(0)
+  CategoryFolders CategoryFolders[]
+}
+
+model CategoryFolders {
+  id                 Int            @id @default(autoincrement())
+  name               String?
+  index              Int?           @default(0)
+  CategoriesListId   Int
+  CategoryListFamily CategoriesList @relation(fields: [CategoriesListId], references: [id])
+  KeyWords           KeyWordsList[]
+}
+
+model KeyWordsList {
+  id              Int               @id @default(autoincrement())
+  type            String?
+  word            String?
+  CategoryFolders CategoryFolders[]
 }
 
 model City {
@@ -99,7 +123,7 @@ model City {
 
 model Region {
   id         Int     @id @default(autoincrement())
-  index Int?
+  index      Int?
   regionName String?
   extra1     String?
   extra2     String?
@@ -148,7 +172,7 @@ model Packages {
 model MockPackage {
   id                           String                         @id @default(uuid())
   title                        String?                        @default("untitled")
-  description                  String?                         @db.Text
+  description                  String?                        @db.Text
   thumbnail                    String?
   price                        String?                        @default("free")
   temporaryPrice               String?
@@ -162,7 +186,7 @@ model MockPackage {
   ExamTakerMockPackagePurchase ExamTakerMockPackagePurchase[]
   extra1                       String?
   extra2                       String?
-  createdAt  DateTime  @default(now())
+  createdAt                    DateTime                       @default(now())
 }
 
 model StudentCourse {
@@ -312,12 +336,12 @@ model Questions {
 
   createdAt       DateTime @default(now())
   assesmentId     String
-  choiseA         String? @db.Text
-  choiseB         String? @db.Text
-  choiseC         String? @db.Text
-  choiseD         String? @db.Text
+  choiseA         String?  @db.Text
+  choiseB         String?  @db.Text
+  choiseC         String?  @db.Text
+  choiseD         String?  @db.Text
   correctChoice   String?
-  question        String? @db.Text
+  question        String?  @db.Text
   correction      String?  @db.Text
   questionImage   String?
   correctionImage String?
@@ -342,7 +366,7 @@ model Notifications {
   addressedTo String? //select admin or student
   notiTo      Students? @relation(fields: [studentsId], references: [id])
   notiHead    String?
-  notiFull    String? @db.Text
+  notiFull    String?   @db.Text
   notiLink    String? // include if any link is connected
   createdAt   DateTime  @default(now())
   status      String?   @default("new") // new or seen
@@ -375,7 +399,7 @@ model Conversations {
 
 model Blogs {
   id            String   @id @default(uuid())
-  blogIndex     Int   @default(0)
+  blogIndex     Int      @default(0)
   displayOnHome String   @default("false")
   writtenBy     String?
   title         String?  @db.Text
@@ -389,7 +413,7 @@ model Blogs {
 
 model Books {
   id          String  @id @default(uuid())
-  index Int? @default(0)
+  index       Int?    @default(0)
   title       String?
   location    String?
   description String? @db.Text
@@ -399,7 +423,7 @@ model Books {
 
 model PaymentMethods {
   id            String  @id @default(uuid())
-  index Int? @default(0)
+  index         Int?    @default(0)
   name          String?
   userName      String?
   accountNumber String?
@@ -422,9 +446,9 @@ model Messages {
 
 model Prize {
   id             String         @id @default(uuid())
-  prizeIndex     Int?        @default(0)
+  prizeIndex     Int?           @default(0)
   itemName       String?        @default("Prize Item")
-  itemDecription String? @db.Text
+  itemDecription String?        @db.Text
   points         String?        @default("0")
   visibleAtPoint String?        @default("0")
   visiblity      String?        @default("inactive")
@@ -449,7 +473,7 @@ model StudentPrize {
 //@id @default(autoincrement())
 model Advertisement {
   id                 String   @id @default(uuid())
-  advertisementIndex Int? @default(0)
+  advertisementIndex Int?     @default(0)
   displayOnHome      String   @default("false")
   title              String?
   subtitle           String?
