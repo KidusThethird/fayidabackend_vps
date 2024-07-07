@@ -62,6 +62,18 @@ app.use("/city", require("./routes/city.route"));
 app.use("/pacakgefolder", require("./routes/packagefolders.route"));
 app.use("/dashboarddata", require("./routes/dashboarddatafetch.route"));
 app.use("/mockexampackage", require("./routes/mockexampackage.route"));
+
+app.use(
+  "/categorylist",
+  require("./routes/category_route/catagorieslist.route")
+);
+app.use(
+  "/categoryfolders",
+  require("./routes/category_route/categoryfolders.route")
+);
+
+app.use("/keywordslist", require("./routes/category_route/keywordslist.route"));
+
 app.use(
   "/questionimageupload",
   require("./routes/questionimageuploader.route")
