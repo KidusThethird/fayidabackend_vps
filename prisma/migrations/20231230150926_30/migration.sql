@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `courses` ADD COLUMN `partName` VARCHAR(191) NULL,
-    ADD COLUMN `parts` VARCHAR(191) NULL DEFAULT '1';
