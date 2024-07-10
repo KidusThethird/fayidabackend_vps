@@ -10,9 +10,9 @@ const checkAuthenticated = require(".././login_register.route");
 router.get("/", async (req, res, next) => {
   try {
     const KeyWord = await prisma.KeyWordsList.findMany({
-      orderBy: {
-        index: "asc",
-      },
+      // orderBy: {
+      //   index: "asc",
+      // },
     });
     res.json(KeyWord);
   } catch (error) {

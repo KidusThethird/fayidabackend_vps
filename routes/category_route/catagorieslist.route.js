@@ -13,6 +13,7 @@ router.get("/", async (req, res, next) => {
       orderBy: {
         index: "asc",
       },
+      include: { CategoryFolders: true },
     });
     res.json(CategoryList);
   } catch (error) {

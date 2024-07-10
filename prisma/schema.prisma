@@ -103,7 +103,8 @@ model CategoryFolders {
   name               String?
   index              Int?           @default(0)
   CategoriesListId   Int
-  CategoryListFamily CategoriesList @relation(fields: [CategoriesListId], references: [id])
+  // CategoryListFamily CategoriesList @relation(fields: [CategoriesListId], references: [id])
+  CategoryListFamily CategoriesList[]
   KeyWords           KeyWordsList[]
 }
 
