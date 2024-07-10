@@ -13,6 +13,7 @@ router.get("/", async (req, res, next) => {
       //   orderBy: {
       //     index: "asc",
       //   },
+      include: { CategoryListFamily: true, KeyWords: true },
     });
     res.json(CategoryFolder);
   } catch (error) {
@@ -29,6 +30,7 @@ router.get("/:id", async (req, res, next) => {
       where: {
         id: parseInt(req.params.id),
       },
+      include: { CategoryListFamily: true, KeyWords: true },
     });
     res.json(CategoryFolder);
   } catch (error) {

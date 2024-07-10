@@ -30,6 +30,7 @@ router.get("/:id", async (req, res, next) => {
       where: {
         id: parseInt(req.params.id),
       },
+      include: { CategoryFolders: true },
     });
     res.json(CategoryList);
   } catch (error) {
