@@ -54,18 +54,27 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 
 //Update Student
 router.patch("/:id", checkAuthenticated, async (req, res, next) => {
+  console.log("Patch is here");
+  console.log("Req: " + req.body);
+  console.log("ReqD: " + JSON.stringify(req.body));
   if (req.isAuthenticated()) {
     if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+      console.log("In Auth");
       try {
         const { id } = req.params;
+        console.log("Id of Folder: " + req.params.id);
+        console.log("Req: " + req.body);
+        console.log("ReqD: " + JSON.stringify(req.body));
         const CategoryFolder = await prisma.CategoryFolders.update({
           where: {
             id: parseInt(req.params.id),
           },
           data: req.body,
         });
+        // console.log("CategoryFolderData: " + JSON.stringify(data));
         res.json(CategoryFolder);
       } catch (error) {
+        console.log("Error from catch: " + error);
         next(error);
       }
     } else {

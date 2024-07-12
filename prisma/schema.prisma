@@ -166,6 +166,7 @@ model Packages {
   group2             String?
   extra1             String?
   extra2             String?
+  tag String?
 
   @@map("package")
 }
