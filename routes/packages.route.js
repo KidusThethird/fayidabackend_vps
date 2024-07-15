@@ -227,6 +227,34 @@ router.get("/fetch_home_packages/", async (req, res, next) => {
     next(error);
   }
 });
+
+router.get("/filter_fetch_home_packages/:filterKey", async (req, res, next) => {
+  const FilterKey = req.params.filterKey;
+  console.log("FIlterKiey: " + FilterKey);
+  try {
+    const packages = await prisma.packages.findMany({
+      where: {
+        tag: FilterKey,
+        status: true,
+      },
+      include: { courses: true },
+    });
+
+    const packagesWithSignedUrls = await Promise.all(
+      packages.map(async (pac) => {
+        const signedUrlforFile = await generateSignedUrl(
+          "generalfilesbucket",
+          "package_thumbnails",
+          pac.thumbnail
+        );
+        return { ...pac, imgUrl: signedUrlforFile };
+      })
+    );
+    res.json(packagesWithSignedUrls);
+  } catch (error) {
+    next(error);
+  }
+});
 //Get one student
 // router.get("/:id", async (req, res, next) => {
 //   try {

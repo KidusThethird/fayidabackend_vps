@@ -266,6 +266,8 @@ model Materials {
   materialType  String?
   video         Videos?
   assementId    Assesment?
+  file MaterialFile?
+  link MaterialLink?
   part          String?    @default("1")
 
   coursesId String
@@ -289,6 +291,34 @@ model Videos {
   materialId String?     @unique
   extra1     String?
   extra2     String?
+}
+model MaterialFile{
+    id             String   @id @unique @default(uuid())
+  title       String?
+  fileDescription String?  @db.Text
+  course         String?
+    createdAt      DateTime @default(now())
+      location       String?
+  materialId String?     @unique
+
+  material   Materials?  @relation(fields: [materialId], references: [id])
+
+
+}
+
+model MaterialLink{
+         id             String   @id @unique @default(uuid())
+  title       String?
+  linkDescription String?  @db.Text
+  course         String?
+    createdAt      DateTime @default(now())
+      location       String?
+  materialId String?     @unique
+
+  material   Materials?  @relation(fields: [materialId], references: [id])
+
+
+
 }
 
 model Assesment {
