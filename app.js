@@ -63,6 +63,9 @@ app.use("/pacakgefolder", require("./routes/packagefolders.route"));
 app.use("/dashboarddata", require("./routes/dashboarddatafetch.route"));
 app.use("/mockexampackage", require("./routes/mockexampackage.route"));
 
+app.use("/materiallink", require("./routes/materiallink.route"));
+app.use("/materialfiles", require("./routes/material_files.route"));
+
 app.use(
   "/categorylist",
   require("./routes/category_route/catagorieslist.route")

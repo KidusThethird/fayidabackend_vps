@@ -26,7 +26,12 @@ router.get("/:id", async (req, res, next) => {
       where: {
         id: id,
       },
-      include: { video: true, assementId: { include: { question: true } } },
+      include: {
+        video: true,
+        assementId: { include: { question: true } },
+        link: true,
+        file: true,
+      },
     });
 
     if (singleMaterial) {
@@ -40,6 +45,14 @@ router.get("/:id", async (req, res, next) => {
         );
         console.log("print of x: " + signedUrlforFile);
         res.json({ ...singleMaterial, videoUrl: signedUrlforFile });
+      } else if (singleMaterial.file && singleMaterial.file.location) {
+        const signedUrlforFile = await generateSignedUrl(
+          "generalfilesbucket",
+          "common_files",
+          singleMaterial.file.location
+        );
+        console.log("print of x: " + signedUrlforFile);
+        res.json({ ...singleMaterial, fileUrl: signedUrlforFile });
       } else {
         res.json({ ...singleMaterial, videoUrl: "" });
       }
