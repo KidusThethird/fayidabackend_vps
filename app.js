@@ -66,6 +66,9 @@ app.use("/mockexampackage", require("./routes/mockexampackage.route"));
 app.use("/materiallink", require("./routes/materiallink.route"));
 app.use("/materialfiles", require("./routes/material_files.route"));
 
+app.use("/studentcourse", require("./routes/studentscourse.route"));
+app.use("/courseunits", require("./routes/courseunits.route"));
+
 app.use(
   "/categorylist",
   require("./routes/category_route/catagorieslist.route")

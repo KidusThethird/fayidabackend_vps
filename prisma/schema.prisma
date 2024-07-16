@@ -214,6 +214,7 @@ model CourseUnits{
  StudentCourse StudentCourse  @relation(fields: [StudentCourseId], references: [id])
 StudentCourseId String
 unitNumber String?
+
 status Boolean? @default(false)
 }
 

@@ -514,6 +514,27 @@ router.get(
             packagesId: true,
           },
         });
+
+        const FilterUnits = await prisma.CourseUnits.findMany({
+          where: {
+            StudentCourse: {
+              studentsId: req.user.id,
+              coursesId: req.params.courseId,
+            },
+          },
+
+          select: {
+            unitNumber: true,
+            status: true,
+          },
+        });
+        console.log("FilteredUnits: " + JSON.stringify(FilterUnits));
+
+        const unitStatusMap = FilterUnits.reduce((map, unit) => {
+          map[unit.unitNumber] = unit.status;
+          return map;
+        }, {});
+
         const StudentCourses = await prisma.StudentCourse.findMany({
           where: {
             studentsId: req.user.id,
@@ -538,6 +559,8 @@ router.get(
                   include: {
                     video: true,
                     assementId: true,
+                    file: true,
+                    link: true,
                   },
                 },
               },
@@ -546,11 +569,19 @@ router.get(
           },
         });
 
+        StudentCourses.forEach((course) => {
+          course.Courses.materials.forEach((material) => {
+            const unitStatus = unitStatusMap[material.part];
+            material.Access = unitStatus ? "unlocked" : "locked";
+          });
+        });
+
         res.json(StudentCourses);
       } else {
         res.status(401).json({ message: "not authenticated" });
       }
     } catch (error) {
+      console.log("Error from catch: " + error);
       next(error);
     }
   }
