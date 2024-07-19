@@ -173,6 +173,35 @@ router.get("/fetchPackages/", async (req, res, next) => {
   }
 });
 
+router.get("/fetchPackagesall/", async (req, res, next) => {
+  //const FolderName = req.params.folderName;
+  // console.log("Folder Name Requested: " + FolderName);
+  try {
+    const packages = await prisma.packages.findMany({
+      where: {
+        status: true,
+        //   group2: FolderName,
+      },
+      include: { courses: true },
+    });
+
+    const packagesWithSignedUrls = await Promise.all(
+      packages.map(async (pac) => {
+        const signedUrlforFile = await generateSignedUrl(
+          "generalfilesbucket",
+          "package_thumbnails",
+          pac.thumbnail
+        );
+        return { ...pac, imgUrl: signedUrlforFile };
+      })
+    );
+    res.json(packagesWithSignedUrls);
+    // res.json(packages);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/fetchPackages/:folderName", async (req, res, next) => {
   const FolderName = req.params.folderName;
   console.log("Folder Name Requested: " + FolderName);
