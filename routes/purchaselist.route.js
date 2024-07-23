@@ -457,10 +457,21 @@ router.get(
             },
           });
 
+          const StudentCourseWithPackageUrl = await Promise.all(
+            StudentCourses.map(async (pac) => {
+              const signedUrlforFile = await generateSignedUrl(
+                "generalfilesbucket",
+                "package_thumbnails",
+                pac.Packages.thumbnail
+              );
+              return { ...pac, packageImgUrl: signedUrlforFile };
+            })
+          );
           //  console.log("Paid Packages 2: " + JSON.stringify(StudentCourses));
 
-          res.json(StudentCourses);
+          res.json(StudentCourseWithPackageUrl);
         } catch (error) {
+          console.log("Error from catch: " + error);
           next(error);
         }
       } else if (req.user.accountType == "Admin") {

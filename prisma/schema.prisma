@@ -26,6 +26,7 @@ model Students {
   city               String?
   gender             String?
   StudentAssessement StudentAssessement[]
+  StudentMaterials   StudentMaterial[]
 
   code String? @default("1136")
 
@@ -196,26 +197,26 @@ model StudentCourse {
   Student Students @relation(fields: [studentsId], references: [id])
   Courses Courses  @relation(fields: [coursesId], references: [id])
 
-  Packages   Packages  @relation(fields: [packageId], references: [id])
+  Packages   Packages      @relation(fields: [packageId], references: [id])
   coursesId  String
   studentsId String
   packageId  String
-  status     String?   @default("default")
-  progress   String?   @default("0")
-  createdAt  DateTime  @default(now())
+  status     String?       @default("default")
+  progress   String?       @default("0")
+  createdAt  DateTime      @default(now())
   expiryDate DateTime?
   extra1     String?
   extra2     String?
-  units   CourseUnits[]
+  units      CourseUnits[]
 }
 
-model CourseUnits{
-    id      String   @id @default(uuid())
- StudentCourse StudentCourse  @relation(fields: [StudentCourseId], references: [id])
-StudentCourseId String
-unitNumber String?
+model CourseUnits {
+  id              String        @id @default(uuid())
+  StudentCourse   StudentCourse @relation(fields: [StudentCourseId], references: [id])
+  StudentCourseId String
+  unitNumber      String?
 
-status Boolean? @default(false)
+  status Boolean? @default(false)
 }
 
 model StudentAssessement {
@@ -251,7 +252,7 @@ model PurchaseList {
   expiryDate          DateTime?
   extra1              String?
   extra2              String?
-  materialAdded String?   @default("false")
+  materialAdded       String?   @default("false")
 }
 
 model Courses {
@@ -281,11 +282,22 @@ model Materials {
   link          MaterialLink?
   part          String?       @default("1")
 
-  coursesId String
+  coursesId       String
+  StudentMaterial StudentMaterial[]
 
   assesmentId String?
   extra1      String?
   extra2      String?
+}
+
+model StudentMaterial {
+  id       Int       @id @default(autoincrement())
+  Student  Students  @relation(fields: [StudentId], references: [id])
+  Material Materials @relation(fields: [MaterialId], references: [id])
+
+  StudentId  String
+  MaterialId String
+  Done       Boolean? @default(false)
 }
 
 model Videos {
@@ -317,14 +329,14 @@ model MaterialFile {
 }
 
 model MaterialLink {
-  id              String   @id @unique @default(uuid())
+  id              String  @id @unique @default(uuid())
   title           String?
-  linkDescription String?  @db.Text
-  
-  course          String?
-  createdAt       DateTime @default(now())
-  location        String?
-  materialId      String?  @unique
+  linkDescription String? @db.Text
+
+  course     String?
+  createdAt  DateTime @default(now())
+  location   String?
+  materialId String?  @unique
 
   material Materials? @relation(fields: [materialId], references: [id])
 }
@@ -431,10 +443,11 @@ model Conversations {
   mentionedStudent String?
   createdAt        DateTime  @default(now())
   Forum            Forum?    @relation(fields: [forumId], references: [id])
-  forumId          String?
-  studentsId       String?
-  extra1           String?
-  extra2           String?
+
+  forumId    String?
+  studentsId String?
+  extra1     String?
+  extra2     String?
 }
 
 model Blogs {
