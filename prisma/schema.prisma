@@ -30,7 +30,7 @@ model Students {
 
   code String? @default("1136")
 
-  email            String?         @unique
+  email            String?          @unique
   password         String?
   phoneNumber      String?
   profilePicture   String?
@@ -39,8 +39,9 @@ model Students {
   Conversations    Conversations[]
   StudentCourse    StudentCourse[]
   StudentPrize     StudentPrize[]
-  points           String?         @default("0")
-  message          String?         @default("")
+  points           String?          @default("0")
+  message          String?          @default("")
+  review           packagesReview[]
 
   extra1 String?
   extra2 String?
@@ -142,7 +143,7 @@ model PackageFolder {
 }
 
 model Packages {
-  id                 String          @id @default(uuid())
+  id                 String           @id @default(uuid())
   packageName        String?
   price              String?
   price2             String?
@@ -150,17 +151,17 @@ model Packages {
   temporaryPrice     String?
   temporaryPrice2    String?
   temporaryPrice3    String?
-  discountStatus     Boolean?        @default(false)
+  discountStatus     Boolean?         @default(false)
   discountExpriyDate DateTime?
-  status             Boolean?        @default(false)
-  displayOnHome      Boolean?        @default(false)
+  status             Boolean?         @default(false)
+  displayOnHome      Boolean?         @default(false)
   courses            Courses[]
   thumbnail          String?
   trailer            String?
-  createdAt          DateTime        @default(now())
-  packageDescription String?         @db.Text
+  createdAt          DateTime         @default(now())
+  packageDescription String?          @db.Text
   purchaselist       PurchaseList[]
-  suggestedSection   Sections?       @relation(fields: [sectionsId], references: [id])
+  suggestedSection   Sections?        @relation(fields: [sectionsId], references: [id])
   sectionsId         String?
   studentCourses     StudentCourse[]
   group              String?
@@ -168,8 +169,20 @@ model Packages {
   extra1             String?
   extra2             String?
   tag                String?
+  review             packagesReview[]
 
   @@map("package")
+}
+
+model packagesReview {
+  id      Int      @id @default(autoincrement())
+  Package Packages @relation(fields: [packageId], references: [id])
+  Student Students @relation(fields: [studentId], references: [id])
+
+  packageId String
+  studentId String
+  text      String?  @db.Text
+  createdAt DateTime @default(now())
 }
 
 model MockPackage {
