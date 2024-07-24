@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 router.get("/", async (req, res, next) => {
   try {
     const materials = await prisma.materials.findMany({
-      include: { video: true, assementId: true },
+      include: { video: true, assementId: true, StudentMaterial: true },
     });
     res.json(materials);
   } catch (error) {
@@ -31,6 +31,7 @@ router.get("/:id", async (req, res, next) => {
         assementId: { include: { question: true } },
         link: true,
         file: true,
+        StudentMaterial: true,
       },
     });
 

@@ -452,7 +452,9 @@ router.get(
               },
             },
             include: {
-              Courses: true,
+              Courses: {
+                include: { materials: { include: { StudentMaterial: true } } },
+              },
               Packages: true,
             },
           });
@@ -493,7 +495,9 @@ router.get(
               },
             },
             include: {
-              Courses: true,
+              Courses: {
+                include: { materials: { include: { StudentMaterial: true } } },
+              },
               Packages: true,
             },
           });
@@ -572,6 +576,7 @@ router.get(
                     assementId: true,
                     file: true,
                     link: true,
+                    StudentMaterial: true,
                   },
                 },
               },

@@ -68,6 +68,7 @@ app.use("/materialfiles", require("./routes/material_files.route"));
 
 app.use("/studentcourse", require("./routes/studentscourse.route"));
 app.use("/courseunits", require("./routes/courseunits.route"));
+app.use("/studentmaterial", require("./routes/studentmaterial.route"));
 
 app.use(
   "/categorylist",
