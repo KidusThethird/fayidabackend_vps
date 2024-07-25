@@ -269,19 +269,29 @@ model PurchaseList {
 }
 
 model Courses {
-  id                      String          @id @default(uuid())
+  id                      String            @id @default(uuid())
   courseName              String?
-  courseDescription       String?         @db.Text
+  courseDescription       String?           @db.Text
   packages                Packages[]
-  createdAt               DateTime        @default(now())
+  createdAt               DateTime          @default(now())
   materials               Materials[]
   Forum                   Forum?
   StudentCourse           StudentCourse[]
-  parts                   String?         @default("1")
+  parts                   String?           @default("1")
   partName                String?
   courseIntroductionVideo String?
+  CourseUnitsList         CourseUnitsList[]
   extra1                  String?
   extra2                  String?
+}
+
+model CourseUnitsList {
+  id     Int     @id @default(autoincrement())
+  Course Courses @relation(fields: [CourseId], references: [id])
+
+  CourseId   String
+  UnitNumber Int?
+  Title      String?
 }
 
 model Materials {
