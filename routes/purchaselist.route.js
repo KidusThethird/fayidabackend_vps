@@ -579,6 +579,7 @@ router.get(
                     StudentMaterial: true,
                   },
                 },
+                CourseUnitsList: true,
               },
             },
             Packages: true,
