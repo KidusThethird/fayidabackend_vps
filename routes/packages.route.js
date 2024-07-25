@@ -319,7 +319,23 @@ router.get("/:id", async (req, res, next) => {
       where: {
         id: id,
       },
-      include: { courses: true, review: { include: { Student: true } } },
+      include: {
+        courses: {
+          include: {
+            CourseUnitsList: { orderBy: { UnitNumber: "asc" } },
+            materials: {
+              orderBy: [{ part: "asc" }, { materialIndex: "asc" }],
+              include: {
+                video: true,
+                assementId: true,
+                file: true,
+                link: true,
+              },
+            },
+          },
+        },
+        review: { include: { Student: true } },
+      },
 
       // reviews: {
       //   include: {
