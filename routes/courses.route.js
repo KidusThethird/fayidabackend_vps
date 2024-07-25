@@ -37,7 +37,11 @@ router.get("/:id", checkAuthenticated, async (req, res, next) => {
           where: {
             id: id,
           },
-          include: { packages: true, Forum: true },
+          include: {
+            packages: true,
+            Forum: true,
+            CourseUnitsList: { orderBy: { UnitNumber: "asc" } },
+          },
         });
         if (singleCourse) {
           console.log("in payment with id 2");

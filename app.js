@@ -70,7 +70,7 @@ app.use("/studentcourse", require("./routes/studentscourse.route"));
 app.use("/courseunits", require("./routes/courseunits.route"));
 app.use("/studentmaterial", require("./routes/studentmaterial.route"));
 app.use("/packagereview", require("./routes/packagereview.route"));
-
+app.use("/courseunitslist", require("./routes/courseunitslist.route"));
 app.use(
   "/categorylist",
   require("./routes/category_route/catagorieslist.route")
