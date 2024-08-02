@@ -77,6 +77,56 @@ router.get("/accessone/:studentId/:courseId/:unit", async (req, res, next) => {
   }
 });
 
+router.get("/removeone/:studentId/:courseId/:unit", async (req, res, next) => {
+  try {
+    //const { id } = req.params.id;
+    console.log(
+      "rec: " +
+        req.params.studentId +
+        " " +
+        req.params.courseId +
+        " " +
+        req.params.unit
+    );
+    // const CitySelected = await prisma.CourseUnits.findUnique({
+    //   where: {
+    //     id: req.params.id,
+    //   },
+    // });
+    //res.json(CitySelected);
+
+    const getCourseStudent = await prisma.StudentCourse.findFirst({
+      where: {
+        studentsId: req.params.studentId,
+        coursesId: req.params.courseId,
+      },
+    });
+
+    if (getCourseStudent) {
+      const StudentCourseId = getCourseStudent.id;
+
+      const getCourseStudentUnit = await prisma.CourseUnits.findFirst({
+        where: {
+          StudentCourseId: StudentCourseId,
+          unitNumber: req.params.unit,
+        },
+      });
+
+      await prisma.CourseUnits.update({
+        where: {
+          id: getCourseStudentUnit.id,
+        },
+        data: {
+          status: false,
+        },
+      });
+    }
+  } catch (error) {
+    console.log("error form catch: " + error);
+    next(error);
+  }
+});
+
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
   // console.log("Req: " + req.body.cityName);
