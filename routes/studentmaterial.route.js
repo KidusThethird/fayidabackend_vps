@@ -47,6 +47,12 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
       });
 
       if (!existingRecord) {
+        console.log(
+          "New material created! : SudentId: " +
+            req.user.id +
+            " \n Material Id: " +
+            req.body.MaterialId
+        );
         const StudentMaterialPost = await prisma.StudentMaterial.create({
           data: {
             ...req.body,
@@ -55,6 +61,13 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
           },
         });
         res.json(StudentMaterialPost);
+      } else {
+        console.log(
+          "Data Already Exist!  : SudentId: " +
+            req.user.id +
+            " \n Material Id: " +
+            req.body.MaterialId
+        );
       }
     } catch (error) {
       console.log("Error from catch: " + error);
