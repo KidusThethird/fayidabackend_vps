@@ -257,14 +257,19 @@ router.get("/:id", async (req, res, next) => {
 
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
+  console.log("Print one");
   if (req.isAuthenticated()) {
+    console.log("Print two");
     if (req.user.accountType == "Admin") {
+      console.log("Print three");
       try {
         const prize = await prisma.Prize.create({
           data: req.body,
         });
         res.json(prize);
-      } catch (error) {}
+      } catch (error) {
+        console.log("Error from catch: " + error);
+      }
     } else {
       res.json({ Error: "You dont have access" });
     }

@@ -28,7 +28,9 @@ router.get("/:id", async (req, res, next) => {
       },
       include: {
         video: true,
-        assementId: { include: { question: true } },
+        assementId: {
+          include: { question: { orderBy: { questionIndex: "asc" } } },
+        },
         link: true,
         file: true,
         StudentMaterial: true,
