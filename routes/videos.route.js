@@ -19,13 +19,20 @@ const cors = require("cors");
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 
+const corsOptions = {
+  origin: "*",
+  credentials: true, //access-control-allow-credentials:true
+  optionSuccessStatus: 200,
+};
+
+router.use(cors(corsOptions));
 // Use CORS middleware with options
-router.use(
-  cors({
-    origin: "*", // Allow this origin
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
-  })
-);
+// router.use(
+//   cors({
+//     origin: "*", // Allow this origin
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
+//   })
+// );
 
 //res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 
