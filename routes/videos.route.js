@@ -17,7 +17,10 @@ const http = require("http");
 const cors = require("cors");
 
 router.use(express.json());
-router.use(express.urlencoded({ extended: true }));
+//router.use(express.urlencoded({ extended: true }));
+
+router.use(express.json({ limit: "50mb" }));
+router.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 const corsOptions = {
   origin: "*",
