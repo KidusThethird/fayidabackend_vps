@@ -17,7 +17,7 @@ const http = require("http");
 const cors = require("cors");
 
 router.use(express.json());
-router.use(express.urlencoded({ extended: false }));
+router.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
   origin: "*",
@@ -26,6 +26,7 @@ const corsOptions = {
 };
 
 router.use(cors(corsOptions));
+
 // Use CORS middleware with options
 // router.use(
 //   cors({
