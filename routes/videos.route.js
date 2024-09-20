@@ -19,8 +19,8 @@ const cors = require("cors");
 router.use(express.json());
 //router.use(express.urlencoded({ extended: true }));
 
-router.use(express.json({ limit: "50mb" }));
-router.use(express.urlencoded({ limit: "50mb", extended: true }));
+router.use(express.json({ limit: "500mb" }));
+router.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 const corsOptions = {
   origin: "*",
@@ -53,6 +53,7 @@ var ProgressPercent = 0;
 //multer storage
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 },
 });
 
 const checkAuthenticated = require("./login_register.route");
