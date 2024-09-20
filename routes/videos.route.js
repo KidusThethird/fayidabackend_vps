@@ -28,7 +28,7 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 
-router.use(cors(corsOptions));
+//router.use(cors(corsOptions));
 
 // Use CORS middleware with options
 // router.use(
@@ -121,7 +121,7 @@ router.post(
     const buffer = file.buffer;
 
     const progressInterval = setInterval(() => {
-      console.log(`Upload progressxx: ${progress}%`);
+      console.log(`Upload progressxx: %`);
     }, 2000); // 2000 ms = 2 seconds
 
     function uploadChunk(start) {
