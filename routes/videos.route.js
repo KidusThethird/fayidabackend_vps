@@ -120,6 +120,10 @@ router.post(
     const CHUNK_SIZE = 1024 * 256; // 256 KB chunk size
     const buffer = file.buffer;
 
+    const progressInterval = setInterval(() => {
+      console.log(`Upload progressxx: ${progress}%`);
+    }, 2000); // 2000 ms = 2 seconds
+
     function uploadChunk(start) {
       const end = Math.min(start + CHUNK_SIZE, buffer.length);
       const chunk = buffer.slice(start, end);
