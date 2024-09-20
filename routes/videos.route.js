@@ -7,7 +7,7 @@ const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 const { PrismaClient } = require("@prisma/client");
 const multer = require("multer");
 const fs = require("fs");
-const path = require("path");
+
 //const { Storage } = require("@google-cloud/storage");
 //const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 //const sendCustomEmail = require("./helper/sendCustomEmail");
