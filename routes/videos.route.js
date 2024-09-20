@@ -15,6 +15,13 @@ const prisma = new PrismaClient();
 const path = require("path");
 const http = require("http");
 const cors = require("cors");
+
+router.use(
+  cors({
+    origin: ["https://fayidaacademy.com", "https://admin.fayidaacademy.com"],
+  })
+);
+
 var fileNameSaved = "";
 var ProgressPercent = 0;
 
