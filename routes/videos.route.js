@@ -20,7 +20,7 @@ router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 
 // Use CORS middleware with options
-app.use(
+router.use(
   cors({
     origin: "https://admin.fayidaacademy.com", // Allow this origin
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
