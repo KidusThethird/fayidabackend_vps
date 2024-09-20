@@ -19,10 +19,15 @@ const cors = require("cors");
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 
-cors({
-  origin: "*", // Allows all origins (you might want to restrict this in production)
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Specify allowed methods
-});
+// Use CORS middleware with options
+app.use(
+  cors({
+    origin: "https://admin.fayidaacademy.com", // Allow this origin
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
+  })
+);
+
+//res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
 
 // router.use(
 //   cors({
