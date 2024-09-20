@@ -22,6 +22,7 @@ router.use(express.urlencoded({ extended: false }));
 router.use(
   cors({
     origin: "*",
+    methods: ["xhr"],
   })
 );
 
