@@ -63,7 +63,6 @@ const storage = new Storage({
 });
 const bucketName = "generalfilesbucket";
 const bucket = storage.bucket(bucketName);
-
 router.post(
   "/upload_video/:id",
   upload.single("course_video"),
@@ -120,10 +119,14 @@ router.post(
     const CHUNK_SIZE = 1024 * 256; // 256 KB chunk size
     const buffer = file.buffer;
 
+    // Progress logging interval
     const progressInterval = setInterval(() => {
-      console.log(`Upload progressxx: %`);
-    }, 2000); // 2000 ms = 2 seconds
+      console.log(
+        `Upload progress: ${Math.round((uploadedBytes / fileSize) * 100)}%`
+      );
+    }, 2000); // Log progress every 2 seconds
 
+    // Upload the file chunk by chunk
     function uploadChunk(start) {
       const end = Math.min(start + CHUNK_SIZE, buffer.length);
       const chunk = buffer.slice(start, end);
@@ -131,19 +134,11 @@ router.post(
       blobStream.write(chunk, () => {
         uploadedBytes += chunk.length;
         const progress = Math.round((uploadedBytes / fileSize) * 100);
-        console.log(`Upload progress: ${progress}%`);
-        ProgressPercent = progress;
+        console.log(`Uploading: ${progress}%`);
 
-        // Send progress to the client
-        const sse = res.locals.sse;
-        if (sse) {
-          sse.write(`data: ${progress}\n\n`);
-        }
-
-        // If we haven't finished, keep uploading
+        // If we haven't finished, upload the next chunk after a small delay
         if (end < buffer.length) {
-          // Use process.nextTick() to allow other I/O operations (like logs) to proceed
-          process.nextTick(() => uploadChunk(end));
+          setTimeout(() => uploadChunk(end), 0); // Use setTimeout to ensure asynchronous chunk uploading
         } else {
           blobStream.end(); // End the stream when the last chunk is written
         }
@@ -152,12 +147,13 @@ router.post(
 
     blobStream.on("error", (err) => {
       console.error("Blob Stream Error:", err);
+      clearInterval(progressInterval); // Clear the progress interval on error
       return res.status(500).send(err.message);
     });
 
     blobStream.on("finish", async () => {
       console.log("Blob Finished!");
-      clearInterval(progressInterval); // Clear interval after upload finishes
+      clearInterval(progressInterval); // Clear the progress interval when finished
       try {
         await prisma.Videos.update({
           where: {
