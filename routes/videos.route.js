@@ -16,17 +16,17 @@ const path = require("path");
 const http = require("http");
 const cors = require("cors");
 
+router.use(express.json());
+router.use(express.urlencoded({ extended: false }));
+
 router.use(
   cors({
-    origin: ["https://fayidaacademy.com", "https://admin.fayidaacademy.com"],
+    origin: "https://admin.fayidaacademy.com",
   })
 );
 
 var fileNameSaved = "";
 var ProgressPercent = 0;
-
-router.use(express.json());
-router.use(express.urlencoded({ extended: false }));
 
 //multer storage
 const upload = multer({
