@@ -19,12 +19,17 @@ const cors = require("cors");
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
 
-router.use(
-  cors({
-    origin: "*",
-    methods: ["xhr"],
-  })
-);
+cors({
+  origin: "*", // Allows all origins (you might want to restrict this in production)
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Specify allowed methods
+});
+
+// router.use(
+//   cors({
+//     origin: "*",
+//     methods: ["xhr"],
+//   })
+// );
 
 var fileNameSaved = "";
 var ProgressPercent = 0;
