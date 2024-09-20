@@ -63,6 +63,7 @@ const storage = new Storage({
 });
 const bucketName = "generalfilesbucket";
 const bucket = storage.bucket(bucketName);
+
 router.post(
   "/upload_video/:id",
   upload.single("course_video"),
@@ -83,20 +84,16 @@ router.post(
       },
     });
 
-    if (singleVideo) {
-      if (singleVideo.location) {
-        olderFileName = singleVideo.location;
-        console.log("OlderFileName: " + olderFileName);
+    if (singleVideo && singleVideo.location) {
+      olderFileName = singleVideo.location;
+      console.log("OlderFileName: " + olderFileName);
 
-        const filePath = `course_videos/${olderFileName}`;
-        try {
-          await bucket.file(filePath).delete();
-          console.log("Older File Deleted");
-        } catch (error) {
-          console.error("Error deleting older file: " + error);
-        }
-      } else {
-        console.log("No prior video found.");
+      const filePath = `course_videos/${olderFileName}`;
+      try {
+        await bucket.file(filePath).delete();
+        console.log("Older File Deleted");
+      } catch (error) {
+        console.error("Error deleting older file: " + error);
       }
     }
 
@@ -104,10 +101,8 @@ router.post(
     const filePath = `course_videos/${fileName}`;
     const blob = bucket.file(filePath);
 
-    const fileSize = file.size; // Get the total file size
-    let uploadedBytes = 0;
-
-    // Create a writable stream
+    // Open a readable stream from the uploaded file
+    const fileStream = fs.createReadStream(file.path);
     const blobStream = blob.createWriteStream({
       metadata: {
         contentType: file.mimetype,
@@ -115,45 +110,31 @@ router.post(
       resumable: false,
     });
 
-    // Track the progress by writing buffer in chunks
-    const CHUNK_SIZE = 1024 * 256; // 256 KB chunk size
-    const buffer = file.buffer;
+    let uploadedBytes = 0;
+    const fileSize = file.size;
 
-    // Progress logging interval
-    const progressInterval = setInterval(() => {
-      console.log(
-        `Upload progress: ${Math.round((uploadedBytes / fileSize) * 100)}%`
-      );
-    }, 2000); // Log progress every 2 seconds
+    // Listen for data (chunks) being written to the blob
+    fileStream.on("data", (chunk) => {
+      uploadedBytes += chunk.length;
+      const progress = Math.round((uploadedBytes / fileSize) * 100);
+      console.log(`Upload progress: ${progress}%`);
 
-    // Upload the file chunk by chunk
-    function uploadChunk(start) {
-      const end = Math.min(start + CHUNK_SIZE, buffer.length);
-      const chunk = buffer.slice(start, end);
-
-      blobStream.write(chunk, () => {
-        uploadedBytes += chunk.length;
-        const progress = Math.round((uploadedBytes / fileSize) * 100);
-        console.log(`Uploading: ${progress}%`);
-
-        // If we haven't finished, upload the next chunk after a small delay
-        if (end < buffer.length) {
-          setTimeout(() => uploadChunk(end), 0); // Use setTimeout to ensure asynchronous chunk uploading
-        } else {
-          blobStream.end(); // End the stream when the last chunk is written
-        }
-      });
-    }
-
-    blobStream.on("error", (err) => {
-      console.error("Blob Stream Error:", err);
-      clearInterval(progressInterval); // Clear the progress interval on error
-      return res.status(500).send(err.message);
+      // Optionally, you can send progress updates to the client
+      const sse = res.locals.sse;
+      if (sse) {
+        sse.write(`data: ${progress}\n\n`);
+      }
     });
 
-    blobStream.on("finish", async () => {
-      console.log("Blob Finished!");
-      clearInterval(progressInterval); // Clear the progress interval when finished
+    // Handle errors during upload
+    fileStream.on("error", (err) => {
+      console.error("File stream error:", err);
+      res.status(500).send("Error uploading file.");
+    });
+
+    // Handle completion of file upload
+    fileStream.on("end", async () => {
+      console.log("File upload finished.");
       try {
         await prisma.Videos.update({
           where: {
@@ -171,8 +152,8 @@ router.post(
       }
     });
 
-    // Start uploading in chunks asynchronously
-    uploadChunk(0);
+    // Pipe the file stream into the blob stream for upload
+    fileStream.pipe(blobStream);
   }
 );
 
