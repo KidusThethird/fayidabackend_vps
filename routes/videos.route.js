@@ -41,21 +41,11 @@ const storage = new Storage({
 const bucketName = "generalfilesbucket";
 const bucket = storage.bucket(bucketName);
 
-router.get("/upload_progress/:id", (req, res) => {
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-
-  // Store response object to send updates later
-  res.locals.sse = res;
-
-  console.log(`SSE connection established for Video ID: ${req.params.id}`);
-});
-
 router.post(
   "/upload_video/:id",
   upload.single("course_video"),
   async (req, res) => {
+    console.log("Upload function started");
     console.log("Id from post: " + req.params.id);
 
     const file = req.file;
