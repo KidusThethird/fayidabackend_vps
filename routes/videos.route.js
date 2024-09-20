@@ -30,25 +30,6 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 
-//router.use(cors(corsOptions));
-
-// Use CORS middleware with options
-// router.use(
-//   cors({
-//     origin: "*", // Allow this origin
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
-//   })
-// );
-
-//res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-
-// router.use(
-//   cors({
-//     origin: "*",
-//     methods: ["xhr"],
-//   })
-// );
-
 var fileNameSaved = "";
 var ProgressPercent = 0;
 
@@ -66,92 +47,120 @@ const storage = new Storage({
 const bucketName = "generalfilesbucket";
 const bucket = storage.bucket(bucketName);
 
-router.post("/upload_video/:id", async (req, res) => {
-  console.log("Upload function started");
-  console.log("Id from post: " + req.params.id);
+router.post("/upload_video/:id", (req, res) => {
+  // Initialize SSE
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
 
-  // Ensure content-length header exists for the file size
-  const fileSize = req.headers["content-length"];
-  if (!fileSize) {
-    return res.status(400).send("No content-length header found.");
-  }
+  // Store the SSE connection in res.locals
+  res.locals.sse = res;
 
-  let uploadedBytes = 0;
-  const videoId = req.params.id;
-
-  // Check if there's a previously uploaded video to delete
-  let olderFileName = "";
-  const singleVideo = await prisma.Videos.findUnique({
-    where: { id: videoId },
-  });
-
-  if (singleVideo && singleVideo.location) {
-    olderFileName = singleVideo.location;
-    const filePath = `course_videos/${olderFileName}`;
-
-    try {
-      await bucket.file(filePath).delete();
-      console.log("Older File Deleted");
-    } catch (error) {
-      console.error("Error deleting older file:", error);
+  upload.single("course_video")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).send("Error during file upload: " + err.message);
     }
-  } else {
-    console.log("No prior video found.");
-  }
 
-  const fileName = Date.now() + "-video.mp4";
-  const filePath = `course_videos/${fileName}`;
-  const blob = bucket.file(filePath);
+    console.log("Upload function started");
+    console.log("Id from post: " + req.params.id);
 
-  const blobStream = blob.createWriteStream({
-    metadata: { contentType: "video/mp4" }, // Adjust content type
-    resumable: false,
-  });
-
-  // Handle upload progress every 2 seconds
-  const progressInterval = setInterval(() => {
-    const progress = Math.round((uploadedBytes / fileSize) * 100);
-    console.log(`Upload progress: ${progress}%`);
-
-    // Optionally, send progress to the client (if using SSE)
-    const sse = res.locals.sse;
-    if (sse) {
-      sse.write(`data: ${progress}\n\n`);
+    const file = req.file;
+    if (!file) {
+      return res.status(400).send("No file uploaded");
     }
-  }, 2000); // Every 2 seconds
 
-  req.on("data", (chunk) => {
-    uploadedBytes += chunk.length;
-    blobStream.write(chunk);
-  });
+    // Delete the former video if it exists
+    let olderFileName = "";
+    const singleVideo = await prisma.Videos.findUnique({
+      where: { id: req.params.id },
+    });
 
-  req.on("end", async () => {
-    clearInterval(progressInterval); // Stop progress updates
+    if (singleVideo) {
+      if (singleVideo.location) {
+        olderFileName = singleVideo.location;
+        console.log("OlderFileName: " + olderFileName);
+        const filePath = `course_videos/${olderFileName}`;
 
-    blobStream.end();
+        try {
+          await bucket.file(filePath).delete();
+          console.log("Older File Deleted");
+        } catch (error) {
+          console.error("Error deleting older file: " + error);
+        }
+      } else {
+        console.log("No prior video found.");
+      }
+    }
 
-    console.log("Upload finished");
-    try {
-      await prisma.Videos.update({
-        where: { id: videoId },
-        data: { location: fileName },
+    const fileName = Date.now() + "-" + file.originalname;
+    const filePath = `course_videos/${fileName}`;
+    const blob = bucket.file(filePath);
+
+    const fileSize = file.size; // Get the total file size
+    let uploadedBytes = 0;
+
+    // Create a writable stream
+    const blobStream = blob.createWriteStream({
+      metadata: {
+        contentType: file.mimetype,
+      },
+      resumable: false,
+    });
+
+    // Track the progress by writing buffer in chunks
+    const CHUNK_SIZE = 1024 * 256; // 256 KB chunk size
+    const buffer = file.buffer;
+
+    function uploadChunk(start) {
+      const end = Math.min(start + CHUNK_SIZE, buffer.length);
+      const chunk = buffer.slice(start, end);
+
+      blobStream.write(chunk, () => {
+        uploadedBytes += chunk.length;
+        const progress = Math.round((uploadedBytes / fileSize) * 100);
+        console.log(`Upload progress: ${progress}%`);
+
+        // Send progress to the client
+        res.locals.sse.write(`data: ${progress}\n\n`);
+
+        // If we haven't finished, keep uploading
+        if (end < buffer.length) {
+          uploadChunk(end);
+        } else {
+          blobStream.end(); // End the stream when the last chunk is written
+        }
       });
-
-      res
-        .status(201)
-        .json({ message: "File uploaded successfully!", fileName });
-    } catch (err) {
-      console.error("Error updating video record:", err);
-      res.status(500).send("Failed to update video record.");
     }
-  });
 
-  req.on("error", (err) => {
-    console.error("Error during upload:", err);
-    clearInterval(progressInterval); // Stop progress updates on error
-    res.status(500).send("Upload failed.");
+    blobStream.on("error", (err) => {
+      console.error("Blob Stream Error:", err);
+      res.locals.sse.write(`data: 0\n\n`); // Send 0% on error
+      return res.status(500).send(err.message);
+    });
+
+    blobStream.on("finish", async () => {
+      console.log("Blob Finished!");
+      try {
+        await prisma.Videos.update({
+          where: { id: req.params.id },
+          data: { location: fileName },
+        });
+        res.locals.sse.write(`data: 100\n\n`); // Send 100% when done
+        res.status(201).json({
+          message: "File uploaded successfully!",
+          fileName: file.originalname,
+        });
+      } catch (err) {
+        console.error("Error updating video record:", err);
+        res.status(500).send("Failed to update video record.");
+      }
+    });
+
+    // Start uploading in chunks
+    uploadChunk(0);
   });
 });
+
 // router.post(
 //   "/upload_video/:id",
 //   upload.single("course_video"),
