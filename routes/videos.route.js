@@ -16,6 +16,7 @@ const path = require("path");
 const http = require("http");
 const cors = require("cors");
 var fileNameSaved = "";
+var ProgressPercent = 0;
 
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
@@ -33,83 +34,475 @@ const storage = new Storage({
 const bucketName = "generalfilesbucket";
 const bucket = storage.bucket(bucketName);
 
+router.get("/upload_progress/:id", (req, res) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  // Store response object to send updates later
+  res.locals.sse = res;
+
+  console.log(`SSE connection established for Video ID: ${req.params.id}`);
+});
+
 router.post(
   "/upload_video/:id",
   upload.single("course_video"),
   async (req, res) => {
     console.log("Id from post: " + req.params.id);
+
     const file = req.file;
     if (!file) {
-      res.status(400).send("No file uploaded");
+      return res.status(400).send("No file uploaded");
     }
 
-    //delete the former image
+    // Delete the former video if it exists
     let olderFileName = "";
     const singleVideo = await prisma.Videos.findUnique({
       where: {
         id: req.params.id,
       },
     });
+
     if (singleVideo) {
-      if (!singleVideo.location) {
-        console.log("No prior Image found!");
-      } else if (singleVideo.location != null || singleVideo.location != "") {
+      if (singleVideo.location) {
         olderFileName = singleVideo.location;
         console.log("OlderFileName: " + olderFileName);
 
-        if (olderFileName != null || olderFileName != "") {
-          const filePath = `course_videos/${olderFileName}`;
-          //const blob = bucket.file(filePath);
-          try {
-            await bucket.file(filePath).delete();
-            console.log("Older File Deleted");
-          } catch (error) {
-            console.log("Error: " + error);
-          }
+        const filePath = `course_videos/${olderFileName}`;
+        try {
+          await bucket.file(filePath).delete();
+          console.log("Older File Deleted");
+        } catch (error) {
+          console.error("Error deleting older file: " + error);
         }
       } else {
-        console.log("New file");
+        console.log("No prior video found.");
       }
     }
 
     const fileName = Date.now() + "-" + file.originalname;
     const filePath = `course_videos/${fileName}`;
-    // convert to a blob
-
     const blob = bucket.file(filePath);
+
+    const fileSize = file.size; // Get the total file size
+    let uploadedBytes = 0;
+
+    // Create a writable stream
     const blobStream = blob.createWriteStream({
       metadata: {
         contentType: file.mimetype,
       },
+      resumable: false,
     });
+
+    // Track the progress by writing buffer in chunks
+    const CHUNK_SIZE = 1024 * 256; // 256 KB chunk size
+    const buffer = file.buffer;
+
+    function uploadChunk(start) {
+      const end = Math.min(start + CHUNK_SIZE, buffer.length);
+      const chunk = buffer.slice(start, end);
+
+      blobStream.write(chunk, () => {
+        uploadedBytes += chunk.length;
+        const progress = Math.round((uploadedBytes / fileSize) * 100);
+        console.log(`Upload progress: ${progress}%`);
+        ProgressPercent = progress;
+
+        // Send progress to the client
+        const sse = res.locals.sse;
+        if (sse) {
+          sse.write(`data: ${progress}\n\n`);
+        }
+
+        // If we haven't finished, keep uploading
+        if (end < buffer.length) {
+          uploadChunk(end);
+        } else {
+          blobStream.end(); // End the stream when the last chunk is written
+        }
+      });
+    }
+
     blobStream.on("error", (err) => {
-      res.status(500).send(err);
+      console.error("Blob Stream Error:", err);
+      return res.status(500).send(err.message);
     });
+
     blobStream.on("finish", async () => {
       console.log("Blob Finished!");
-      console.log("FIle Name: " + fileName);
-      console.log("Id: " + req.params.id);
       try {
-        const updateVideo = await prisma.Videos.update({
+        await prisma.Videos.update({
           where: {
             id: req.params.id,
           },
           data: { location: fileName },
         });
-        //   res.json(updatePaymentMethod);
-
         res.status(201).json({
           message: "File uploaded successfully!",
           fileName: file.originalname,
         });
       } catch (err) {
-        console.log("Error from catch: " + err);
+        console.error("Error updating video record:", err);
+        res.status(500).send("Failed to update video record.");
       }
     });
 
-    blobStream.end(file.buffer);
+    // Start uploading in chunks
+    uploadChunk(0);
   }
 );
+
+router.get("/progressvalue", async (req, res, next) => {
+  try {
+    //const videos = await prisma.videos.findMany({});
+    res.json({ progress: ProgressPercent });
+  } catch (error) {
+    next(error);
+  }
+});
+
+//this one works with uploading percent
+// router.post(
+//   "/upload_video/:id",
+//   upload.single("course_video"),
+//   async (req, res) => {
+//     console.log("Id from post: " + req.params.id);
+
+//     const file = req.file;
+//     if (!file) {
+//       return res.status(400).send("No file uploaded");
+//     }
+
+//     // Delete the former video if it exists
+//     let olderFileName = "";
+//     const singleVideo = await prisma.Videos.findUnique({
+//       where: {
+//         id: req.params.id,
+//       },
+//     });
+
+//     if (singleVideo) {
+//       if (singleVideo.location) {
+//         olderFileName = singleVideo.location;
+//         console.log("OlderFileName: " + olderFileName);
+
+//         const filePath = `course_videos/${olderFileName}`;
+//         try {
+//           await bucket.file(filePath).delete();
+//           console.log("Older File Deleted");
+//         } catch (error) {
+//           console.error("Error deleting older file: " + error);
+//         }
+//       } else {
+//         console.log("No prior video found.");
+//       }
+//     }
+
+//     const fileName = Date.now() + "-" + file.originalname;
+//     const filePath = `course_videos/${fileName}`;
+//     const blob = bucket.file(filePath);
+
+//     const fileSize = file.size; // Get the total file size
+//     let uploadedBytes = 0;
+
+//     // Create a writable stream
+//     const blobStream = blob.createWriteStream({
+//       metadata: {
+//         contentType: file.mimetype,
+//       },
+//       resumable: false, // Disable resumable to make tracking easier
+//     });
+
+//     // Track the progress by writing buffer in chunks
+//     const CHUNK_SIZE = 1024 * 256; // 256 KB chunk size
+//     const buffer = file.buffer;
+
+//     function uploadChunk(start) {
+//       const end = Math.min(start + CHUNK_SIZE, buffer.length);
+//       const chunk = buffer.slice(start, end);
+
+//       blobStream.write(chunk, () => {
+//         uploadedBytes += chunk.length;
+//         const progress = Math.round((uploadedBytes / fileSize) * 100);
+//         console.log(`Upload progress: ${progress}%`);
+
+//         // If we haven't finished, keep uploading
+//         if (end < buffer.length) {
+//           uploadChunk(end);
+//         } else {
+//           blobStream.end(); // End the stream when the last chunk is written
+//         }
+//       });
+//     }
+
+//     blobStream.on("error", (err) => {
+//       console.error("Blob Stream Error:", err);
+//       return res.status(500).send(err.message);
+//     });
+
+//     blobStream.on("finish", async () => {
+//       console.log("Blob Finished!");
+//       try {
+//         await prisma.Videos.update({
+//           where: {
+//             id: req.params.id,
+//           },
+//           data: { location: fileName },
+//         });
+//         res.status(201).json({
+//           message: "File uploaded successfully!",
+//           fileName: file.originalname,
+//         });
+//       } catch (err) {
+//         console.error("Error updating video record:", err);
+//         res.status(500).send("Failed to update video record.");
+//       }
+//     });
+
+//     // Start uploading in chunks
+//     uploadChunk(0);
+//   }
+// );
+
+// router.post(
+//   "/upload_video/:id",
+//   upload.single("course_video"),
+//   async (req, res) => {
+//     console.log("Id from post: " + req.params.id);
+
+//     const file = req.file;
+//     if (!file) {
+//       return res.status(400).send("No file uploaded");
+//     }
+
+//     // Delete the former video if it exists
+//     let olderFileName = "";
+//     const singleVideo = await prisma.Videos.findUnique({
+//       where: {
+//         id: req.params.id,
+//       },
+//     });
+
+//     if (singleVideo) {
+//       if (singleVideo.location) {
+//         olderFileName = singleVideo.location;
+//         console.log("OlderFileName: " + olderFileName);
+
+//         const filePath = `course_videos/${olderFileName}`;
+//         try {
+//           await bucket.file(filePath).delete();
+//           console.log("Older File Deleted");
+//         } catch (error) {
+//           console.error("Error deleting older file: " + error);
+//         }
+//       } else {
+//         console.log("No prior video found.");
+//       }
+//     }
+
+//     const fileName = Date.now() + "-" + file.originalname;
+//     const filePath = `course_videos/${fileName}`;
+//     const blob = bucket.file(filePath);
+
+//     const fileSize = file.size; // Get the file size to track progress
+//     let uploadedBytes = 0;
+
+//     // Create a writable stream
+//     const blobStream = blob.createWriteStream({
+//       metadata: {
+//         contentType: file.mimetype,
+//       },
+//     });
+
+//     // Track progress by intercepting the data events
+//     blobStream.on("data", (chunk) => {
+//       uploadedBytes += chunk.length;
+//       const progress = Math.round((uploadedBytes / fileSize) * 100);
+//       console.log(`Upload progress: ${progress}%`);
+//     });
+
+//     blobStream.on("error", (err) => {
+//       console.error("Blob Stream Error:", err);
+//       return res.status(500).send(err.message);
+//     });
+
+//     blobStream.on("finish", async () => {
+//       console.log("Blob Finished!");
+//       try {
+//         await prisma.Videos.update({
+//           where: {
+//             id: req.params.id,
+//           },
+//           data: { location: fileName },
+//         });
+//         res.status(201).json({
+//           message: "File uploaded successfully!",
+//           fileName: file.originalname,
+//         });
+//       } catch (err) {
+//         console.error("Error updating video record:", err);
+//         res.status(500).send("Failed to update video record.");
+//       }
+//     });
+
+//     blobStream.end(file.buffer);
+//   }
+// );
+
+// router.post(
+//   "/upload_video/:id",
+//   upload.single("course_video"),
+//   async (req, res) => {
+//     console.log("Id from post: " + req.params.id);
+
+//     const file = req.file;
+//     if (!file) {
+//       return res.status(400).send("No file uploaded");
+//     }
+
+//     // Delete the former video if it exists
+//     let olderFileName = "";
+//     const singleVideo = await prisma.Videos.findUnique({
+//       where: {
+//         id: req.params.id,
+//       },
+//     });
+
+//     if (singleVideo) {
+//       if (singleVideo.location) {
+//         olderFileName = singleVideo.location;
+//         console.log("OlderFileName: " + olderFileName);
+
+//         const filePath = `course_videos/${olderFileName}`;
+//         try {
+//           await bucket.file(filePath).delete();
+//           console.log("Older File Deleted");
+//         } catch (error) {
+//           console.error("Error deleting older file: " + error);
+//         }
+//       } else {
+//         console.log("No prior video found.");
+//       }
+//     }
+
+//     const fileName = Date.now() + "-" + file.originalname;
+//     const filePath = `course_videos/${fileName}`;
+//     const blob = bucket.file(filePath);
+
+//     // Create a writable stream
+//     const blobStream = blob.createWriteStream({
+//       metadata: {
+//         contentType: file.mimetype,
+//       },
+//     });
+
+//     blobStream.on("error", (err) => {
+//       console.error("Blob Stream Error:", err);
+//       return res.status(500).send(err.message);
+//     });
+
+//     blobStream.on("finish", async () => {
+//       console.log("Blob Finished!");
+//       try {
+//         await prisma.Videos.update({
+//           where: {
+//             id: req.params.id,
+//           },
+//           data: { location: fileName },
+//         });
+//         res.status(201).json({
+//           message: "File uploaded successfully!",
+//           fileName: file.originalname,
+//         });
+//       } catch (err) {
+//         console.error("Error updating video record:", err);
+//         res.status(500).send("Failed to update video record.");
+//       }
+//     });
+
+//     blobStream.end(file.buffer);
+//   }
+// );
+
+// router.post(
+//   "/upload_video/:id",
+//   upload.single("course_video"),
+//   async (req, res) => {
+//     console.log("Id from post: " + req.params.id);
+//     const file = req.file;
+//     if (!file) {
+//       res.status(400).send("No file uploaded");
+//     }
+
+//     //delete the former image
+//     let olderFileName = "";
+//     const singleVideo = await prisma.Videos.findUnique({
+//       where: {
+//         id: req.params.id,
+//       },
+//     });
+//     if (singleVideo) {
+//       if (!singleVideo.location) {
+//         console.log("No prior Image found!");
+//       } else if (singleVideo.location != null || singleVideo.location != "") {
+//         olderFileName = singleVideo.location;
+//         console.log("OlderFileName: " + olderFileName);
+
+//         if (olderFileName != null || olderFileName != "") {
+//           const filePath = `course_videos/${olderFileName}`;
+//           //const blob = bucket.file(filePath);
+//           try {
+//             await bucket.file(filePath).delete();
+//             console.log("Older File Deleted");
+//           } catch (error) {
+//             console.log("Error: " + error);
+//           }
+//         }
+//       } else {
+//         console.log("New file");
+//       }
+//     }
+
+//     const fileName = Date.now() + "-" + file.originalname;
+//     const filePath = `course_videos/${fileName}`;
+//     // convert to a blob
+
+//     const blob = bucket.file(filePath);
+//     const blobStream = blob.createWriteStream({
+//       metadata: {
+//         contentType: file.mimetype,
+//       },
+//     });
+//     blobStream.on("error", (err) => {
+//       res.status(500).send(err);
+//     });
+//     blobStream.on("finish", async () => {
+//       console.log("Blob Finished!");
+//       console.log("FIle Name: " + fileName);
+//       console.log("Id: " + req.params.id);
+//       try {
+//         const updateVideo = await prisma.Videos.update({
+//           where: {
+//             id: req.params.id,
+//           },
+//           data: { location: fileName },
+//         });
+//         //   res.json(updatePaymentMethod);
+
+//         res.status(201).json({
+//           message: "File uploaded successfully!",
+//           fileName: file.originalname,
+//         });
+//       } catch (err) {
+//         console.log("Error from catch: " + err);
+//       }
+//     });
+
+//     blobStream.end(file.buffer);
+//   }
+// );
 
 router.get("/upload_video", async (req, res, next) => {
   //res.send({ message: "Awesome it works" });
