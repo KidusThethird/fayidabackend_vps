@@ -21,7 +21,7 @@ router.use(express.urlencoded({ extended: false }));
 
 router.use(
   cors({
-    origin: "https://admin.fayidaacademy.com",
+    origin: "*",
   })
 );
 
