@@ -48,7 +48,9 @@ const bucketName = "generalfilesbucket";
 const bucket = storage.bucket(bucketName);
 
 router.post("/upload_video/:id", (req, res) => {
-  // Initialize SSE
+  console.log("Upload function started");
+
+  // Set headers for SSE
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -61,7 +63,6 @@ router.post("/upload_video/:id", (req, res) => {
       return res.status(400).send("Error during file upload: " + err.message);
     }
 
-    console.log("Upload function started");
     console.log("Id from post: " + req.params.id);
 
     const file = req.file;
@@ -118,6 +119,8 @@ router.post("/upload_video/:id", (req, res) => {
       blobStream.write(chunk, () => {
         uploadedBytes += chunk.length;
         const progress = Math.round((uploadedBytes / fileSize) * 100);
+
+        // Log progress immediately
         console.log(`Upload progress: ${progress}%`);
 
         // Send progress to the client
@@ -134,7 +137,6 @@ router.post("/upload_video/:id", (req, res) => {
 
     blobStream.on("error", (err) => {
       console.error("Blob Stream Error:", err);
-      res.locals.sse.write(`data: 0\n\n`); // Send 0% on error
       return res.status(500).send(err.message);
     });
 
