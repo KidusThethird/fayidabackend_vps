@@ -18,7 +18,7 @@ const uploadsDirectory = path.join(__dirname, "upload_assets");
 const checkAuthenticated = require("./routes/login_register.route");
 const checkNotAuthenticated = require("./routes/login_register.route");
 
-app.use(cors({ credentials: true, origin: true }));
+//app.use(cors({ credentials: true, origin: true }));
 //app.use(cors({ credentials: true, origin: `${homeWebUrl}` }));
 
 app.use("/", require("./routes/api.route"));
