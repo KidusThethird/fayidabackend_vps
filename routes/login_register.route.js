@@ -29,11 +29,21 @@ const codeGenerator = require("./helper/codegenerator");
 //     return student;
 //   }
 // );
+
+//working previously
+// router.use(
+//   cors({
+//     origin: ["https://fayidaacademy.com", "https://admin.fayidaacademy.com"],
+//   })
+// );
+
 router.use(
   cors({
     origin: ["https://fayidaacademy.com", "https://admin.fayidaacademy.com"],
+    credentials: true, // Allow credentials (e.g., cookies) if needed
   })
 );
+
 //router.use(cors({ credentials: true, origin: true }));
 initializePassport(
   passport,
