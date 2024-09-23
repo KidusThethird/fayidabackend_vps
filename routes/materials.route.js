@@ -116,16 +116,42 @@ router.patch("/:id", async (req, res, next) => {
 });
 
 //delete Student
+// router.delete("/:id", async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     deleteMaterials = await prisma.materials.delete({
+//       where: {
+//         id: id,
+//       },
+//     });
+//     res.json(deleteMaterials);
+//   } catch (error) {
+//     console.log("Error from catch: " + error);
+//     next(error);
+//   }
+// });
+
 router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+
   try {
-    const { id } = req.params;
-    deleteMaterials = await prisma.materials.delete({
+    // Step 1: Delete related StudentMaterial records
+    await prisma.studentMaterial.deleteMany({
+      where: {
+        MaterialId: id,
+      },
+    });
+
+    // Step 2: Delete the main material record
+    const deletedMaterial = await prisma.materials.delete({
       where: {
         id: id,
       },
     });
-    res.json(deleteMaterials);
+
+    res.json(deletedMaterial);
   } catch (error) {
+    console.log("Error from catch: " + error);
     next(error);
   }
 });
