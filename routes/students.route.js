@@ -22,7 +22,7 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
       },
     });
     //Student Admin
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       res.json(students);
     } else {
       res.json({ Error: "You dont have access" });
@@ -89,7 +89,7 @@ router.get(
 //Get one student
 router.get("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         const singleStudent = await prisma.students.findUnique({
@@ -141,7 +141,11 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
   console.log(req.isAuthenticated());
   if (req.isAuthenticated()) {
     console.log("first");
-    if (req.user.accountType == "Admin" || req.user.id == req.params.id) {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.id == req.params.id
+    ) {
       try {
         const { id } = req.params;
         console.log(req.params.id);
@@ -190,7 +194,11 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.id == req.params.id) {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.id == req.params.id
+    ) {
       try {
         const { id } = req.params;
         deleteStudent = await prisma.students.delete({

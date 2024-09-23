@@ -186,7 +186,7 @@ router.get("/:id", async (req, res, next) => {
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (req.user.accountType == "Admin" || req.user.accountType == "min") {
       try {
         const advertisment = await prisma.Advertisement.create({
           data: req.body,
