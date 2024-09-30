@@ -170,6 +170,7 @@ model Packages {
   extra2             String?
   tag                String?
   review             packagesReview[]
+  removed Boolean @default(false)
 
   @@map("package")
 }

@@ -335,6 +335,8 @@ router.get("/:id", async (req, res, next) => {
           },
         },
         review: { include: { Student: true } },
+        purchaselist: true,
+        studentCourses: true,
       },
 
       // reviews: {
@@ -441,6 +443,7 @@ router.delete("/:id", async (req, res, next) => {
     });
     res.json(deletePackages);
   } catch (error) {
+    console.log("Error from catch: " + error);
     next(error);
   }
 });
