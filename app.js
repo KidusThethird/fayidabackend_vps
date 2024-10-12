@@ -8,16 +8,16 @@ const cron = require("node-cron");
 const app = express();
 
 //telegram file started
-const telegramBot = require("node-telegram-bot-api");
-const TELEGRAMTOKEN = "8050365014:AAFUX3yYC2Op_00G9sCjaANBR2H6NgTs6bw";
+// const telegramBot = require("node-telegram-bot-api");
+// const TELEGRAMTOKEN = "8050365014:AAFUX3yYC2Op_00G9sCjaANBR2H6NgTs6bw";
 
-const bot = new telegramBot(TELEGRAMTOKEN, { polling: true });
+// const bot = new telegramBot(TELEGRAMTOKEN, { polling: true });
 
-bot.on("message", (message) => {
-  console.log("Message: " + message.text);
-  console.log("Message Id: " + message.from.id);
-  bot.sendMessage(message.from.id, "Hello from NodeJs");
-});
+// bot.on("message", (message) => {
+//   console.log("Message: " + message.text);
+//   console.log("Message Id: " + message.from.id);
+//   bot.sendMessage(message.from.id, "Hello from NodeJs");
+// });
 
 //telegram file end
 
