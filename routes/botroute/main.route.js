@@ -2,7 +2,6 @@ const express = require("express");
 const telegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
 const { sendWelcomeMessage } = require("./welcomeRoute");
-const { sendChoiceOptions } = require("./choices01");
 const { sendPostLoginOptions, sendClubOptions } = require("./choices02");
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
@@ -169,9 +168,35 @@ bot.on("callback_query", (callbackQuery) => {
   } else if (callbackData === "questions") {
     bot.sendMessage(chatId, "You clicked Questions.");
   } else if (callbackData === "go_to_website") {
-    bot.sendMessage(chatId, "You clicked Go to Website.");
+    // Redirect to the website
+    bot.sendMessage(chatId, "Redirecting you to the website...", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Visit Website",
+              url: "https://www.fayidaacademy.com", // Website URL
+            },
+          ],
+        ],
+      },
+    });
   } else if (callbackData === "change_language") {
     bot.sendMessage(chatId, "You clicked Change Language.");
+  } else if (callbackData === "sign_up_student") {
+    // Redirect to the signup webpage
+    bot.sendMessage(chatId, "Redirecting you to the signup page...", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Go to Signup Page",
+              url: "https://www.fayidaacademy.com/signup", // Signup URL
+            },
+          ],
+        ],
+      },
+    });
   }
 
   // Acknowledge the callback query to remove the loading state
