@@ -45,6 +45,8 @@ model Students {
 
   promocode String?
   balance   String? @default("0")
+  bankaccounttype String?
+  backaccountnumber String?
 
   extra1 String?
   extra2 String?
