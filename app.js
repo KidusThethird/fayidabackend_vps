@@ -1,3 +1,5 @@
+require('dotenv').config(); 
+
 const express = require("express");
 const createError = require("http-errors");
 const morgan = require("morgan");
@@ -7,6 +9,7 @@ const path = require("path");
 const cron = require("node-cron");
 const app = express();
 
+const telegramRoute = require("./routes/botroute/main.route.js");
 //telegram file started
 // const telegramBot = require("node-telegram-bot-api");
 // const TELEGRAMTOKEN = "8050365014:AAFUX3yYC2Op_00G9sCjaANBR2H6NgTs6bw";

@@ -1,0 +1,181 @@
+const express = require("express");
+const telegramBot = require("node-telegram-bot-api");
+const axios = require("axios");
+const { sendWelcomeMessage } = require("./welcomeRoute");
+const { sendChoiceOptions } = require("./choices01");
+const { sendPostLoginOptions, sendClubOptions } = require("./choices02");
+const { CookieJar } = require("tough-cookie");
+const { wrapper } = require("axios-cookiejar-support");
+
+const router = express.Router();
+
+// Access the Telegram token from environment variables
+const TELEGRAMTOKEN = process.env.TELEGRAM_TOKEN;
+const bot = new telegramBot(TELEGRAMTOKEN, { polling: true });
+
+// Create a Map to store cookie jars for each user
+const userCookieJars = new Map();
+
+// Handle incoming messages
+bot.on("message", (message) => {
+  const chatId = message.from.id;
+  const userName = message.from.first_name;
+  console.log("Message: " + message.text);
+  console.log("Message Id: " + chatId);
+
+  // Handle '/start' command and call the welcome route
+  if (message.text === "/start") {
+    sendWelcomeMessage(bot, chatId, userName);
+  }
+});
+
+// Handle callback queries from inline keyboard
+bot.on("callback_query", (callbackQuery) => {
+  const chatId = callbackQuery.from.id;
+  const callbackData = callbackQuery.data;
+
+  if (callbackData === "login_student") {
+    // Ask for email
+    bot.sendMessage(chatId, "Please enter your email:");
+
+    // Listen for the next message (email)
+    bot.once("message", (emailMessage) => {
+      const email = emailMessage.text;
+      bot.sendMessage(chatId, "Please enter your password:");
+
+      // Listen for the next message (password)
+      bot.once("message", (passwordMessage) => {
+        const password = passwordMessage.text;
+
+        // Create a new cookie jar for the user
+        const cookieJar = new CookieJar();
+        userCookieJars.set(chatId, cookieJar);
+        const axiosInstance = wrapper(
+          axios.create({
+            jar: cookieJar, // Use the user's cookie jar
+            withCredentials: true,
+          })
+        );
+
+        // Send a request to the login endpoint
+        axiosInstance
+          .post("http://localhost:5000/login_register/loginss", {
+            email,
+            password,
+          })
+          .then((response) => {
+            if (response.data.message === "Login successful") {
+              bot.sendMessage(chatId, "Login successful! 🎉");
+              sendPostLoginOptions(bot, chatId); // Show post-login options
+            } else {
+              bot.sendMessage(chatId, "Login failed: " + response.data.message);
+            }
+          })
+          .catch((error) => {
+            bot.sendMessage(
+              chatId,
+              "An error occurred during login: " + error.message
+            );
+          });
+      });
+    });
+  } else if (callbackData === "view_profile") {
+    // Handle 'View Profile' option
+    const cookieJar = userCookieJars.get(chatId);
+    if (cookieJar) {
+      const axiosInstance = wrapper(
+        axios.create({
+          jar: cookieJar,
+          withCredentials: true,
+        })
+      );
+
+      // Fetch user profile
+      axiosInstance
+        .get("http://localhost:5000/login_register/profile")
+        .then((profileResponse) => {
+          const { firstName, lastName, gread } = profileResponse.data;
+          const fullName = `${firstName} ${lastName}`;
+          bot.sendMessage(
+            chatId,
+            `Profile Information:\nName: ${fullName}\nGrade: ${gread}`
+          );
+        })
+        .catch((error) => {
+          bot.sendMessage(
+            chatId,
+            "An error occurred while fetching profile: " + error.message
+          );
+        });
+    } else {
+      bot.sendMessage(chatId, "You need to log in first!");
+    }
+  } else if (callbackData === "clubs") {
+    sendClubOptions(bot, chatId); // Show club options when 'Clubs' is selected
+  } else if (callbackData === "grade_9_club") {
+    bot.sendMessage(chatId, "Go to Grade 9 Club...", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Go to Grade 9 Club",
+              url: "https://t.me/fayidaacademy_grade9_club", // Link to the Grade 9 Club
+            },
+          ],
+        ],
+      },
+    });
+  } else if (callbackData === "grade_10_club") {
+    bot.sendMessage(chatId, "Go to Grade 10 Club...", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Go to Grade 10 Club",
+              url: "https://t.me/fayidaacademy_grade10_club", // Link to the Grade 10 Club
+            },
+          ],
+        ],
+      },
+    });
+  } else if (callbackData === "grade_11_club") {
+    bot.sendMessage(chatId, "Go to Grade 11 Club...", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Go to Grade 11 Club",
+              url: "https://t.me/fayidaacademy_grade11_club", // Link to the Grade 11 Club
+            },
+          ],
+        ],
+      },
+    });
+  } else if (callbackData === "grade_12_club") {
+    bot.sendMessage(chatId, "Go to Grade 12 Club...", {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Go to Grade 12 Club",
+              url: "https://t.me/fayidaacademy_grade12_club", // Link to the Grade 12 Club
+            },
+          ],
+        ],
+      },
+    });
+  } else if (callbackData === "others_club") {
+    bot.sendMessage(chatId, "You clicked Others.");
+  } else if (callbackData === "questions") {
+    bot.sendMessage(chatId, "You clicked Questions.");
+  } else if (callbackData === "go_to_website") {
+    bot.sendMessage(chatId, "You clicked Go to Website.");
+  } else if (callbackData === "change_language") {
+    bot.sendMessage(chatId, "You clicked Change Language.");
+  }
+
+  // Acknowledge the callback query to remove the loading state
+  bot.answerCallbackQuery(callbackQuery.id);
+});
+
+module.exports = router;
