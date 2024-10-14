@@ -10,6 +10,62 @@ const cron = require("node-cron");
 // and if the date passes it will expire the payment status
 //this runs once in 24 hours at mid night
 
+/***************************************************************************** */
+
+// cron.schedule("0 0 * * *", async () => {
+//   console.log("*******Purchase Expirydate Status Check Started!*******");
+//   try {
+//     const data = await prisma.PurchaseList.findMany({
+//       where: { type: "main" },
+//     }); // Replace 'tableName' with the actual name of your table
+
+//     for (const item of data) {
+//       // Perform your condition check and patch operation here
+
+//       var ExpiryDate = new Date(item.expiryDate); // Convert expiryDate to Date object
+//       var CurrentDate = new Date();
+//       var remainingTime = ExpiryDate.getTime() - CurrentDate.getTime();
+//       var remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
+
+//       if (ExpiryDate) {
+//         if (ExpiryDate < CurrentDate) {
+//           console.log(
+//             "Exp: " + ExpiryDate + "Remaining Days: " + remainingDays
+//           );
+//           const updatedItem = await prisma.PurchaseList.update({
+//             where: { id: item.id }, // Assuming 'id' is the primary key of the table
+//             data: {
+//               paymentStatus: "Expired",
+//             },
+//           });
+//           console.log(`Updated item with ID ${updatedItem.id}`);
+//         } else {
+//           const updatedItem = await prisma.PurchaseList.update({
+//             where: { id: item.id }, // Assuming 'id' is the primary key of the table
+//             data: {
+//               paymentStatus: "active",
+//             },
+//           });
+//           console.log(
+//             "Good: " + ExpiryDate + "Remaining Days: " + remainingDays
+//           );
+//         }
+//       } else {
+//         const updatedItem = await prisma.PurchaseList.update({
+//           where: { id: item.id }, // Assuming 'id' is the primary key of the table
+//           data: {
+//             paymentStatus: "pending",
+//           },
+//         });
+//         console.log("Set to Pending");
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Error updating data:", error);
+//   }
+//   console.log("******Purchase Expirydate Status Check Ended!*****");
+// });
+
 cron.schedule("0 0 * * *", async () => {
   console.log("*******Purchase Expirydate Status Check Started!*******");
   try {
@@ -25,18 +81,30 @@ cron.schedule("0 0 * * *", async () => {
       var remainingTime = ExpiryDate.getTime() - CurrentDate.getTime();
       var remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
 
+      console.log("Expiry date: " + item.expiryDate);
+
       if (ExpiryDate) {
         if (ExpiryDate < CurrentDate) {
           console.log(
             "Exp: " + ExpiryDate + "Remaining Days: " + remainingDays
           );
-          const updatedItem = await prisma.PurchaseList.update({
-            where: { id: item.id }, // Assuming 'id' is the primary key of the table
-            data: {
-              paymentStatus: "Expired",
-            },
-          });
-          console.log(`Updated item with ID ${updatedItem.id}`);
+          if (item.expiryDate != null) {
+            const updatedItem = await prisma.PurchaseList.update({
+              where: { id: item.id }, // Assuming 'id' is the primary key of the table
+              data: {
+                paymentStatus: "Expired",
+              },
+            });
+          } else {
+            const updatedItem = await prisma.PurchaseList.update({
+              where: { id: item.id }, // Assuming 'id' is the primary key of the table
+              data: {
+                paymentStatus: "pending",
+              },
+            });
+            console.log("New Purchase Request");
+          }
+          // console.log(`Updated item with ID ${updatedItem.id}`);
         } else {
           const updatedItem = await prisma.PurchaseList.update({
             where: { id: item.id }, // Assuming 'id' is the primary key of the table
@@ -63,6 +131,8 @@ cron.schedule("0 0 * * *", async () => {
   }
   console.log("******Purchase Expirydate Status Check Ended!*****");
 });
+
+/***************************************************************************** */
 
 //this code will check expriy date of the course package discount,
 // and if the date is over it will set the status of discount to false
