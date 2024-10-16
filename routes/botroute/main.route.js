@@ -7,6 +7,13 @@ const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
 const { sendAgentOptions } = require("./agentChoices");
 
+const { editFirstName } = require("./edit_agent/editFirstName");
+const { editLastName } = require("./edit_agent/editLastName");
+const { editGrandName } = require("./edit_agent/editGrandName");
+const { editBankAccountType } = require("./edit_agent/editBankAccountType");
+const { editBankAccountNumber } = require("./edit_agent/editAccountNumber");
+const { editPhoneNumber } = require("./edit_agent/editPhoneNumber");
+
 const {
   handleAgentLogin,
   viewAgentProfile,
@@ -85,8 +92,6 @@ bot.on("callback_query", (callbackQuery) => {
           });
       });
     });
-  } else if (callbackData === "login_student") {
-    // Existing student login logic
   } else if (callbackData === "login_agent") {
     sendAgentOptions(bot, chatId); // Show "Login" and "Sign Up" options for agents
   } else if (callbackData === "login_agent_choice") {
@@ -127,6 +132,18 @@ bot.on("callback_query", (callbackQuery) => {
     }
   } else if (callbackData === "edit_profile") {
     editProfile(bot, chatId); // Call editProfile method to display editing options
+  } else if (callbackData === "edit_first_name") {
+    editFirstName(bot, chatId, userCookieJars); // Call the function to edit the first name
+  } else if (callbackData === "edit_last_name") {
+    editLastName(bot, chatId, userCookieJars); // Call the function to edit the first name
+  } else if (callbackData === "edit_grand_name") {
+    editGrandName(bot, chatId, userCookieJars); // Call the function to edit the first name
+  } else if (callbackData === "edit_bank_account_type") {
+    editBankAccountType(bot, chatId, userCookieJars); // Call the function to edit the first name
+  } else if (callbackData === "edit_bank_account_number") {
+    editBankAccountNumber(bot, chatId, userCookieJars); // Call the function to edit the first name
+  } else if (callbackData === "edit_phone_number") {
+    editPhoneNumber(bot, chatId, userCookieJars); // Call the function to edit the first name
   } else if (callbackData === "clubs") {
     sendClubOptions(bot, chatId); // Show club options when 'Clubs' is selected
   } else if (callbackData === "grade_9_club") {

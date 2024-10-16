@@ -6,7 +6,8 @@ module.exports = {
         inline_keyboard: [
           [{ text: "Edit First Name", callback_data: "edit_first_name" }],
           [{ text: "Edit Last Name", callback_data: "edit_last_name" }],
-          [{ text: "Edit Grade", callback_data: "edit_grade" }],
+          [{ text: "Edit Grand Name", callback_data: "edit_grand_name" }],
+          [{ text: "Edit Phone Number", callback_data: "edit_phone_number" }],
           [
             {
               text: "Edit Bank Account Type",

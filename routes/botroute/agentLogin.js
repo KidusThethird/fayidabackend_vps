@@ -91,7 +91,7 @@ module.exports = {
           const {
             firstName,
             lastName,
-            gread,
+            grandName,
             email,
             phoneNumber,
             prefferdLanguage,
@@ -100,7 +100,7 @@ module.exports = {
             bankaccounttype,
             backaccountnumber,
           } = profileResponse.data;
-          const fullName = `${firstName} ${lastName}`;
+          const fullName = `${firstName} ${lastName} ${grandName}`;
           bot.sendMessage(
             chatId,
             `Profile Information:\nName: ${fullName}\nEmail: ${email}\nPhone Number: ${phoneNumber}\nPromo Code: ${promocode}\nCurrent Balance: ${balance}\nAccount Type: ${bankaccounttype}\nAccount Number: ${backaccountnumber}`
