@@ -5,6 +5,13 @@ const { sendWelcomeMessage } = require("./welcomeRoute");
 const { sendPostLoginOptions, sendClubOptions } = require("./choices02");
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
+const { sendAgentOptions } = require("./agentChoices");
+
+const {
+  handleAgentLogin,
+  viewAgentProfile,
+  editProfile,
+} = require("./agentLogin");
 
 const router = express.Router();
 
@@ -78,6 +85,15 @@ bot.on("callback_query", (callbackQuery) => {
           });
       });
     });
+  } else if (callbackData === "login_student") {
+    // Existing student login logic
+  } else if (callbackData === "login_agent") {
+    sendAgentOptions(bot, chatId); // Show "Login" and "Sign Up" options for agents
+  } else if (callbackData === "login_agent_choice") {
+    // When "Login" under agent options is pressed
+    handleAgentLogin(bot, chatId, userCookieJars); // Call agent login logic (email, password)
+  } else if (callbackData === "view_profile_agent") {
+    viewAgentProfile(bot, chatId, userCookieJars); // Show agent profile
   } else if (callbackData === "view_profile") {
     // Handle 'View Profile' option
     const cookieJar = userCookieJars.get(chatId);
@@ -109,6 +125,8 @@ bot.on("callback_query", (callbackQuery) => {
     } else {
       bot.sendMessage(chatId, "You need to log in first!");
     }
+  } else if (callbackData === "edit_profile") {
+    editProfile(bot, chatId); // Call editProfile method to display editing options
   } else if (callbackData === "clubs") {
     sendClubOptions(bot, chatId); // Show club options when 'Clubs' is selected
   } else if (callbackData === "grade_9_club") {

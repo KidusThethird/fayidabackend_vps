@@ -485,6 +485,43 @@ router.post(
 );
 
 router.post(
+  "/agentlogin",
+  (req, res, next) => {
+    passport.authenticate(
+      "local",
+      { keepSessionInfo: true },
+
+      (err, user, info) => {
+        if (err) {
+          return res.status(500).json({ message: "Internal server error" });
+        }
+        if (!user) {
+          req.flash("error", "Invalid credentials"); // Add flash message
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
+        req.logIn(user, (err) => {
+          console.log("Account: " + user.accountType);
+
+          if (user.accountType != "agent") {
+            return res.status(401).json({ message: "Invalid credentials" });
+          }
+
+          if (err) {
+            return res.status(500).json({ message: "Internal server error" });
+          }
+          return res.status(200).json({ message: "Login successful" });
+        });
+      }
+    )(req, res, next);
+  },
+  (req, res) => {
+    // This function is executed after the authentication process
+    // You can handle the flash messages here if needed
+    // For example, you can access the flash messages using `req.flash("error")`
+  }
+);
+
+router.post(
   "/adminlogin",
   (req, res, next) => {
     passport.authenticate(
