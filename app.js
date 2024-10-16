@@ -51,6 +51,8 @@ app.use(
   "/courseintroductionvideo",
   require("./routes/courseintroductionvideos.route")
 );
+app.use("/agents", require("./routes/agents.route"));
+
 app.use("/packages", require("./routes/packages.route"));
 app.use("/purchaselist", require("./routes/purchaselist.route"));
 app.use("/conversations", require("./routes/conversations.route"));
