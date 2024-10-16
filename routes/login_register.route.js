@@ -148,27 +148,48 @@ router.post("/register", async (req, res, next) => {
   } catch (error) {}
 });
 
+const generatePromoCode = () => {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let promoCode = "";
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    promoCode += characters[randomIndex];
+  }
+  return promoCode;
+};
+
 router.post("/register_agent", async (req, res, next) => {
+  console.log("We are here");
   try {
     req.body.password = await bcrypt.hash(req.body.password, 10);
-    req.body = { ...req.body, accountType: "agent" };
+    req.body = {
+      ...req.body,
+      accountType: "agent",
+      promocode: generatePromoCode(), // Generate and add the promo code
+    };
+
     console.log("Body: " + JSON.stringify(req.body));
+
     const student = await prisma.students.create({
       data: req.body,
     });
+
     const addNotificationtoAdmin = await prisma.Notifications.create({
       data: {
         type: "1",
-
-        //studentsId: req.user.id,
         addressedTo: "admin",
         notiHead: "New Agent Account is Created!",
         notiFull: `${req.body.firstName} ${req.body.lastName} has created an account!`,
         status: "0",
       },
     });
+
     res.status(200).json({ message: "Account has been created!" });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error registering agent:", error);
+    res.status(500).json({ message: "Error creating account." });
+  }
 });
 
 router.post("/login", cors(), (req, res, next) => {

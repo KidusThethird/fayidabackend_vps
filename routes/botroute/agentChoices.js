@@ -8,7 +8,7 @@ module.exports = {
           [
             {
               text: "Sign Up",
-              url: "https://www.fayidaacademy.com/agent_login", // Redirect to sign-up page
+              url: "https://www.fayidaacademy.com/signup_agent", // Redirect to sign-up page
             },
           ],
         ],
