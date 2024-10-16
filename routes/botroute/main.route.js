@@ -19,6 +19,7 @@ const {
   viewAgentProfile,
   editProfile,
 } = require("./agentLogin");
+const { localUrl } = require("../../configFIles");
 
 const router = express.Router();
 
@@ -72,7 +73,7 @@ bot.on("callback_query", (callbackQuery) => {
 
         // Send a request to the login endpoint
         axiosInstance
-          .post("http://localhost:5000/login_register/loginss", {
+          .post(`${localUrl}/login_register/loginss`, {
             email,
             password,
           })
@@ -112,7 +113,7 @@ bot.on("callback_query", (callbackQuery) => {
 
       // Fetch user profile
       axiosInstance
-        .get("http://localhost:5000/login_register/profile")
+        .get(`${localUrl}/login_register/profile`)
         .then((profileResponse) => {
           const { firstName, lastName, gread } = profileResponse.data;
           const fullName = `${firstName} ${lastName}`;

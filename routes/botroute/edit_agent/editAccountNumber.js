@@ -2,6 +2,7 @@
 const axios = require("axios");
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
+const { localUrl } = require("../../../configFIles");
 
 const editBankAccountNumber = (bot, chatId, userCookieJars) => {
   bot.sendMessage(chatId, "Please enter your new bank account number:");
@@ -21,18 +22,15 @@ const editBankAccountNumber = (bot, chatId, userCookieJars) => {
 
       // First, fetch the user profile to get the user ID
       axiosInstance
-        .get("http://localhost:5000/login_register/profile")
+        .get(`${localUrl}/login_register/profile`)
         .then((profileResponse) => {
           const userId = profileResponse.data.id; // Extract the user ID from the profile response
 
           // Send a request to update the bank account number with user ID
-          return axiosInstance.patch(
-            `http://localhost:5000/students/${userId}`,
-            {
-              backaccountnumber: newBankAccountNumber,
-              // Use lowercase here
-            }
-          );
+          return axiosInstance.patch(`${localUrl}/students/${userId}`, {
+            backaccountnumber: newBankAccountNumber,
+            // Use lowercase here
+          });
         })
         .then((response) => {
           console.log("Response: " + response.data.backaccountnumber);

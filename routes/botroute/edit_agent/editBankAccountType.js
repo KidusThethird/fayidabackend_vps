@@ -2,6 +2,7 @@
 const axios = require("axios");
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
+const { localUrl } = require("../../../configFIles");
 
 const editBankAccountType = (bot, chatId, userCookieJars) => {
   bot.sendMessage(chatId, "Please enter your new bank account type:");
@@ -21,17 +22,14 @@ const editBankAccountType = (bot, chatId, userCookieJars) => {
 
       // First, fetch the user profile to get the user ID
       axiosInstance
-        .get("http://localhost:5000/login_register/profile")
+        .get(`${localUrl}/login_register/profile`)
         .then((profileResponse) => {
           const userId = profileResponse.data.id; // Extract the user ID from the profile response
 
           // Send a request to update the bank account type with user ID
-          return axiosInstance.patch(
-            `http://localhost:5000/students/${userId}`,
-            {
-              bankaccounttype: newBankAccountType, // Use lowercase here
-            }
-          );
+          return axiosInstance.patch(`${localUrl}/students/${userId}`, {
+            bankaccounttype: newBankAccountType, // Use lowercase here
+          });
         })
         .then((response) => {
           console.log("Response: " + response.data.bankaccounttype);

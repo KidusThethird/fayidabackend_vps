@@ -1,6 +1,7 @@
 const axios = require("axios");
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
+const { localUrl } = require("../../../configFIles");
 
 // Function to prompt user for first name and update the profile
 async function askForFirstName(bot, chatId, userCookieJars) {
@@ -27,7 +28,7 @@ async function askForFirstName(bot, chatId, userCookieJars) {
 
     try {
       const response = await axiosInstance.patch(
-        `http://localhost:5000/login_register/student/${getUserId(chatId)}`, // Update URL
+        `${localUrl}/login_register/student/${getUserId(chatId)}`, // Update URL
         { firstName: newFirstName }
       );
 

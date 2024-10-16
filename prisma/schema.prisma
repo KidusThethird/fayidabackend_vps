@@ -569,6 +569,11 @@ model Advertisement {
   extra2             String?
 }
 
+model Configuration {
+  id String  @id @default(uuid())
+  agentCommisionRate String? 
+}
+
 model Collection {
   id     String  @id @default(uuid())
   field1 String?

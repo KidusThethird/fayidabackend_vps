@@ -1,7 +1,8 @@
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
 const axios = require("axios");
-const { sendEditProfileOptions } = require("./editProfileOptions"); // Import the edit profile options
+const { sendEditProfileOptions } = require("./editProfileOptions");
+const { localUrl } = require("../../configFIles"); // Import the edit profile options
 
 module.exports = {
   handleAgentLogin: (bot, chatId, userCookieJars) => {
@@ -27,7 +28,7 @@ module.exports = {
 
         // Send a login request to the API (same as student login)
         axiosInstance
-          .post("http://localhost:5000/login_register/agentlogin", {
+          .post(`${localUrl}/login_register/agentlogin`, {
             email,
             password,
           })
@@ -86,7 +87,7 @@ module.exports = {
 
       // Fetch agent profile (same as student)
       axiosInstance
-        .get("http://localhost:5000/login_register/profile")
+        .get(`${localUrl}/login_register/profile`)
         .then((profileResponse) => {
           const {
             firstName,
