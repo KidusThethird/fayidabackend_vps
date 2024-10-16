@@ -20,6 +20,8 @@ const {
   editProfile,
 } = require("./agentLogin");
 const { localUrl } = require("../../configFIles");
+const { fetchAgentTransactions } = require("./transaction");
+const { listStudentsfromAgents } = require("./liststudents");
 
 const router = express.Router();
 
@@ -93,6 +95,12 @@ bot.on("callback_query", (callbackQuery) => {
           });
       });
     });
+  } else if (callbackData === "transaction") {
+    const cookieJar = userCookieJars.get(chatId);
+    fetchAgentTransactions(bot, chatId, userCookieJars); // Correctly call this function
+  } else if (callbackData === "list_students") {
+    const cookieJar = userCookieJars.get(chatId);
+    listStudentsfromAgents(bot, chatId, userCookieJars); // Correctly call this function
   } else if (callbackData === "login_agent") {
     sendAgentOptions(bot, chatId); // Show "Login" and "Sign Up" options for agents
   } else if (callbackData === "login_agent_choice") {

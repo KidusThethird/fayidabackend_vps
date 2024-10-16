@@ -9,7 +9,7 @@ const path = require("path");
 const cron = require("node-cron");
 const app = express();
 
-//const telegramRoute = require("./routes/botroute/main.route.js");
+const telegramRoute = require("./routes/botroute/main.route.js");
 
 //telegram file started
 // const telegramBot = require("node-telegram-bot-api");
@@ -43,6 +43,7 @@ app.use(cors({ credentials: true, origin: true }));
 app.use("/", require("./routes/api.route"));
 
 app.use("/analysis", require("./routes/analysis.route"));
+app.use("/agenttransaction", require("./routes/agenttransaction.route"));
 
 app.use("/students", checkAuthenticated, require("./routes/students.route"));
 app.use("/sections", require("./routes/sections.route"));

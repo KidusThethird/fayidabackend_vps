@@ -226,6 +226,45 @@ router.patch(
               expiryDate: expiryDate,
             },
           });
+
+          const packagePrice = req.body.packagePrice;
+
+          const StudentFind = await prisma.students.findUnique({
+            where: { id: req.body.studentId },
+          });
+          if (StudentFind) {
+            const Agent = await prisma.students.findFirst({
+              where: {
+                accountType: "agent",
+                promocode: StudentFind.promocode,
+              },
+            });
+
+            if (Agent) {
+              const commisionPercent = await prisma.configuration.findUnique({
+                where: {
+                  id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
+                },
+              });
+
+              const commisionValue = commisionPercent.agentCommisionRate;
+              console.log("Commision Value: " + commisionValue);
+              console.log("Package Price: " + packagePrice);
+              const ExistingAgentBalance = parseFloat(Agent.balance);
+              const FinalValue =
+                (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
+              const Total = FinalValue + ExistingAgentBalance;
+              const updateAgentValue = await prisma.students.update({
+                where: {
+                  id: Agent.id,
+                },
+                data: {
+                  balance: Total.toString(),
+                },
+              });
+            }
+          }
+
           res.json(updatePurchaselist);
         } catch (error) {
           next(error);
@@ -361,6 +400,45 @@ router.patch(
               },
             });
             console.log("third print");
+
+            // const packagePrice = req.body.packagePrice;
+
+            // const StudentFind = await prisma.students.findUnique({
+            //   where: { id: req.body.studentId },
+            // });
+            // if (StudentFind) {
+            //   const Agent = await prisma.students.findFirst({
+            //     where: {
+            //       accountType: "agent",
+            //       promocode: StudentFind.promocode,
+            //     },
+            //   });
+
+            //   if (Agent) {
+            //     const commisionPercent = await prisma.configuration.findUnique({
+            //       where: {
+            //         id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
+            //       },
+            //     });
+
+            //     const commisionValue = commisionPercent.agentCommisionRate;
+            //     console.log("Commision Value: " + commisionValue);
+            //     console.log("Package Price: " + packagePrice);
+            //     const ExistingAgentBalance = parseFloat(Agent.balance);
+            //     const FinalValue =
+            //       (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
+            //     const Total = FinalValue + ExistingAgentBalance;
+            //     const updateAgentValue = await prisma.students.update({
+            //       where: {
+            //         id: Agent.id,
+            //       },
+            //       data: {
+            //         balance: Total.toString(),
+            //       },
+            //     });
+            //   }
+            // }
+
             const updatePurchaselist2 = await prisma.PurchaseList.update({
               where: {
                 id: id,

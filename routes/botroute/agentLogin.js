@@ -55,7 +55,7 @@ module.exports = {
                       },
                       {
                         text: "Transactions",
-                        callback_data: "transactions",
+                        callback_data: "transaction",
                       },
                     ],
                   ],
