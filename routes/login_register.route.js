@@ -136,7 +136,7 @@ router.post("/register", async (req, res, next) => {
 
         //studentsId: req.user.id,
         addressedTo: "admin",
-        notiHead: "New Account is Created!",
+        notiHead: "New Student Account is Created!",
         notiFull: `${req.body.firstName} ${req.body.lastName} has created an account!`,
         status: "0",
       },
@@ -145,6 +145,29 @@ router.post("/register", async (req, res, next) => {
     // console.log(req.body);
     //res.redirect("https://www.google.com");
     //successRedirect: `${homeWebUrl}`,
+  } catch (error) {}
+});
+
+router.post("/register_agent", async (req, res, next) => {
+  try {
+    req.body.password = await bcrypt.hash(req.body.password, 10);
+    req.body = { ...req.body, accountType: "agent" };
+    console.log("Body: " + JSON.stringify(req.body));
+    const student = await prisma.students.create({
+      data: req.body,
+    });
+    const addNotificationtoAdmin = await prisma.Notifications.create({
+      data: {
+        type: "1",
+
+        //studentsId: req.user.id,
+        addressedTo: "admin",
+        notiHead: "New Agent Account is Created!",
+        notiFull: `${req.body.firstName} ${req.body.lastName} has created an account!`,
+        status: "0",
+      },
+    });
+    res.status(200).json({ message: "Account has been created!" });
   } catch (error) {}
 });
 

@@ -9,7 +9,7 @@ const path = require("path");
 const cron = require("node-cron");
 const app = express();
 
-//const telegramRoute = require("./routes/botroute/main.route.js");
+const telegramRoute = require("./routes/botroute/main.route.js");
 
 //telegram file started
 // const telegramBot = require("node-telegram-bot-api");
