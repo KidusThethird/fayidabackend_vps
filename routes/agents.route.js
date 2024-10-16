@@ -34,6 +34,39 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
   }
 });
 
+router.get(
+  "/studentswithpromocode/:promoCode",
+  checkAuthenticated,
+  async (req, res, next) => {
+    try {
+      if (req.isAuthenticated()) {
+        const { promoCode } = req.params; // Get the promo code from the URL parameters
+
+        console.log("User logged in:", req.user.accountType);
+
+        // Find students where accountType is 'student' and promoCode matches the provided param
+        const students = await prisma.Students.findMany({
+          where: {
+            accountType: "student", // filter for students
+            promocode: promoCode, // filter where promoCode matches the param
+          },
+          orderBy: {
+            firstName: "desc", // Order by first name in descending order
+          },
+        });
+
+        // Allow access only for Admin or SubAdmin
+
+        res.json(students);
+      } else {
+        res.status(401).json({ message: "User not authenticated" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.get("/config/commison", async (req, res, next) => {
   try {
     const Commison = await prisma.Configuration.findFirst({});

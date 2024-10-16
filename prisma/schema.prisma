@@ -53,7 +53,16 @@ model Students {
 
   @@index([sectionId], map: "Students_sectionId_fkey")
 }
+model agentTransaction{
+    id                           String                         @id @default(uuid())
+    promocode String
+    value String
+    status String? @default("paid")
+    createdAt                    DateTime                       @default(now())
 
+
+
+}
 model ExamTaker {
   id                           String                         @id @default(uuid())
   name                         String?
