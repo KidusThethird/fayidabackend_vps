@@ -142,6 +142,26 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
   }
 });
 
+router.get("/answers", checkAuthenticated, async (req, res, next) => {
+  if (req.isAuthenticated()) {
+    if (req.user.accountType == "Admin") {
+      try {
+        const Questions = await prisma.BotQuestionAnswer.findMany({
+          //include: { courses: true },
+        });
+        res.json(Questions);
+      } catch (error) {
+        console.log("Error from catch: " + error);
+        next(error);
+      }
+    } else {
+      res.status(401).json({ message: "User not authenticated" });
+    }
+  } else {
+    res.status(401).json({ message: "User not authenticated" });
+  }
+});
+
 router.get(
   "/filtergrade/:grade",
   checkAuthenticated,
@@ -236,6 +256,84 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
     res.status(401).json({ message: "User not authenticated" });
   }
 });
+
+router.post("/answers", checkAuthenticated, async (req, res, next) => {
+  console.log("Body: " + JSON.stringify(req.body));
+
+  const studentId = req.body.userId;
+  const questionId = req.body.questionId;
+  const studentsAnswer = req.body.text;
+
+  try {
+    // Fetch the question by its ID
+    const question = await prisma.BotQuestions.findUnique({
+      where: { id: questionId },
+    });
+
+    // Check if the question is active
+    if (!question || question.status !== "active") {
+      console.log("Too late");
+      return res.status(400).json({
+        message: "You are too late, the question is deactivated.",
+      });
+    }
+
+    // Check if the student has already submitted an answer for the same question
+    const existingSubmission = await prisma.BotQuestionAnswer.findFirst({
+      where: {
+        studentId: studentId,
+        questionId: questionId,
+      },
+    });
+
+    if (existingSubmission) {
+      console.log("You cant submit twice");
+      return res.status(400).json({
+        message: "You can only submit once!",
+      });
+    }
+
+    // Submit the data to BotQuestionAnswer model
+    const submission = await prisma.BotQuestionAnswer.create({
+      data: {
+        studentId: studentId,
+        questionId: questionId,
+        text: studentsAnswer,
+      },
+    });
+
+    // Send a success message
+    res.status(201).json({
+      message: "Your answer has been submitted successfully!",
+      submission, // Include the submission details if needed
+    });
+  } catch (error) {
+    console.error("Error submitting answer:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while submitting your answer." });
+  }
+});
+
+// router.post("/answers", checkAuthenticated, async (req, res, next) => {
+//   console.log("Body: " + JSON.stringify(req.body));
+
+//   const StudentId = req.body.userId;
+//   const QuestionId = req.body.questionId;
+//   const StudentsAnswer = req.body.text;
+
+//   //fetch http://localhost:5000/botquestions/${questionId}
+
+//  and check if the status is "active" , if not respond "You are too late, the question is deactivated",
+//  else check if the student has already submitted for the same question in BotQuestionAnswer model, if they have already participated, response "You can only submit once!"
+// else submit the data to BotQuestionAnswer model with studentId, questionId , text  attributes in it.
+//   try {
+//     // const package = await prisma.BotQuestions.create({
+//     //   data: req.body,
+//     //  });
+//     res.json(package);
+//   } catch (error) {}
+// });
 
 //Update Student
 router.patch("/:id", async (req, res, next) => {

@@ -19,7 +19,12 @@ module.exports = {
       axiosInstance
         .get(`${localUrl}/login_register/profile`)
         .then((profileResponse) => {
-          const { firstName, lastName, gread } = profileResponse.data;
+          const {
+            firstName,
+            lastName,
+            id: userId,
+            gread,
+          } = profileResponse.data; // Added userId
 
           // Clear previous messages and show profile information
           bot.sendMessage(chatId, "Fetching your grade...").then(() => {
@@ -32,7 +37,12 @@ module.exports = {
             axios
               .get(`http://localhost:5000/botquestions/filtergrade/${gread}`)
               .then((questionsResponse) => {
-                const { text, image, imgUrl } = questionsResponse.data;
+                const {
+                  text,
+                  image,
+                  imgUrl,
+                  id: questionId,
+                } = questionsResponse.data; // Added questionId
 
                 // Prepare header and message
                 let message = `Current question for Grade ${gread}:\n`;
@@ -50,6 +60,43 @@ module.exports = {
                     message += "Type your response and send.";
                     bot.sendMessage(chatId, message);
                   }
+
+                  // Listen for user's response
+                  bot.on("message", (msg) => {
+                    const userResponse = msg.text; // The user's typed answer
+
+                    // Prepare data to send to the answers endpoint
+                    const responseData = {
+                      text: userResponse,
+                      userId: userId, // User ID from profile fetch
+                      questionId: questionId, // Question ID from questions fetch
+                    };
+
+                    // Send the user's response to the server
+                    axios
+                      .post(
+                        "http://localhost:5000/botquestions/answers",
+                        responseData
+                      )
+                      .then((response) => {
+                        // Send success message from the server's response
+                        bot.sendMessage(
+                          chatId,
+                          response.data.message ||
+                            "Your answer has been submitted successfully!"
+                        );
+                      })
+                      .catch((error) => {
+                        bot.sendMessage(
+                          chatId,
+                          "You can not submit the answer if you are too late or if you are trying to submit multiple times. "
+                          //error.message
+                        );
+                      });
+
+                    // Optionally, you may want to remove the listener after the response is received
+                    bot.removeListener("message", this);
+                  });
                 } else {
                   bot.sendMessage(
                     chatId,
