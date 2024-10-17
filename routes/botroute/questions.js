@@ -102,11 +102,7 @@ module.exports = {
                 }
               })
               .catch((questionsError) => {
-                bot.sendMessage(
-                  chatId,
-                  "An error occurred while fetching questions: " +
-                    questionsError.message
-                );
+                bot.sendMessage(chatId, "No Avialable Question Right Now! ");
               });
           });
         })
