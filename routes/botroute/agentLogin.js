@@ -36,7 +36,7 @@ module.exports = {
             if (response.data.message === "Login successful") {
               bot.sendMessage(chatId, "Login successful! 🎉");
 
-              // Show profile options including Edit Profile
+              // Show profile options in a vertical layout
               bot.sendMessage(chatId, "What would you like to do next?", {
                 reply_markup: {
                   inline_keyboard: [
@@ -45,17 +45,29 @@ module.exports = {
                         text: "View Profile",
                         callback_data: "view_profile_agent",
                       },
+                    ],
+                    [
                       {
                         text: "Edit Profile",
                         callback_data: "edit_profile",
                       },
+                    ],
+                    [
                       {
                         text: "List Students",
                         callback_data: "list_students",
                       },
+                    ],
+                    [
                       {
                         text: "Transactions",
                         callback_data: "transaction",
+                      },
+                    ],
+                    [
+                      {
+                        text: "Comment",
+                        callback_data: "comment",
                       },
                     ],
                   ],

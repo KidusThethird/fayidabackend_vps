@@ -23,6 +23,7 @@ const { localUrl } = require("../../configFIles");
 const { fetchAgentTransactions } = require("./transaction");
 const { listStudentsfromAgents } = require("./liststudents");
 const { fetchQuestionsForGrade } = require("./questions");
+const { postComment } = require("./comment");
 
 const router = express.Router();
 
@@ -99,6 +100,17 @@ bot.on("callback_query", (callbackQuery) => {
   } else if (callbackData === "questions") {
     fetchQuestionsForGrade(bot, chatId, userCookieJars);
     // Fetch questions for the user
+  } else if (callbackData === "comment") {
+    // Ask the user to type a comment
+    bot.sendMessage(chatId, "Please type your comment:");
+
+    // Listen for the next message (the comment text)
+    bot.once("message", (commentMessage) => {
+      const commentText = commentMessage.text;
+
+      // Call the function to post the comment, passing the bot instance
+      postComment(bot, chatId, commentText);
+    });
   } else if (callbackData === "transaction") {
     const cookieJar = userCookieJars.get(chatId);
     fetchAgentTransactions(bot, chatId, userCookieJars); // Correctly call this function

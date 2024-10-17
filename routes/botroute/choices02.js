@@ -8,6 +8,7 @@ module.exports = {
           [{ text: "Questions", callback_data: "questions" }],
           [{ text: "Go to Website", callback_data: "go_to_website" }],
           [{ text: "Change Language", callback_data: "change_language" }],
+          [{ text: "Comment", callback_data: "comment" }],
         ],
       },
     };
