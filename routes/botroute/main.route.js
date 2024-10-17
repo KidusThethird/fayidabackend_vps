@@ -22,6 +22,7 @@ const {
 const { localUrl } = require("../../configFIles");
 const { fetchAgentTransactions } = require("./transaction");
 const { listStudentsfromAgents } = require("./liststudents");
+const { fetchQuestionsForGrade } = require("./questions");
 
 const router = express.Router();
 
@@ -95,6 +96,9 @@ bot.on("callback_query", (callbackQuery) => {
           });
       });
     });
+  } else if (callbackData === "questions") {
+    fetchQuestionsForGrade(bot, chatId, userCookieJars);
+    // Fetch questions for the user
   } else if (callbackData === "transaction") {
     const cookieJar = userCookieJars.get(chatId);
     fetchAgentTransactions(bot, chatId, userCookieJars); // Correctly call this function

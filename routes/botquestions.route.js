@@ -142,6 +142,50 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
   }
 });
 
+router.get(
+  "/filtergrade/:grade",
+  checkAuthenticated,
+  async (req, res, next) => {
+    try {
+      const gradeParam = req.params.grade; // Get the grade from the request params
+
+      // Fetch the first active question with the matching grade
+      const question = await prisma.BotQuestions.findFirst({
+        where: {
+          grade: gradeParam, // Filter by grade
+          status: "active", // Filter by active status
+        },
+      });
+
+      if (question) {
+        console.log("in payment with id 2");
+
+        const signedUrlforThumbnail = await generateSignedUrl(
+          "generalfilesbucket",
+          "botquestionimages",
+          question.image
+        );
+
+        const packageWithUrls = {
+          ...question,
+
+          imgUrl: signedUrlforThumbnail[0],
+        };
+
+        console.log("print of x: " + packageWithUrls);
+        res.json(packageWithUrls);
+      } else {
+        res
+          .status(404)
+          .json({ message: "No active questions found for this grade." });
+      }
+    } catch (error) {
+      console.log("Error from catch: " + error);
+      next(error);
+    }
+  }
+);
+
 router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -197,16 +241,30 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 router.patch("/:id", async (req, res, next) => {
   console.log("Requested: " + req.body);
   console.log("Req:", JSON.stringify(req.body));
+  console.log("Statis Fetch: " + req.body.status);
   try {
     const { id } = req.params;
+
     const updatePackages = await prisma.BotQuestions.update({
       where: {
         id: id,
       },
       data: req.body,
     });
+
+    if (req.body.status == "active") {
+      const updatePackages = await prisma.BotQuestions.update({
+        where: {
+          id: id,
+        },
+        data: {
+          activeAt: new Date(),
+        },
+      });
+    }
     res.json(updatePackages);
   } catch (error) {
+    console.log("Error from catch: " + error);
     next(error);
   }
 });

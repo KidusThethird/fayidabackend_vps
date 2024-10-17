@@ -122,6 +122,15 @@ app.use(
   "packageexpirydatesetter",
   require("./routes/coassistant/packageExpirydateSetter")
 );
+app.use(
+  "packageexpirydatesetter2",
+  require("./routes/coassistant/botquestionactivationchecker")
+);
+
+// app.use(
+//   "botquestionactivationchecker",
+//   require("./routes/coassistant/botquestionactivationchecker.js")
+// );
 
 app.use("/upload_assets/", express.static(uploadsDirectory));
 app.use((req, res, next) => {
