@@ -475,6 +475,13 @@ model Languages {
   extra1    String?
   extra2    String?
 }
+model Comments {
+  id        String   @id @default(uuid())
+   createdAt DateTime @default(now())
+   commentFrom String?
+   text String?  @db.Text
+   
+}
 
 model Notifications {
   notiId      String    @id @default(uuid())
