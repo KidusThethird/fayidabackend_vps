@@ -35,7 +35,7 @@ module.exports = {
 
             // After fetching the profile, proceed to fetch questions based on the Grade
             axios
-              .get(`http://localhost:5000/botquestions/filtergrade/${gread}`)
+              .get(`${localUrl}/botquestions/filtergrade/${gread}`)
               .then((questionsResponse) => {
                 const {
                   text,
@@ -74,10 +74,7 @@ module.exports = {
 
                     // Send the user's response to the server
                     axios
-                      .post(
-                        "http://localhost:5000/botquestions/answers",
-                        responseData
-                      )
+                      .post(`${localUrl}/botquestions/answers`, responseData)
                       .then((response) => {
                         // Send success message from the server's response
                         bot.sendMessage(

@@ -127,7 +127,9 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
     if (req.user.accountType == "Admin") {
       try {
         const Questions = await prisma.BotQuestions.findMany({
-          //include: { courses: true },
+          orderBy: {
+            createdAt: "desc", // Sorting by createdAt in descending order
+          },
         });
         res.json(Questions);
       } catch (error) {
@@ -212,6 +214,14 @@ router.get("/:id", async (req, res, next) => {
     const singlePackage = await prisma.BotQuestions.findUnique({
       where: {
         id: id,
+      },
+      include: {
+        answers: {
+          include: { student: true },
+          orderBy: {
+            createdAt: "asc", // Sorting by createdAt in ascending order (oldest first)
+          },
+        },
       },
     });
 
@@ -360,6 +370,27 @@ router.patch("/:id", async (req, res, next) => {
         },
       });
     }
+    res.json(updatePackages);
+  } catch (error) {
+    console.log("Error from catch: " + error);
+    next(error);
+  }
+});
+
+router.patch("/botquestionanswer/:id", async (req, res, next) => {
+  // console.log("Requested: " + req.body);
+  // console.log("Req:", JSON.stringify(req.body));
+  // console.log("Statis Fetch: " + req.body.status);
+  try {
+    const { id } = req.params;
+
+    const updatePackages = await prisma.BotQuestionAnswer.update({
+      where: {
+        id: id,
+      },
+      data: req.body,
+    });
+
     res.json(updatePackages);
   } catch (error) {
     console.log("Error from catch: " + error);
