@@ -449,6 +449,7 @@ model BotQuestions {
   studentLimit String?
  createdAt DateTime @default(now())
  grade String?
+ answers BotQuestionAnswer[]
  
 }
 model BotQuestionAnswer{
@@ -458,6 +459,8 @@ model BotQuestionAnswer{
    text String?  @db.Text
    correct String? @default("waiting")
    createdAt DateTime @default(now())
+   question BotQuestions? @relation(fields: [questionId], references: [id])
+   questionId String?
 }
 
 
