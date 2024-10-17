@@ -43,6 +43,7 @@ app.use(cors({ credentials: true, origin: true }));
 app.use("/", require("./routes/api.route"));
 
 app.use("/analysis", require("./routes/analysis.route"));
+app.use("/botquestions", require("./routes/botquestions.route.js"));
 app.use("/agenttransaction", require("./routes/agenttransaction.route"));
 
 app.use("/students", checkAuthenticated, require("./routes/students.route"));

@@ -448,6 +448,7 @@ model BotQuestions {
   status String? @default("down")
   studentLimit String?
  createdAt DateTime @default(now())
+ activeAt DateTime?
  grade String?
  answers BotQuestionAnswer[]
  

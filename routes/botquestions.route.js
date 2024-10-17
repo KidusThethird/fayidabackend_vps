@@ -126,11 +126,12 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
     if (req.user.accountType == "Admin") {
       try {
-        const packages = await prisma.packages.findMany({
-          include: { courses: true },
+        const Questions = await prisma.BotQuestions.findMany({
+          //include: { courses: true },
         });
-        res.json(packages);
+        res.json(Questions);
       } catch (error) {
+        console.log("Error from catch: " + error);
         next(error);
       }
     } else {
@@ -141,231 +142,27 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
   }
 });
 
-router.get("/slider/", async (req, res, next) => {
-  try {
-    const packages = await prisma.packages.findMany({
-      include: { courses: true },
-      where: {
-        status: true,
-        discountStatus: true,
-      },
-    });
-    res.json(packages);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/fetchPackages/", async (req, res, next) => {
-  try {
-    const packages = await prisma.packages.findMany({
-      where: {
-        status: true,
-      },
-      include: { courses: true },
-    });
-    res.json(packages);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/fetchPackagesall/", async (req, res, next) => {
-  //const FolderName = req.params.folderName;
-  // console.log("Folder Name Requested: " + FolderName);
-  try {
-    const packages = await prisma.packages.findMany({
-      where: {
-        status: true,
-        //   group2: FolderName,
-      },
-      include: { courses: true },
-    });
-
-    const packagesWithSignedUrls = await Promise.all(
-      packages.map(async (pac) => {
-        const signedUrlforFile = await generateSignedUrl(
-          "generalfilesbucket",
-          "package_thumbnails",
-          pac.thumbnail
-        );
-        return { ...pac, imgUrl: signedUrlforFile };
-      })
-    );
-    res.json(packagesWithSignedUrls);
-    // res.json(packages);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/fetchPackages/:folderName", async (req, res, next) => {
-  const FolderName = req.params.folderName;
-  console.log("Folder Name Requested: " + FolderName);
-  try {
-    const packages = await prisma.packages.findMany({
-      where: {
-        status: true,
-        group2: FolderName,
-      },
-      include: { courses: true },
-    });
-
-    const packagesWithSignedUrls = await Promise.all(
-      packages.map(async (pac) => {
-        const signedUrlforFile = await generateSignedUrl(
-          "generalfilesbucket",
-          "package_thumbnails",
-          pac.thumbnail
-        );
-        return { ...pac, imgUrl: signedUrlforFile };
-      })
-    );
-    res.json(packagesWithSignedUrls);
-    // res.json(packages);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/fetch_home_packages/", async (req, res, next) => {
-  try {
-    const packages = await prisma.packages.findMany({
-      where: {
-        displayOnHome: true,
-        status: true,
-      },
-      include: { courses: true },
-    });
-
-    const packagesWithSignedUrls = await Promise.all(
-      packages.map(async (pac) => {
-        const signedUrlforFile = await generateSignedUrl(
-          "generalfilesbucket",
-          "package_thumbnails",
-          pac.thumbnail
-        );
-        return { ...pac, imgUrl: signedUrlforFile };
-      })
-    );
-    res.json(packagesWithSignedUrls);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/filter_fetch_home_packages/:filterKey", async (req, res, next) => {
-  const FilterKey = req.params.filterKey;
-  console.log("FIlterKiey: " + FilterKey);
-  try {
-    const packages = await prisma.packages.findMany({
-      where: {
-        tag: FilterKey,
-        status: true,
-      },
-      include: { courses: true },
-    });
-
-    const packagesWithSignedUrls = await Promise.all(
-      packages.map(async (pac) => {
-        const signedUrlforFile = await generateSignedUrl(
-          "generalfilesbucket",
-          "package_thumbnails",
-          pac.thumbnail
-        );
-        return { ...pac, imgUrl: signedUrlforFile };
-      })
-    );
-    res.json(packagesWithSignedUrls);
-  } catch (error) {
-    next(error);
-  }
-});
-//Get one student
-// router.get("/:id", async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-//     const singlePackage = await prisma.packages.findUnique({
-//       where: {
-//         id: id,
-//       },
-//       include: { courses: true },
-//     });
-
-//     if (singlePackage) {
-//       console.log("in payment with id 2");
-//       const signedUrlforFile = await generateSignedUrl(
-//         "generalfilesbucket",
-//         "package_thumbnails",
-//         singlePackage.thumbnail
-//       );
-//       console.log("print of x: " + signedUrlforFile);
-//       res.json({ ...singlePackage, imgUrl: signedUrlforFile });
-//     }
-
-//     //  res.json(singlePackage);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
-
 router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    const singlePackage = await prisma.packages.findUnique({
+    const singlePackage = await prisma.BotQuestions.findUnique({
       where: {
         id: id,
       },
-      include: {
-        courses: {
-          include: {
-            CourseUnitsList: { orderBy: { UnitNumber: "asc" } },
-            materials: {
-              orderBy: [{ part: "asc" }, { materialIndex: "asc" }],
-              include: {
-                video: true,
-                assementId: true,
-                file: true,
-                link: true,
-              },
-            },
-          },
-        },
-        review: { include: { Student: true } },
-        purchaselist: true,
-        studentCourses: true,
-      },
-
-      // reviews: {
-      //   include: {
-      //     Student: true,
-      //   },
-      // },
     });
 
     if (singlePackage) {
       console.log("in payment with id 2");
-      const signedUrlsForCourses = await Promise.all(
-        singlePackage.courses.map(async (course) => {
-          console.log("Course Vid: " + course.courseIntroductionVideo);
-          const signedUrlforVideo = await generateSignedUrl(
-            "generalfilesbucket",
-            "course_introduction_videos",
-            course.courseIntroductionVideo
-          );
-          return { ...course, videoUrl: signedUrlforVideo };
-        })
-      );
 
       const signedUrlforThumbnail = await generateSignedUrl(
         "generalfilesbucket",
-        "package_thumbnails",
-        singlePackage.thumbnail
+        "botquestionimages",
+        singlePackage.image
       );
 
       const packageWithUrls = {
         ...singlePackage,
-        courses: signedUrlsForCourses,
+
         imgUrl: signedUrlforThumbnail,
       };
 
@@ -381,8 +178,9 @@ router.get("/:id", async (req, res, next) => {
 router.post("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
     if (req.user.accountType == "Admin") {
+      console.log("Body: " + JSON.stringify(req.body));
       try {
-        const package = await prisma.packages.create({
+        const package = await prisma.BotQuestions.create({
           data: req.body,
         });
         res.json(package);
@@ -401,7 +199,7 @@ router.patch("/:id", async (req, res, next) => {
   console.log("Req:", JSON.stringify(req.body));
   try {
     const { id } = req.params;
-    const updatePackages = await prisma.packages.update({
+    const updatePackages = await prisma.BotQuestions.update({
       where: {
         id: id,
       },
