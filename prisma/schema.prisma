@@ -42,6 +42,7 @@ model Students {
   points           String?          @default("0")
   message          String?          @default("")
   review           packagesReview[]
+  botquestonanswes BotQuestionAnswer[]
 
   promocode String?
   balance   String? @default("0")
@@ -438,6 +439,26 @@ model Questions {
   extra1          String?
   extra2          String?
 }
+
+model BotQuestions {
+  id        String   @id @default(uuid())
+  text String? @db.Text
+  image String?
+  period String?
+  status String? @default("down")
+  studentLimit String?
+ createdAt DateTime @default(now())
+ 
+}
+model BotQuestionAnswer{
+   id        String   @id @default(uuid())
+   studentId String?
+   student Students? @relation(fields: [studentId], references: [id])
+   text String?  @db.Text
+   correct String? @default("waiting")
+   createdAt DateTime @default(now())
+}
+
 
 model Languages {
   id        String   @id @default(uuid())
