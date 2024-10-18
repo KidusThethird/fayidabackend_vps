@@ -70,6 +70,12 @@ module.exports = {
                         callback_data: "comment",
                       },
                     ],
+                    [
+                      {
+                        text: "Change Language",
+                        callback_data: "change_language_agent",
+                      },
+                    ],
                   ],
                 },
               });

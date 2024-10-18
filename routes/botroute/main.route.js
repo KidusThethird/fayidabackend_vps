@@ -24,6 +24,8 @@ const { fetchAgentTransactions } = require("./transaction");
 const { listStudentsfromAgents } = require("./liststudents");
 const { fetchQuestionsForGrade } = require("./questions");
 const { postComment } = require("./comment");
+const languages = require("./languages");
+const agentLanguages = require("./agent_language");
 
 const router = express.Router();
 
@@ -97,12 +99,33 @@ bot.on("callback_query", (callbackQuery) => {
           });
       });
     });
+  } //change_language_agent
+  else if (callbackData === "change_language") {
+    languages.sendLanguageOptions(bot, chatId, "student");
+  } else if (callbackData === "change_language_agent") {
+    languages.sendLanguageOptions(bot, chatId, "agent");
+  } else if (callbackData.startsWith("lang_")) {
+    const language = callbackData.split("_")[1];
+
+    // Set the language preference using setLanguage in languages.js
+    languages.setLanguage(bot, chatId, language);
   } else if (callbackData === "questions") {
     fetchQuestionsForGrade(bot, chatId, userCookieJars);
     // Fetch questions for the user
   } else if (callbackData === "comment") {
+    const language = languages.getUserLanguage(chatId);
+
+    const messages = {
+      en: {
+        prompt: "Please type your comment:",
+      },
+      am: {
+        prompt: "እባኮትን መልዕትዎን ያስገቡ እና ይላኩ",
+      },
+    };
+    const promptMessage = messages[language].prompt;
     // Ask the user to type a comment
-    bot.sendMessage(chatId, "Please type your comment:");
+    bot.sendMessage(chatId, promptMessage);
 
     // Listen for the next message (the comment text)
     bot.once("message", (commentMessage) => {
