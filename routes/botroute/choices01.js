@@ -12,6 +12,7 @@ const sendChoiceOptions = (bot, chatId) => {
         ],
         [{ text: "Sign Up as a Student", callback_data: "sign_up_student" }],
         [{ text: "Get Information", callback_data: "get_info" }],
+        [{ text: "Get Support", callback_data: "get_support" }],
         [{ text: "Change Language", callback_data: "change_language_home" }],
       ],
     },
