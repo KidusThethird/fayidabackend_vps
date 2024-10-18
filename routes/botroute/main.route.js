@@ -26,6 +26,7 @@ const { fetchQuestionsForGrade } = require("./questions");
 const { postComment } = require("./comment");
 const languages = require("./languages");
 const agentLanguages = require("./agent_language");
+const { sendBotInfo } = require("./get_info");
 
 const router = express.Router();
 
@@ -104,11 +105,17 @@ bot.on("callback_query", (callbackQuery) => {
     languages.sendLanguageOptions(bot, chatId, "student");
   } else if (callbackData === "change_language_agent") {
     languages.sendLanguageOptions(bot, chatId, "agent");
+  } else if (callbackData === "change_language_home") {
+    languages.sendLanguageOptions(bot, chatId, "home");
   } else if (callbackData.startsWith("lang_")) {
     const language = callbackData.split("_")[1];
 
     // Set the language preference using setLanguage in languages.js
     languages.setLanguage(bot, chatId, language);
+  }
+
+  if (callbackData === "get_info") {
+    sendBotInfo(bot, chatId); // Call the function to send the info message
   } else if (callbackData === "questions") {
     fetchQuestionsForGrade(bot, chatId, userCookieJars);
     // Fetch questions for the user
