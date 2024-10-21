@@ -30,7 +30,7 @@ model Students {
 
   code String? @default("1136")
 
-  email            String?          @unique
+  email            String?             @unique
   password         String?
   phoneNumber      String?
   profilePicture   String?
@@ -39,14 +39,14 @@ model Students {
   Conversations    Conversations[]
   StudentCourse    StudentCourse[]
   StudentPrize     StudentPrize[]
-  points           String?          @default("0")
-  message          String?          @default("")
+  points           String?             @default("0")
+  message          String?             @default("")
   review           packagesReview[]
   botquestonanswes BotQuestionAnswer[]
 
-  promocode String?
-  balance   String? @default("0")
-  bankaccounttype String?
+  promocode         String?
+  balance           String? @default("0")
+  bankaccounttype   String?
   backaccountnumber String?
 
   extra1 String?
@@ -54,16 +54,15 @@ model Students {
 
   @@index([sectionId], map: "Students_sectionId_fkey")
 }
-model agentTransaction{
-    id                           String                         @id @default(uuid())
-    promocode String
-    value String
-    status String? @default("paid")
-    createdAt                    DateTime                       @default(now())
 
-
-
+model agentTransaction {
+  id        String   @id @default(uuid())
+  promocode String
+  value     String
+  status    String?  @default("paid")
+  createdAt DateTime @default(now())
 }
+
 model ExamTaker {
   id                           String                         @id @default(uuid())
   name                         String?
@@ -186,6 +185,7 @@ model Packages {
   tag                String?
   review             packagesReview[]
   removed            Boolean          @default(false)
+  featured           Boolean          @default(false)
 
   @@map("package")
 }
@@ -441,29 +441,28 @@ model Questions {
 }
 
 model BotQuestions {
-  id        String   @id @default(uuid())
-  text String? @db.Text
-  image String?
-  period String?
-  status String? @default("down")
+  id           String              @id @default(uuid())
+  text         String?             @db.Text
+  image        String?
+  period       String?
+  status       String?             @default("down")
   studentLimit String?
- createdAt DateTime @default(now())
- activeAt DateTime?
- grade String?
- answers BotQuestionAnswer[]
- 
-}
-model BotQuestionAnswer{
-   id        String   @id @default(uuid())
-   studentId String?
-   student Students? @relation(fields: [studentId], references: [id])
-   text String?  @db.Text
-   correct String? @default("waiting")
-   createdAt DateTime @default(now())
-   question BotQuestions? @relation(fields: [questionId], references: [id])
-   questionId String?
+  createdAt    DateTime            @default(now())
+  activeAt     DateTime?
+  grade        String?
+  answers      BotQuestionAnswer[]
 }
 
+model BotQuestionAnswer {
+  id         String        @id @default(uuid())
+  studentId  String?
+  student    Students?     @relation(fields: [studentId], references: [id])
+  text       String?       @db.Text
+  correct    String?       @default("waiting")
+  createdAt  DateTime      @default(now())
+  question   BotQuestions? @relation(fields: [questionId], references: [id])
+  questionId String?
+}
 
 model Languages {
   id        String   @id @default(uuid())
@@ -475,12 +474,12 @@ model Languages {
   extra1    String?
   extra2    String?
 }
+
 model Comments {
-  id        String   @id @default(uuid())
-   createdAt DateTime @default(now())
-   commentFrom String?
-   text String?  @db.Text
-   
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  commentFrom String?
+  text        String?  @db.Text
 }
 
 model Notifications {
@@ -612,8 +611,8 @@ model Advertisement {
 }
 
 model Configuration {
-  id String  @id @default(uuid())
-  agentCommisionRate String? 
+  id                 String  @id @default(uuid())
+  agentCommisionRate String?
 }
 
 model Collection {
