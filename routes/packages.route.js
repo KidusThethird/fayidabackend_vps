@@ -159,6 +159,21 @@ router.get("/slider/", async (req, res, next) => {
   }
 });
 
+router.get("/featured/", async (req, res, next) => {
+  try {
+    const packages = await prisma.packages.findMany({
+      include: { courses: true },
+      where: {
+        // status: true,
+        featured: true,
+      },
+    });
+    res.json(packages);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/fetchPackages/", async (req, res, next) => {
   try {
     const packages = await prisma.packages.findMany({
