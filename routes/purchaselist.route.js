@@ -735,10 +735,14 @@ router.get(
   checkAuthenticated,
   async (req, res, next) => {
     try {
+      //req.isAuthenticated()
+
       if (req.isAuthenticated()) {
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
+            //studentsId: "716d3050-2916-447a-88a2-c4316ce4a2a1",
+            //716d3050-2916-447a-88a2-c4316ce4a2a1
             //check
             paymentStatus: "active",
           },
@@ -750,6 +754,7 @@ router.get(
         const paidCourses = await prisma.StudentCourse.findMany({
           where: {
             studentsId: req.user.id,
+            //studentsId: "716d3050-2916-447a-88a2-c4316ce4a2a1",
             packageId: {
               in: paidPackages.map((package) => package.packagesId),
             },
@@ -805,7 +810,48 @@ router.get(
 
         /////////////////////
 
-          res.json(CheckAssessment);
+        // Assume CheckAssessment is an array as shown in your JSON example.
+        const assessmentWithImages = await Promise.all(
+          CheckAssessment.map(async (assessment) => {
+            const questionsWithImages = await Promise.all(
+              assessment.question.map(async (q) => {
+                const questionImageUrl = q.questionImage
+                  ? await generateSignedUrl(
+                      "generalfilesbucket",
+                      "question_images",
+                      q.questionImage
+                    )
+                  : null;
+
+                const correctionImageUrl = q.correctionImage
+                  ? await generateSignedUrl(
+                      "generalfilesbucket",
+                      "question_images",
+                      q.correctionImage
+                    )
+                  : null;
+
+                return {
+                  ...q,
+                  questionImageUrl,
+                  correctionImageUrl,
+                };
+              })
+            );
+
+            return {
+              ...assessment,
+              question: questionsWithImages,
+            };
+          })
+        );
+
+        // Send the modified response
+        res.send(assessmentWithImages);
+
+        /////////////////////
+
+        //   res.json(CheckAssessment);
       } else {
         res.status(401).json({ message: "not authenticated" });
       }
