@@ -735,7 +735,7 @@ router.get(
   checkAuthenticated,
   async (req, res, next) => {
     try {
-      //req.isAuthenticated()
+      //req.isAuthenticated();
 
       if (req.isAuthenticated()) {
         const paidPackages = await prisma.PurchaseList.findMany({
@@ -810,7 +810,48 @@ router.get(
 
         /////////////////////
 
+        ///////////////////////////////////////////////////////////////////////////////
         // Assume CheckAssessment is an array as shown in your JSON example.
+        // const assessmentWithImages = await Promise.all(
+        //   CheckAssessment.map(async (assessment) => {
+        //     const questionsWithImages = await Promise.all(
+        //       assessment.question.map(async (q) => {
+        //         const questionImageUrl = q.questionImage
+        //           ? await generateSignedUrl(
+        //               "generalfilesbucket",
+        //               "question_images",
+        //               q.questionImage
+        //             )
+        //           : null;
+
+        //         const correctionImageUrl = q.correctionImage
+        //           ? await generateSignedUrl(
+        //               "generalfilesbucket",
+        //               "question_images",
+        //               q.correctionImage
+        //             )
+        //           : null;
+
+        //         return {
+        //           ...q,
+        //           questionImageUrl,
+        //           correctionImageUrl,
+        //         };
+        //       })
+        //     );
+
+        //     return {
+        //       ...assessment,
+        //       question: questionsWithImages,
+        //     };
+        //   })
+        // );
+
+        // // Send the modified response
+        // res.send(assessmentWithImages);
+
+        ///////////////////////////////////////////////////////////////////////////////
+
         const assessmentWithImages = await Promise.all(
           CheckAssessment.map(async (assessment) => {
             const questionsWithImages = await Promise.all(
@@ -821,7 +862,7 @@ router.get(
                       "question_images",
                       q.questionImage
                     )
-                  : null;
+                  : "0"; // Replace null with "0"
 
                 const correctionImageUrl = q.correctionImage
                   ? await generateSignedUrl(
@@ -829,12 +870,12 @@ router.get(
                       "question_images",
                       q.correctionImage
                     )
-                  : null;
+                  : "0"; // Replace null with "0"
 
                 return {
                   ...q,
-                  questionImageUrl,
-                  correctionImageUrl,
+                  questionImageUrl: questionImageUrl[0], // Accessing the first element
+                  correctionImageUrl: correctionImageUrl[0], // Accessing the first element
                 };
               })
             );
@@ -848,8 +889,6 @@ router.get(
 
         // Send the modified response
         res.send(assessmentWithImages);
-
-        /////////////////////
 
         //   res.json(CheckAssessment);
       } else {
