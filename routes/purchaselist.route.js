@@ -779,33 +779,33 @@ router.get(
 
         /////////////////////
 
-        const assessmentWithImages = {
-          ...CheckAssessment,
-          question: await Promise.all(
-            CheckAssessment[0].question.map(async (q) => {
-              const questionImageUrl = await generateSignedUrl(
-                "generalfilesbucket",
-                "question_images",
-                q.questionImage
-              );
-              const correctionImageUrl = await generateSignedUrl(
-                "generalfilesbucket",
-                "question_images",
-                q.correctionImage
-              );
-              return {
-                ...q,
-                questionImageUrl: questionImageUrl,
-                correctionImageUrl: correctionImageUrl,
-              };
-            })
-          ),
-        };
-        res.send(assessmentWithImages);
+        // const assessmentWithImages = {
+        //   ...CheckAssessment,
+        //   question: await Promise.all(
+        //     CheckAssessment[0].question.map(async (q) => {
+        //       const questionImageUrl = await generateSignedUrl(
+        //         "generalfilesbucket",
+        //         "question_images",
+        //         q.questionImage
+        //       );
+        //       const correctionImageUrl = await generateSignedUrl(
+        //         "generalfilesbucket",
+        //         "question_images",
+        //         q.correctionImage
+        //       );
+        //       return {
+        //         ...q,
+        //         questionImageUrl: questionImageUrl,
+        //         correctionImageUrl: correctionImageUrl,
+        //       };
+        //     })
+        //   ),
+        // };
+        // res.send(assessmentWithImages);
 
         /////////////////////
 
-        //  res.json(CheckAssessment);
+          res.json(CheckAssessment);
       } else {
         res.status(401).json({ message: "not authenticated" });
       }
