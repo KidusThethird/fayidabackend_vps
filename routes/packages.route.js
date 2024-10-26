@@ -159,16 +159,45 @@ router.get("/slider/", async (req, res, next) => {
   }
 });
 
+// router.get("/featured/", async (req, res, next) => {
+//   try {
+//     const packages = await prisma.packages.findMany({
+//       include: { courses: true },
+//       where: {
+//         // status: true,
+//         featured: true,
+//       },
+//     });
+//     res.json(packages);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
 router.get("/featured/", async (req, res, next) => {
+  //const FolderName = req.params.folderName;
+  // console.log("Folder Name Requested: " + FolderName);
   try {
     const packages = await prisma.packages.findMany({
-      include: { courses: true },
       where: {
-        // status: true,
         featured: true,
+        //   group2: FolderName,
       },
+      include: { courses: true },
     });
-    res.json(packages);
+
+    const packagesWithSignedUrls = await Promise.all(
+      packages.map(async (pac) => {
+        const signedUrlforFile = await generateSignedUrl(
+          "generalfilesbucket",
+          "package_thumbnails",
+          pac.thumbnail
+        );
+        return { ...pac, imgUrl: signedUrlforFile };
+      })
+    );
+    res.json(packagesWithSignedUrls);
+    // res.json(packages);
   } catch (error) {
     next(error);
   }
