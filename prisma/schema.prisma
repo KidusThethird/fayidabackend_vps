@@ -201,6 +201,15 @@ model packagesReview {
   createdAt DateTime @default(now())
 }
 
+model resources {
+  id    String  @id @default(uuid())
+  title String?
+
+  fileDescription String? @db.Text
+  grade           String?
+  location        String?
+}
+
 model MockPackage {
   id                           String                         @id @default(uuid())
   title                        String?                        @default("untitled")
