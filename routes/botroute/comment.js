@@ -29,8 +29,29 @@ const postComment = async (bot, chatId, commentText) => {
     const options = messages[language]; // Choose the appropriate messages based on language
 
     if (response.status === 200) {
+      const language = languages.getUserLanguage(chatId);
+
+      const messages = {
+        en: {
+          prompt: "Back To Main Menu:",
+        },
+        am: {
+          prompt: "ወደ ዋናው ምርጫ",
+        },
+      };
       // If the comment was successfully posted
-      bot.sendMessage(chatId, options.success);
+      bot.sendMessage(chatId, options.success, {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: `${messages[language].prompt}`, // Button text in English and Amharic
+                callback_data: "student_main_menu", // Callback data for the button
+              },
+            ],
+          ],
+        },
+      });
     } else {
       bot.sendMessage(chatId, options.failure + response.data.message);
     }

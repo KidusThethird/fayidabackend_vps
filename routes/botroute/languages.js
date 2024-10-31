@@ -44,6 +44,7 @@ module.exports = {
           website: "Go to Website",
           comment: "Comment",
           changeLanguage: "Change Language",
+          log_out: "Log Out to Start Menu",
         },
         am: {
           postLoginOptions: "ከመግባት በኋላ አማራጮችዎ እነሆ ናቸው፡፡",
@@ -52,7 +53,9 @@ module.exports = {
           questions: "ጥያቄዎች",
           website: "ድረ-ገጹን ይጎብኙ",
           comment: "አስተያየት",
+          resources: "መማሪያ ዶክመንቶች",
           changeLanguage: "ቋንቋ ይቀይሩ",
+          log_out: "ወደ ዋናው መውጫ መመለስ",
         },
       };
 
@@ -78,6 +81,12 @@ module.exports = {
               {
                 text: options[language].changeLanguage,
                 callback_data: "change_language",
+              },
+            ],
+            [
+              {
+                text: options[language].log_out,
+                callback_data: "log_out_page",
               },
             ],
           ],

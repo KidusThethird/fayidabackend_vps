@@ -2,7 +2,10 @@ const express = require("express");
 const telegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
 const { sendWelcomeMessage } = require("./welcomeRoute");
-const { sendPostLoginOptions, sendClubOptions } = require("./choices02");
+const { sendPostLoginOptions } = require("./choices02");
+//sendClubOptions
+const { sendClubOptions } = require("./clubs");
+
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
 const { sendAgentOptions } = require("./agentChoices");
@@ -14,7 +17,7 @@ const { editBankAccountType } = require("./edit_agent/editBankAccountType");
 const { editBankAccountNumber } = require("./edit_agent/editAccountNumber");
 const { editPhoneNumber } = require("./edit_agent/editPhoneNumber");
 const { sendResourcesMessage } = require("./resources");
-
+const { sendSubjectOptions } = require("./club02");
 const {
   handleAgentLogin,
   viewAgentProfile,
@@ -28,7 +31,8 @@ const { postComment } = require("./comment");
 const languages = require("./languages");
 const agentLanguages = require("./agent_language");
 const { sendBotInfo } = require("./get_info");
-
+//const sendWelcomeMessage = require("./welcomeRoute");
+//sendWelcomeMessage
 const router = express.Router();
 
 // Access the Telegram token from environment variables
@@ -117,7 +121,16 @@ bot.on("callback_query", (callbackQuery) => {
   if (callbackData === "resources") {
     sendResourcesMessage(bot, chatId, userCookieJars); // Call the function from resources.js
   }
-
+  //sendWelcomeMessage
+  if (callbackData === "log_out_page") {
+    //sendWelcomeMessage();
+    // const chatId = message.from.id;
+    // const userName = message.from.first_name;
+    console.log("This is something to print");
+    console.log("CHat Id : ");
+    console.log("UserName: ");
+    sendWelcomeMessage(bot, chatId, ""); // Call the function from resources.js
+  }
   if (callbackData === "get_info") {
     sendBotInfo(bot, chatId); // Call the function to send the info message
   } else if (callbackData === "questions") {
@@ -134,6 +147,7 @@ bot.on("callback_query", (callbackQuery) => {
         prompt: "እባኮትን መልዕትዎን ያስገቡ እና ይላኩ",
       },
     };
+
     const promptMessage = messages[language].prompt;
     // Ask the user to type a comment
     bot.sendMessage(chatId, promptMessage);
@@ -158,6 +172,11 @@ bot.on("callback_query", (callbackQuery) => {
     handleAgentLogin(bot, chatId, userCookieJars); // Call agent login logic (email, password)
   } else if (callbackData === "view_profile_agent") {
     viewAgentProfile(bot, chatId, userCookieJars); // Show agent profile
+  }
+
+  if (callbackData === "student_main_menu") {
+    // Call sendPostLoginOptions from choice02.js
+    sendPostLoginOptions(bot, chatId);
   } else if (callbackData === "view_profile") {
     // Handle 'View Profile' option
     const cookieJar = userCookieJars.get(chatId);
@@ -175,10 +194,37 @@ bot.on("callback_query", (callbackQuery) => {
         .then((profileResponse) => {
           const { firstName, lastName, gread } = profileResponse.data;
           const fullName = `${firstName} ${lastName}`;
-          bot.sendMessage(
-            chatId,
-            `Profile Information:\nName: ${fullName}\nGrade: ${gread}`
-          );
+
+          // Prepare the message and the inline keyboard
+          const profileMessage = `Profile Information:\nName: ${fullName}\nGrade: ${gread}`;
+
+          const language = languages.getUserLanguage(chatId);
+
+          const messages = {
+            en: {
+              prompt: "Back To Main Menu:",
+            },
+            am: {
+              prompt: "ወደ ዋናው ምርጫ",
+            },
+          };
+
+          // Create an inline keyboard with a button leading to "main_menu"
+          const options = {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: `${messages[language].prompt}`,
+                    callback_data: "student_main_menu", // Callback data for the button
+                  },
+                ],
+              ],
+            },
+          };
+
+          // Send the profile information with the button
+          bot.sendMessage(chatId, profileMessage, options);
         })
         .catch((error) => {
           bot.sendMessage(
@@ -205,64 +251,92 @@ bot.on("callback_query", (callbackQuery) => {
     editPhoneNumber(bot, chatId, userCookieJars); // Call the function to edit the first name
   } else if (callbackData === "clubs") {
     sendClubOptions(bot, chatId); // Show club options when 'Clubs' is selected
-  } else if (callbackData === "grade_9_club") {
-    bot.sendMessage(chatId, "Go to Grade 9 Club...", {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Go to Grade 9 Club",
-              url: "https://t.me/fayidaacademy_grade9_club", // Link to the Grade 9 Club
-            },
-          ],
-        ],
-      },
-    });
+  }
+
+  /////////////////////////////////////
+
+  //////////////////////////////
+
+  if (callbackData === "grade_9_club") {
+    sendSubjectOptions(bot, chatId, "grade9");
   } else if (callbackData === "grade_10_club") {
-    bot.sendMessage(chatId, "Go to Grade 10 Club...", {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Go to Grade 10 Club",
-              url: "https://t.me/fayidaacademy_grade10_club", // Link to the Grade 10 Club
-            },
-          ],
-        ],
-      },
-    });
+    sendSubjectOptions(bot, chatId, "grade10");
   } else if (callbackData === "grade_11_club") {
-    bot.sendMessage(chatId, "Go to Grade 11 Club...", {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Go to Grade 11 Club",
-              url: "https://t.me/fayidaacademy_grade11_club", // Link to the Grade 11 Club
-            },
-          ],
-        ],
-      },
-    });
+    sendSubjectOptions(bot, chatId, "grade11");
   } else if (callbackData === "grade_12_club") {
-    bot.sendMessage(chatId, "Go to Grade 12 Club...", {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "Go to Grade 12 Club",
-              url: "https://t.me/fayidaacademy_grade12_club", // Link to the Grade 12 Club
-            },
-          ],
-        ],
-      },
-    });
-  } else if (callbackData === "others_club") {
-    bot.sendMessage(chatId, "You clicked Others.");
-  } else if (callbackData === "questions") {
+    sendSubjectOptions(bot, chatId, "grade12");
+  }
+
+  //  else if (callbackData === "grade_9_club") {
+  //   bot.sendMessage(chatId, "Go to Grade 9 Club...", {
+  //     reply_markup: {
+  //       inline_keyboard: [
+  //         [
+  //           {
+  //             text: "Go to Grade 9 Club",
+  //             url: "https://t.me/fayidaacademy_grade9_club", // Link to the Grade 9 Club
+  //           },
+  //         ],
+  //       ],
+  //     },
+  //   });
+  // } else if (callbackData === "grade_10_club") {
+  //   bot.sendMessage(chatId, "Go to Grade 10 Club...", {
+  //     reply_markup: {
+  //       inline_keyboard: [
+  //         [
+  //           {
+  //             text: "Go to Grade 10 Club",
+  //             url: "https://t.me/fayidaacademy_grade10_club", // Link to the Grade 10 Club
+  //           },
+  //         ],
+  //       ],
+  //     },
+  //   });
+  // } else if (callbackData === "grade_11_club") {
+  //   bot.sendMessage(chatId, "Go to Grade 11 Club...", {
+  //     reply_markup: {
+  //       inline_keyboard: [
+  //         [
+  //           {
+  //             text: "Go to Grade 11 Club",
+  //             url: "https://t.me/fayidaacademy_grade11_club", // Link to the Grade 11 Club
+  //           },
+  //         ],
+  //       ],
+  //     },
+  //   });
+  // } else if (callbackData === "grade_12_club") {
+  //   bot.sendMessage(chatId, "Go to Grade 12 Club...", {
+  //     reply_markup: {
+  //       inline_keyboard: [
+  //         [
+  //           {
+  //             text: "Go to Grade 12 Club",
+  //             url: "https://t.me/fayidaacademy_grade12_club", // Link to the Grade 12 Club
+  //           },
+  //         ],
+  //       ],
+  //     },
+  //   });
+  // } else if (callbackData === "others_club") {
+  //   bot.sendMessage(chatId, "You clicked Others.");
+  // }
+  else if (callbackData === "questions") {
     bot.sendMessage(chatId, "You clicked Questions.");
   } else if (callbackData === "go_to_website") {
     // Redirect to the website
+
+    const language = languages.getUserLanguage(chatId);
+
+    const messages = {
+      en: {
+        prompt: "Back To Main Menu:",
+      },
+      am: {
+        prompt: "ወደ ዋናው ምርጫ",
+      },
+    };
     bot.sendMessage(chatId, "Redirecting you to the website...", {
       reply_markup: {
         inline_keyboard: [
@@ -272,11 +346,17 @@ bot.on("callback_query", (callbackQuery) => {
               url: "https://www.fayidaacademy.com", // Website URL
             },
           ],
+          [
+            {
+              text: `${messages[language].prompt}`, // Button to call back to student_main_menu
+              callback_data: "student_main_menu", // Callback data for the button
+            },
+          ],
         ],
       },
     });
   } else if (callbackData === "change_language") {
-    bot.sendMessage(chatId, "You clicked Change Language.");
+    bot.sendMessage(chatId, "");
   } else if (callbackData === "sign_up_student") {
     // Redirect to the signup webpage
     bot.sendMessage(chatId, "Redirecting you to the signup page...", {

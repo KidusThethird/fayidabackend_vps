@@ -24,11 +24,11 @@ function sendResourcesMessage(bot, chatId, userCookieJars) {
 
         const messages = {
           en: {
-            greeting: "Hello World!",
+            greeting: "Your files are ready:",
             profileInfo: `Profile Information:\nName: ${firstName} ${lastName}\nGrade: ${gread}`,
           },
           am: {
-            greeting: "ሰላም ልዑል!",
+            greeting: "ዶክመንቶቹ እንደሚከተለው ናቸው፥",
             profileInfo: `የግል መረጃ:\nስም: ${firstName} ${lastName}\nደረጃ: ${gread}`,
           },
         };
@@ -58,6 +58,20 @@ function sendResourcesMessage(bot, chatId, userCookieJars) {
                       `Error sending file: ${error.message}`
                     );
                   });
+              });
+
+              // After all documents are sent, add a back to main menu button
+              bot.sendMessage(chatId, "Here are your resources:", {
+                reply_markup: {
+                  inline_keyboard: [
+                    [
+                      {
+                        text: "Back to Main Menu", // Button text in English and Amharic
+                        callback_data: "student_main_menu", // Callback data for the button
+                      },
+                    ],
+                  ],
+                },
               });
             })
             .catch((resourceError) => {

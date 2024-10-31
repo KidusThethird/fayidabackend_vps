@@ -44,6 +44,7 @@ module.exports = {
               submitError:
                 "You cannot submit the answer if you are too late or if you are trying to submit multiple times.",
               loginRequired: "You need to log in first!",
+              backToMainMenu: "Back to Main Menu",
             },
             am: {
               fetchingGrade: "እባኮትን የእርስዎን ደረጃ ይፈትሹ...",
@@ -53,9 +54,24 @@ module.exports = {
               noActiveQuestion: "አሁን የሚኖር ጥያቄ የለም።",
               noQuestions: "አሁን ለመደገፍ ጥያቄ የለም!",
               profileError: "የእርስዎ መግቢያ ማዕከል መፈለጊያ ጊዜ የተከሰተ ነው: ",
-              submitSuccess: "መልስዎ በተ成功 ይላኩልዎታል!",
-              submitError: "ወንድ ይህ ውይይት ከታች ነው ወይም ከአሁኑ በተነሱ ይላኩልዎታል።",
+              submitSuccess: "መልስዎ በተሳካ ሁኔታ ተልኳል!",
+              submitError: "መልስዎ በማዘዋወር ወይም ተደጋጋሚ ለመላክ አይችሉም።",
               loginRequired: "መጀመሪያ ይግባኝ ነው!",
+              backToMainMenu: "ወደ ዋና ሜኑ ተመለስ",
+            },
+          };
+
+          // Define the "Back to Main Menu" button
+          const mainMenuButton = {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: messages[language].backToMainMenu,
+                    callback_data: "student_main_menu",
+                  },
+                ],
+              ],
             },
           };
 
@@ -84,11 +100,12 @@ module.exports = {
                   if (image) {
                     bot.sendPhoto(chatId, imgUrl, {
                       caption: message + messages[language].typeResponse,
+                      reply_markup: mainMenuButton.reply_markup,
                     });
                   } else {
                     // If there's no image, just send the message with footer
                     message += messages[language].typeResponse;
-                    bot.sendMessage(chatId, message);
+                    bot.sendMessage(chatId, message, mainMenuButton);
                   }
 
                   // Listen for user's response
@@ -110,33 +127,48 @@ module.exports = {
                         bot.sendMessage(
                           chatId,
                           response.data.message ||
-                            messages[language].submitSuccess
+                            messages[language].submitSuccess,
+                          mainMenuButton
                         );
                       })
                       .catch((error) => {
-                        bot.sendMessage(chatId, messages[language].submitError);
+                        bot.sendMessage(
+                          chatId,
+                          messages[language].submitError,
+                          mainMenuButton
+                        );
                       });
 
                     // Optionally, you may want to remove the listener after the response is received
                     bot.removeListener("message", this);
                   });
                 } else {
-                  bot.sendMessage(chatId, messages[language].noActiveQuestion);
+                  // Send "no active question" message with the "Back to Main Menu" button
+                  bot.sendMessage(
+                    chatId,
+                    messages[language].noActiveQuestion,
+                    mainMenuButton
+                  );
                 }
               })
               .catch((questionsError) => {
-                bot.sendMessage(chatId, messages[language].noQuestions);
+                bot.sendMessage(
+                  chatId,
+                  messages[language].noQuestions,
+                  mainMenuButton
+                );
               });
           });
         })
         .catch((error) => {
           bot.sendMessage(
             chatId,
-            messages[language].profileError + error.message
+            messages[language].profileError + error.message,
+            mainMenuButton
           );
         });
     } else {
-      bot.sendMessage(chatId, messages[language].loginRequired);
+      bot.sendMessage(chatId, messages[language].loginRequired, mainMenuButton);
     }
   },
 };
