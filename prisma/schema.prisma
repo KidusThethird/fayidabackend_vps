@@ -208,6 +208,7 @@ model resources {
   fileDescription String? @db.Text
   grade           String?
   location        String?
+  status Boolean? @default(false)
 }
 
 model MockPackage {
@@ -460,6 +461,8 @@ model BotQuestions {
   activeAt     DateTime?
   grade        String?
   answers      BotQuestionAnswer[]
+  choice Boolean?
+  correct_choice String? @default("")
 }
 
 model BotQuestionAnswer {

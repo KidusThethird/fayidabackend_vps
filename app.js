@@ -95,6 +95,8 @@ app.use("/studentmaterial", require("./routes/studentmaterial.route"));
 app.use("/packagereview", require("./routes/packagereview.route"));
 app.use("/courseunitslist", require("./routes/courseunitslist.route"));
 app.use("/comments", require("./routes/comments.js"));
+app.use("/resources", require("./routes/resoures.route.js"));
+
 app.use(
   "/categorylist",
   require("./routes/category_route/catagorieslist.route")
