@@ -14,6 +14,7 @@ module.exports = {
         website: "Go to Website",
         comment: "Comment",
         changeLanguage: "Change Language",
+        resources: "Resources",
         whatNext: "What would you like to do next?",
       },
       am: {
@@ -23,6 +24,7 @@ module.exports = {
         website: "ወደ ድህረገፅ ይሂዱ",
         comment: "አስተያየት",
         changeLanguage: "ቋንቋ ይቀይሩ",
+        resources: "መማሪያ ዶክመንቶች",
         whatNext: "በሚቀጥለው ምን መደምሰስ ትፈልጋለህ?",
       },
     };
@@ -38,6 +40,7 @@ module.exports = {
           [{ text: options.questions, callback_data: "questions" }],
           [{ text: options.website, callback_data: "go_to_website" }],
           [{ text: options.comment, callback_data: "comment" }],
+          [{ text: options.resources, callback_data: "resources" }],
           [{ text: options.changeLanguage, callback_data: "change_language" }],
         ],
       },

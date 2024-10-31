@@ -60,7 +60,7 @@ router.post(
         console.log("OlderFileName: " + olderFileName);
 
         if (olderFileName != null || olderFileName != "") {
-          const filePath = `common_files/${olderFileName}`;
+          const filePath = `resource_files/${olderFileName}`;
           //const blob = bucket.file(filePath);
           try {
             await bucket.file(filePath).delete();
@@ -75,7 +75,7 @@ router.post(
     }
 
     const fileName = Date.now() + "-" + file.originalname;
-    const filePath = `common_files/${fileName}`;
+    const filePath = `resource_files/${fileName}`;
     // convert to a blob
 
     const blob = bucket.file(filePath);
@@ -92,7 +92,7 @@ router.post(
       console.log("FIle Name: " + fileName);
       console.log("Id: " + req.params.id);
       try {
-        const updateVideo = await prisma.MaterialFile.update({
+        const updateVideo = await prisma.resources.update({
           where: {
             id: req.params.id,
           },
@@ -185,7 +185,46 @@ router.get("/", async (req, res, next) => {
     next(error);
   }
 });
+router.get("/filtered", async (req, res, next) => {
+  try {
+    const videos = await prisma.resources.findMany({
+      where: {
+        status: true,
+      },
+    });
+    res.json(videos);
+  } catch (error) {
+    next(error);
+  }
+});
 
+router.get("/filtered_with_grade/:grade", async (req, res, next) => {
+  try {
+    const grade = req.params.grade;
+    const videos = await prisma.resources.findMany({
+      where: {
+        status: true,
+        grade: grade,
+      },
+    });
+
+    // Map over the videos to add the fileUrl to each one
+    const videosWithUrls = await Promise.all(
+      videos.map(async (video) => {
+        const signedUrlforFile = await generateSignedUrl(
+          "generalfilesbucket",
+          "resource_files",
+          video.location
+        );
+        return { ...video, fileUrl: signedUrlforFile[0] };
+      })
+    );
+
+    res.json(videosWithUrls);
+  } catch (error) {
+    next(error);
+  }
+});
 //Get one student
 router.get("/:id", async (req, res, next) => {
   try {
@@ -200,7 +239,7 @@ router.get("/:id", async (req, res, next) => {
       console.log("in payment with id 2");
       const signedUrlforFile = await generateSignedUrl(
         "generalfilesbucket",
-        "common_files",
+        "resource_files",
         singleVideo.location
       );
       console.log("print of x: " + signedUrlforFile);

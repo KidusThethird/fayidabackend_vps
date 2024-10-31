@@ -13,6 +13,7 @@ const { editGrandName } = require("./edit_agent/editGrandName");
 const { editBankAccountType } = require("./edit_agent/editBankAccountType");
 const { editBankAccountNumber } = require("./edit_agent/editAccountNumber");
 const { editPhoneNumber } = require("./edit_agent/editPhoneNumber");
+const { sendResourcesMessage } = require("./resources");
 
 const {
   handleAgentLogin,
@@ -112,6 +113,9 @@ bot.on("callback_query", (callbackQuery) => {
 
     // Set the language preference using setLanguage in languages.js
     languages.setLanguage(bot, chatId, language);
+  }
+  if (callbackData === "resources") {
+    sendResourcesMessage(bot, chatId, userCookieJars); // Call the function from resources.js
   }
 
   if (callbackData === "get_info") {
