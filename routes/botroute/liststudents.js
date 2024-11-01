@@ -40,7 +40,7 @@ module.exports = {
               `Name: ${firstName} ${lastName} ${grandName}\n`
             );
             console.log("Mypromocode: " + promocode);
-            // After showing profile, proceed to fetch transactions
+            // After showing profile, proceed to fetch students data
 
             axios
               .get(`${localUrl}/agents/studentswithpromocode/${promocode}`)
@@ -48,9 +48,9 @@ module.exports = {
                 const studentsData = transactionResponse.data; // Assuming this is an array of student data objects
                 console.log("first");
 
-                if (studentsData && studentsData.length > 0) {
-                  let studentsInfoMessage = "--- Students Info ---\n";
+                let studentsInfoMessage = "--- Students Info ---\n";
 
+                if (studentsData && studentsData.length > 0) {
                   // Iterate over each student and extract the required fields
                   studentsData.forEach((student, index) => {
                     const { firstName, lastName, grandName, gread, age } =
@@ -69,26 +69,29 @@ module.exports = {
                       `Age: ${age}\n`;
                   });
 
-                  // Get the user's language preference
-                  const language = getUserLanguage(chatId);
-                  const mainMenuText = language === "am" ? "መነሻ" : "Main Menu"; // Define button text based on language
-
-                  // Send the formatted message to the user with a Main Menu button
-                  bot.sendMessage(chatId, studentsInfoMessage, {
-                    reply_markup: {
-                      inline_keyboard: [
-                        [
-                          {
-                            text: mainMenuText,
-                            callback_data: "agent_main_menu",
-                          },
-                        ],
-                      ],
-                    },
-                  });
+                  // Send the formatted message to the user
+                  bot.sendMessage(chatId, studentsInfoMessage);
                 } else {
                   bot.sendMessage(chatId, "No students found.");
                 }
+
+                // Get the user's language preference for the button text
+                const language = getUserLanguage(chatId);
+                const mainMenuText = language === "am" ? "መነሻ" : "Main Menu"; // Define button text based on language
+
+                // Send a Back to Menu button
+                bot.sendMessage(chatId, "Choose an option:", {
+                  reply_markup: {
+                    inline_keyboard: [
+                      [
+                        {
+                          text: mainMenuText,
+                          callback_data: "agent_main_menu",
+                        },
+                      ],
+                    ],
+                  },
+                });
               })
               .catch((transactionError) => {
                 bot.sendMessage(

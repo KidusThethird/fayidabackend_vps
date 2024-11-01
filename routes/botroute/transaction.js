@@ -46,9 +46,10 @@ module.exports = {
               .get(`${localUrl}/agenttransaction/withpromocode/${promocode}`)
               .then((transactionResponse) => {
                 const transactions = transactionResponse.data;
+                let transactionList = "";
 
                 if (transactions && transactions.length > 0) {
-                  let transactionList = "--- Transactions ---\n";
+                  transactionList += "--- Transactions ---\n";
                   transactions.forEach((transaction, index) => {
                     transactionList +=
                       `Transaction ${index + 1}:\n` +
@@ -57,27 +58,27 @@ module.exports = {
                         transaction.createdAt
                       ).toLocaleString()}\n\n`;
                   });
-
-                  // Get the user's language preference
-                  const language = getUserLanguage(chatId);
-                  const mainMenuText = language === "am" ? "መነሻ" : "Main Menu"; // Define button text based on language
-
-                  // Send the transaction list with a Main Menu button
-                  bot.sendMessage(chatId, transactionList, {
-                    reply_markup: {
-                      inline_keyboard: [
-                        [
-                          {
-                            text: mainMenuText,
-                            callback_data: "agent_main_menu",
-                          },
-                        ],
-                      ],
-                    },
-                  });
                 } else {
-                  bot.sendMessage(chatId, "No transactions found.");
+                  transactionList = "No transactions found.";
                 }
+
+                // Get the user's language preference
+                const language = getUserLanguage(chatId);
+                const mainMenuText = language === "am" ? "መነሻ" : "Main Menu"; // Define button text based on language
+
+                // Send the transaction list with a Main Menu button
+                bot.sendMessage(chatId, transactionList, {
+                  reply_markup: {
+                    inline_keyboard: [
+                      [
+                        {
+                          text: mainMenuText,
+                          callback_data: "agent_main_menu",
+                        },
+                      ],
+                    ],
+                  },
+                });
               })
               .catch((transactionError) => {
                 bot.sendMessage(

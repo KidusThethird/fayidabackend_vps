@@ -69,7 +69,7 @@ module.exports = {
             firstName,
             lastName,
             grandName,
-            email,
+            agent_email,
             phoneNumber,
             prefferdLanguage,
             promocode,
@@ -80,7 +80,7 @@ module.exports = {
           const fullName = `${firstName} ${lastName} ${grandName}`;
           bot.sendMessage(
             chatId,
-            `Profile Information:\nName: ${fullName}\nEmail: ${email}\nPhone Number: ${phoneNumber}\nPromo Code: ${promocode}\nCurrent Balance: ${balance}\nAccount Type: ${bankaccounttype}\nAccount Number: ${backaccountnumber}`,
+            `Profile Information:\nName: ${fullName}\nEmail: ${agent_email}\nPhone Number: ${phoneNumber}\nPromo Code: ${promocode}\nCurrent Balance: ${balance}\nAccount Type: ${bankaccounttype}\nAccount Number: ${backaccountnumber}`,
             {
               reply_markup: {
                 inline_keyboard: [

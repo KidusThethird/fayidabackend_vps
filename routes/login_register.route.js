@@ -45,17 +45,49 @@ router.use(
 );
 
 //router.use(cors({ credentials: true, origin: true }));
+// initializePassport(
+//   passport,
+//   async (email) => {
+//     const user = await prisma.students.findUnique({ where: { email: email } });
+
+//     // console.log(user);
+//     return user;
+//   },
+
+//   async (id) => {
+//     console.log("account confirmed from passport");
+//     const user = await prisma.students.findUnique({ where: { id: id } });
+
+//     return user;
+//   }
+// );
+
 initializePassport(
   passport,
-  async (email) => {
-    const user = await prisma.students.findUnique({ where: { email: email } });
+  async (providedEmail) => {
+    console.log("This is printed: " + providedEmail);
 
-    // console.log(user);
-    return user;
+    // First, try to find the user based on the provided email
+    const user = await prisma.students.findUnique({
+      where: { email: providedEmail },
+    });
+
+    // If the user is found and the email is not null
+    if (user && user.email) {
+      return user; // Return the user if the email is not null
+    } else {
+      // If the email is null, check the agent_email instead
+      const agentUser = await prisma.students.findUnique({
+        where: { agent_email: providedEmail },
+      });
+      console.log("Agent User: " + JSON.stringify(agentUser));
+
+      return agentUser; // Return the agent user if found
+    }
   },
 
   async (id) => {
-    console.log("account confirmed from passport");
+    console.log("Account confirmed from passport");
     const user = await prisma.students.findUnique({ where: { id: id } });
 
     return user;
@@ -474,6 +506,37 @@ router.post(
 //})
 //);
 
+// router.post(
+//   "/loginss",
+//   (req, res, next) => {
+//     passport.authenticate(
+//       "local",
+//       { keepSessionInfo: true },
+
+//       (err, user, info) => {
+//         if (err) {
+//           return res.status(500).json({ message: "Internal server error" });
+//         }
+//         if (!user) {
+//           req.flash("error", "Invalid credentials"); // Add flash message
+//           return res.status(401).json({ message: "Invalid credentials" });
+//         }
+//         req.logIn(user, (err) => {
+//           if (err) {
+//             return res.status(500).json({ message: "Internal server error" });
+//           }
+//           return res.status(200).json({ message: "Login successful" });
+//         });
+//       }
+//     )(req, res, next);
+//   },
+//   (req, res) => {
+//     // This function is executed after the authentication process
+//     // You can handle the flash messages here if needed
+//     // For example, you can access the flash messages using `req.flash("error")`
+//   }
+// );
+
 router.post(
   "/loginss",
   (req, res, next) => {
@@ -490,6 +553,12 @@ router.post(
           return res.status(401).json({ message: "Invalid credentials" });
         }
         req.logIn(user, (err) => {
+          console.log("Account: " + user.accountType);
+
+          if (user.accountType != "Student") {
+            return res.status(401).json({ message: "Invalid credentials" });
+          }
+
           if (err) {
             return res.status(500).json({ message: "Internal server error" });
           }
