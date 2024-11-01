@@ -102,6 +102,7 @@ module.exports = {
           transaction: "Transaction",
           comment: "Comment",
           changeLanguage: "Change Language",
+          log_out: "Log Out",
         },
         am: {
           postLoginOptions: "ከመግባት በኋላ አማራጮችዎ እነሆ ናቸው፡፡",
@@ -111,6 +112,7 @@ module.exports = {
           transaction: "የገዘብ ዝውውር",
           comment: "አስተያየት",
           changeLanguage: "ቋንቋ ይቀይሩ",
+          log_out: "ወደ ዋናው መውጫ",
         },
       };
 
@@ -151,6 +153,12 @@ module.exports = {
               {
                 text: options[language].changeLanguage,
                 callback_data: "change_language_agent",
+              },
+            ],
+            [
+              {
+                text: options[language].log_out,
+                callback_data: "log_out_page",
               },
             ],
           ],

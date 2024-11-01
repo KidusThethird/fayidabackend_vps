@@ -22,12 +22,15 @@ const {
   handleAgentLogin,
   viewAgentProfile,
   editProfile,
+  showAgentMenu,
 } = require("./agentLogin");
 const { localUrl } = require("../../configFIles");
 const { fetchAgentTransactions } = require("./transaction");
 const { listStudentsfromAgents } = require("./liststudents");
 const { fetchQuestionsForGrade } = require("./questions");
 const { postComment } = require("./comment");
+const { postAgentComment } = require("./agent_commnet");
+
 const languages = require("./languages");
 const agentLanguages = require("./agent_language");
 const { sendBotInfo } = require("./get_info");
@@ -136,6 +139,32 @@ bot.on("callback_query", (callbackQuery) => {
   } else if (callbackData === "questions") {
     fetchQuestionsForGrade(bot, chatId, userCookieJars);
     // Fetch questions for the user
+  }
+
+  //postAgentComment
+  else if (callbackData === "agnet_comment") {
+    const language = languages.getUserLanguage(chatId);
+
+    const messages = {
+      en: {
+        prompt: "Please type your comment:",
+      },
+      am: {
+        prompt: "እባኮትን መልዕትዎን ያስገቡ እና ይላኩ",
+      },
+    };
+
+    const promptMessage = messages[language].prompt;
+    // Ask the user to type a comment
+    bot.sendMessage(chatId, promptMessage);
+
+    // Listen for the next message (the comment text)
+    bot.once("message", (commentMessage) => {
+      const commentText = commentMessage.text;
+
+      // Call the function to post the comment, passing the bot instance
+      postAgentComment(bot, chatId, commentText);
+    });
   } else if (callbackData === "comment") {
     const language = languages.getUserLanguage(chatId);
 
@@ -177,6 +206,11 @@ bot.on("callback_query", (callbackQuery) => {
   if (callbackData === "student_main_menu") {
     // Call sendPostLoginOptions from choice02.js
     sendPostLoginOptions(bot, chatId);
+  }
+
+  if (callbackData === "agent_main_menu") {
+    // Call sendPostLoginOptions from choice02.js
+    showAgentMenu(bot, chatId);
   } else if (callbackData === "view_profile") {
     // Handle 'View Profile' option
     const cookieJar = userCookieJars.get(chatId);

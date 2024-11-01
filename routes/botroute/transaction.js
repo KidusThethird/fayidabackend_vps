@@ -2,6 +2,7 @@ const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
 const axios = require("axios");
 const { localUrl } = require("../../configFIles");
+const { getUserLanguage } = require("./languages"); // Import the function to get user's language preference
 
 module.exports = {
   fetchAgentTransactions: (bot, chatId, userCookieJars) => {
@@ -36,7 +37,6 @@ module.exports = {
           bot.sendMessage(chatId, "Clearing previous messages...").then(() => {
             bot.sendMessage(
               chatId,
-
               `Name: ${firstName} ${lastName} ${grandName}\n`
             );
             console.log("Mypromocode: " + promocode);
@@ -46,7 +46,6 @@ module.exports = {
               .get(`${localUrl}/agenttransaction/withpromocode/${promocode}`)
               .then((transactionResponse) => {
                 const transactions = transactionResponse.data;
-                console.log("first");
 
                 if (transactions && transactions.length > 0) {
                   let transactionList = "--- Transactions ---\n";
@@ -59,7 +58,23 @@ module.exports = {
                       ).toLocaleString()}\n\n`;
                   });
 
-                  bot.sendMessage(chatId, transactionList);
+                  // Get the user's language preference
+                  const language = getUserLanguage(chatId);
+                  const mainMenuText = language === "am" ? "መነሻ" : "Main Menu"; // Define button text based on language
+
+                  // Send the transaction list with a Main Menu button
+                  bot.sendMessage(chatId, transactionList, {
+                    reply_markup: {
+                      inline_keyboard: [
+                        [
+                          {
+                            text: mainMenuText,
+                            callback_data: "agent_main_menu",
+                          },
+                        ],
+                      ],
+                    },
+                  });
                 } else {
                   bot.sendMessage(chatId, "No transactions found.");
                 }

@@ -14,7 +14,7 @@ module.exports = {
         editPhoneNumber: "Edit Phone Number",
         editBankAccountType: "Edit Bank Account Type",
         editBankAccountNumber: "Edit Bank Account Number",
-        home: "Home",
+        home: "Main Menu",
       },
       am: {
         editFirstName: "የመጀመሪያ ስምን ይቀይሩ",
@@ -66,7 +66,7 @@ module.exports = {
               callback_data: "edit_bank_account_number",
             },
           ],
-          [{ text: options[language].home, callback_data: "home" }],
+          [{ text: options[language].home, callback_data: "agent_main_menu" }],
         ],
       },
     };
