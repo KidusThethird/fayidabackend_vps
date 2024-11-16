@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
 const sendCustomEmail = require("./helper/sendCustomEmail");
 const { generateSignedUrl } = require("./helper/bucketurlgenerator");
+const authenticateToken = require("./authMiddleware");
+
 
 const cron = require("node-cron");
 
@@ -61,9 +63,18 @@ const cron = require("node-cron");
 //working with students
 
 //Get all student
-router.get("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.get("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+console.log("Logged in: "+ req.user.id)
+const UserDetails = await prisma.Students.findUnique({
+ 
+  where: { id: req.user.id },
+ 
+});
+if(UserDetails){
+
+    if (UserDetails.accountType == "Admin") {
+      console.log("Act type = "+ UserDetails.accountType)
       try {
         const purchaselist = await prisma.PurchaseList.findMany({
           include: {
@@ -81,15 +92,22 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
       }
     } else {
       res.status(401).json({ message: "User not authenticated" });
-    }
+    } }
   } else {
     res.status(401).json({ message: "User not authenticated" });
   }
 });
 
-router.get("/update", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.get("/update", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+if(UserDetails){
+    if (UserDetails.accountType == "Admin") {
       try {
         const purchaselist = await prisma.PurchaseList.findMany({
           include: {
@@ -107,6 +125,8 @@ router.get("/update", checkAuthenticated, async (req, res, next) => {
       }
     } else {
       res.status(401).json({ message: "User not authenticated" });
+    } }  else {
+      res.status(401).json({ message: "User not authenticated" });
     }
   } else {
     res.status(401).json({ message: "User not authenticated" });
@@ -115,10 +135,20 @@ router.get("/update", checkAuthenticated, async (req, res, next) => {
 
 router.get(
   "/filterbyStudentId/:studentId",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
-    if (req.isAuthenticated()) {
-      if (req.user.accountType == "Admin") {
+    if (req.user.id) {
+
+
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+
+if(UserDetails){
+
+      if (UserDetails.accountType == "Admin") {
         try {
           const purchaselist = await prisma.PurchaseList.findMany({
             where: {
@@ -138,7 +168,7 @@ router.get(
         }
       } else {
         res.status(401).json({ message: "User not authenticated" });
-      }
+      }}
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
@@ -147,9 +177,22 @@ router.get(
 
 router.get(
   "/filterPurchase/:purchaseid",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
-    if (req.user.accountType == "Admin") {
+
+
+
+if(req.user.id){
+
+
+  const UserDetails = await prisma.Students.findUnique({
+ 
+    where: { id: req.user.id },
+   
+  });
+
+if(UserDetails){
+    if (UserDetails.accountType == "Admin") {
       try {
         const purchaselist = await prisma.PurchaseList.findUnique({
           where: {
@@ -164,7 +207,7 @@ router.get(
       } catch (error) {
         next(error);
       }
-    } else if (req.user.accountType == "Student") {
+    } else if (UserDetails.accountType == "Student") {
       try {
         const purchaselist = await prisma.PurchaseList.findUnique({
           where: {
@@ -184,13 +227,28 @@ router.get(
       res.status(401).json({ message: "User not authenticated" });
     }
   }
+  } else {
+    res.status(401).json({ message: "User not authenticated" });
+  }
+  }
 );
 router.patch(
   "/filterPurchase/:id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
-    if (req.isAuthenticated()) {
-      if (req.user.accountType == "Admin") {
+    if (req.user.id) {
+
+
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+
+
+      if(UserDetails){
+
+      if (UserDetails.accountType == "Admin") {
         try {
           const { id } = req.params;
           console.log("body: " + JSON.stringify(req.body));
@@ -269,7 +327,7 @@ router.patch(
         } catch (error) {
           next(error);
         }
-      }
+      } }
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
@@ -278,10 +336,19 @@ router.patch(
 
 router.patch(
   "/filterPurchase/reverse/:id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
-    if (req.isAuthenticated()) {
-      if (req.user.accountType == "Admin") {
+    if (req.user.id) {
+
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+
+if(UserDetails){
+
+      if (UserDetails.accountType == "Admin") {
         try {
           const { id } = req.params;
           console.log("body: " + JSON.stringify(req.body));
@@ -314,7 +381,7 @@ router.patch(
         } catch (error) {
           next(error);
         }
-      }
+      }}
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
@@ -323,10 +390,20 @@ router.patch(
 
 router.patch(
   "/filterPurchase/update/:id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
-    if (req.isAuthenticated()) {
-      if (req.user.accountType == "Admin") {
+    if (req.user.id) {
+
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+
+if(UserDetails){
+
+
+      if (UserDetails.accountType == "Admin") {
         try {
           const { id } = req.params;
           console.log("bodyyyy: " + JSON.stringify(req.body));
@@ -458,16 +535,29 @@ router.patch(
           console.log("Error from catch: " + error);
           next(error);
         }
-      }
+      } }
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
   }
 );
 
-router.get("/studentCourses/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.get("/studentCourses/", authenticateToken, async (req, res, next) => {
+
+
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+if(UserDetails){
+
+
+    if (UserDetails.accountType == "Admin") {
       try {
         const StudentCourses = await prisma.StudentCourse.findMany({
           include: {
@@ -479,6 +569,8 @@ router.get("/studentCourses/", checkAuthenticated, async (req, res, next) => {
         next(error);
       }
     } else {
+      res.json({ Error: "You dont have access" });
+    } } else {
       res.json({ Error: "You dont have access" });
     }
   } else {
@@ -502,12 +594,19 @@ router.get("/purchasetest/", async (req, res, next) => {
 
 router.get(
   "/specificStudentCourses/",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     console.log("Initial is printed");
-    if (req.isAuthenticated()) {
+    if (req.user.id) {
       console.log("authentication is printed");
-      if (req.user.accountType == "Student") {
+
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+if(UserDetails){
+      if (UserDetails.accountType == "Student") {
         console.log("student is in");
         try {
           const paidPackages = await prisma.PurchaseList.findMany({
@@ -554,7 +653,7 @@ router.get(
           console.log("Error from catch: " + error);
           next(error);
         }
-      } else if (req.user.accountType == "Admin") {
+      } else if (UserDetails.accountType == "Admin") {
         try {
           const paidPackages = await prisma.PurchaseList.findMany({
             where: {
@@ -584,7 +683,7 @@ router.get(
         } catch (error) {
           next(error);
         }
-      }
+      } }
     } else {
       res.json({ message: "not authenticated" });
     }
@@ -594,10 +693,10 @@ router.get(
 
 router.get(
   "/specificStudentSingleCourse/:courseId",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     try {
-      if (req.isAuthenticated()) {
+      if (req.user.id) {
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
@@ -684,10 +783,13 @@ router.get(
 
 router.get(
   "/specificStudentSingleVideo/:videoId",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     try {
-      if (req.isAuthenticated()) {
+      if (req.user.id) {
+
+
+
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
@@ -697,6 +799,8 @@ router.get(
             packagesId: true,
           },
         });
+
+if(paidPackages){
 
         const paidCourses = await prisma.StudentCourse.findMany({
           where: {
@@ -710,6 +814,9 @@ router.get(
             coursesId: true,
           },
         });
+      }
+
+if(paidCourses){
         const CheckVideo = await prisma.Videos.findMany({
           where: {
             id: req.params.videoId,
@@ -720,7 +827,7 @@ router.get(
           },
         });
 
-        res.json(CheckVideo);
+        res.json(CheckVideo); }
       } else {
         res.status(401).json({ message: "not authenticated" });
       }
@@ -732,12 +839,12 @@ router.get(
 
 router.get(
   "/specificStudentSingleAssessment/:assessmentId",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     try {
       //req.isAuthenticated();
 
-      if (req.isAuthenticated()) {
+      if (req.user.id) {
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
@@ -936,10 +1043,10 @@ router.get("/", async (req, res, next) => {
 //   }
 // });
 
-router.get("/getpuchasedlist", checkAuthenticated, async (req, res, next) => {
+router.get("/getpuchasedlist", authenticateToken, async (req, res, next) => {
   console.log("PuchaseList");
   try {
-    if (req.isAuthenticated()) {
+    if (req.user.id) {
       const singlePurchaselist = await prisma.PurchaseList.findMany({
         where: {
           studentsId: req.user.id,
@@ -979,13 +1086,21 @@ router.get("/getpuchasedlist", checkAuthenticated, async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
+router.post("/", authenticateToken, async (req, res, next) => {
   console.log("first");
-  console.log(req.isAuthenticated());
+  console.log(req.user.id);
   try {
-    if (req.isAuthenticated()) {
-      if (req.user.studentStatus == "active") {
-        console.log("code: " + req.user.firstName);
+    if (req.user.id) {
+
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+
+  if(UserDetails){
+      if (UserDetails.studentStatus == "active") {
+        console.log("code: " + UserDetails.firstName);
         console.log(req.body);
         const purchaseInfo = {
           ...req.body,
@@ -1018,21 +1133,21 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 
               //studentsId: req.user.id,
               addressedTo: "admin",
-              notiHead: `${req.user.firstName} ${req.user.lastName}  requested a purchase.`,
-              notiFull: `${req.user.firstName} ${req.user.lastName} has requested a purchase!`,
+              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  requested a purchase.`,
+              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has requested a purchase!`,
               status: "0",
             },
           });
-          console.log("uem" + req.user.email);
-          console.log("FN" + req.user.firstName);
+          console.log("uem" + UserDetails.email);
+          console.log("FN" + UserDetails.firstName);
           // console.log("ItemName" + req.body.itemName);
           //  console.log("PrizeId" + studentPrizeId);
           const purchaselistId = purchaselist.id;
           if (purchaselistId) {
             console.log("purchaseList Recorded: ", purchaselist);
             const returnValue = sendCustomEmail.emailsender(
-              req.user.email,
-              req.user.firstName,
+              UserDetails.email,
+              UserDetails.firstName,
               "You have ordered a package!",
               `Your purchase id is [${purchaselistId}], `,
               "We will approve as soon as possible!"
@@ -1113,8 +1228,8 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 
               //studentsId: req.user.id,
               addressedTo: "admin",
-              notiHead: `${req.user.firstName} ${req.user.lastName}  requested an update in package.`,
-              notiFull: `${req.user.firstName} ${req.user.lastName} has requested an update!`,
+              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  requested an update in package.`,
+              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has requested an update!`,
               status: "0",
             },
           });
@@ -1125,8 +1240,8 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
           if (purchaselistId) {
             //  console.log("purchaseList Recorded: ", purchaselist);
             const returnValue = sendCustomEmail.emailsender(
-              req.user.email,
-              req.user.firstName,
+              UserDetails.email,
+              UserDetails.firstName,
               "You have ordered an update in a package!",
               `Your purchase id is [${purchaselistId}], `,
               "We will approve as soon as possible!"
@@ -1201,7 +1316,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
         }
       } else {
         res.status(401).json({ message: "inactive" });
-      }
+      } }
     } else {
       res.status(401).json({ message: "failed" });
     }
@@ -1211,9 +1326,17 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 });
 
 //Update Student
-router.patch("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.patch("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+if(UserDetails){
+    if (UserDetails.accountType == "Admin") {
       try {
         const { id } = req.params;
         const updatePurchaselist = await prisma.PurchaseList.update({
@@ -1228,16 +1351,29 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
       }
     } else {
       res.json({ Error: "You dont have access" });
-    }
+    } }
+
+
   } else {
     res.json({ Error: "You dont have access" });
   }
 });
 
 //delete Student
-router.delete("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.delete("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+if(UserDetails){
+    if (UserDetails.accountType == "Admin") {
       try {
         const { id } = req.params;
         deletePurchaselist = await prisma.PurchaseList.delete({
@@ -1250,6 +1386,8 @@ router.delete("/:id", checkAuthenticated, async (req, res, next) => {
         next(error);
       }
     } else {
+      res.json({ Error: "You dont have access" });
+    } } else {
       res.json({ Error: "You dont have access" });
     }
   } else {

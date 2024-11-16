@@ -4,6 +4,10 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
 
+const authenticateToken = require("./authMiddleware");
+
+
+
 //working with students
 
 //Get all student
@@ -25,9 +29,17 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
   }
 });
 
-router.get("/admin/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.get("/admin/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+if(UserDetails){
+    if (UserDetails.accountType == "Admin") {
       try {
         const notifications = await prisma.notifications.findMany({
           where: {
@@ -41,13 +53,15 @@ router.get("/admin/", checkAuthenticated, async (req, res, next) => {
       } catch (error) {
         next(error);
       }
-    }
+    }}
   } else res.json({ error: "not authenticated" });
 });
 
-router.get("/count/", checkAuthenticated, async (req, res, next) => {
+router.get("/count", authenticateToken, async (req, res) => {
+
+  console.log("User in counts: "+ req.user.id)
   try {
-    if (req.isAuthenticated()) {
+    
       const notifications = await prisma.notifications.findMany({
         where: {
           studentsId: req.user.id,
@@ -55,15 +69,23 @@ router.get("/count/", checkAuthenticated, async (req, res, next) => {
         },
       });
       res.json(notifications);
-    } else res.json({ error: "not authenticated" });
+   
   } catch (error) {
     next(error);
   }
 });
 
-router.get("/admin/count/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.get("/admin/count", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+if(UserDetails){
+    if (UserDetails.accountType == "Admin") {
       try {
         const notifications = await prisma.notifications.findMany({
           where: {
@@ -75,7 +97,7 @@ router.get("/admin/count/", checkAuthenticated, async (req, res, next) => {
       } catch (error) {
         next(error);
       }
-    }
+    }}
   } else res.json({ error: "not authenticated" });
 });
 

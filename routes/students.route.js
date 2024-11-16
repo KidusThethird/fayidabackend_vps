@@ -4,6 +4,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
 const checkNotAuthenticated = require("./login_register.route");
+const authenticateToken = require("./authMiddleware");
+
 const cors = require("cors");
 
 router.use(cors({ credentials: true, origin: true }));
@@ -11,10 +13,21 @@ router.use(cors({ credentials: true, origin: true }));
 //working with students
 
 //Get all student
-router.get("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    console.log("User logged in:", req.user.accountType);
+router.get("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+   // console.log("User logged in:", req.user.accountType);
     // Access the logged-in user's information from req.user
+
+
     const students = await prisma.Students.findMany({
       //  include: { sections: true },
       orderBy: {
@@ -22,11 +35,13 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
       },
     });
     //Student Admin
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+
+if(UserDetails){
+    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
       res.json(students);
     } else {
       res.json({ Error: "You dont have access" });
-    }
+    }}
   } else {
     res.status(401).json({ message: "User not authenticated" });
   }
@@ -87,9 +102,17 @@ router.get(
 // });
 
 //Get one student
-router.get("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+router.get("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+if(UserDetails){
+    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         const singleStudent = await prisma.students.findUnique({
@@ -119,7 +142,7 @@ router.get("/:id", checkAuthenticated, async (req, res, next) => {
       } catch (error) {
         next(error);
       }
-    }
+    }}
   } else {
     res.status(401).json({ message: "User not authenticated" });
   }
@@ -137,13 +160,22 @@ router.post("/", async (req, res, next) => {
 });
 
 //Update Student
-router.patch("/:id", checkAuthenticated, async (req, res, next) => {
-  console.log(req.isAuthenticated());
-  if (req.isAuthenticated()) {
+router.patch("/:id", authenticateToken, async (req, res, next) => {
+ // console.log(req.isAuthenticated());
+  if (req.user.id) {
     console.log("first");
+
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+if(UserDetails){
     if (
-      req.user.accountType == "Admin" ||
-      req.user.accountType == "SubAdmin" ||
+      UserDetails.accountType == "Admin" ||
+      UserDetails.accountType == "SubAdmin" ||
       req.user.id == req.params.id
     ) {
       try {
@@ -174,7 +206,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
             //studentsId: req.user.id,
             addressedTo: "admin",
             notiHead: "Student Account is Updated!",
-            notiFull: `${req.user.firstName} ${req.user.lastName} has updated his profile content!`,
+            notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has updated his profile content!`,
             status: "0",
           },
         });
@@ -184,7 +216,7 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
       }
     } else {
       res.json({ error: "not authorized" });
-    }
+    } }
   } else {
     console.log("not logged in");
     res.status(401).json({ message: "not logged in" });

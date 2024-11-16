@@ -3,6 +3,8 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
+const authenticateToken = require("./authMiddleware");
+
 
 //working with students
 
@@ -34,9 +36,9 @@ router.get("/:id", async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    console.log("User Name: " + req.user.firstName);
+router.post("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    //console.log("User Name: " + req.user.firstName);
 
     try {
       const existingRecord = await prisma.studentMaterial.findFirst({

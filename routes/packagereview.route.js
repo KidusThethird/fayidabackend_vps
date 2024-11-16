@@ -3,6 +3,7 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
+const authenticateToken = require("./authMiddleware");
 
 //working with students
 
@@ -34,9 +35,9 @@ router.get("/:id", async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
+router.post("/", authenticateToken, async (req, res, next) => {
   console.log("Data req: " + JSON.stringify(req.body));
-  if (req.isAuthenticated() && req.user.id == req.body.studentId) {
+  if (req.user.id && req.user.id == req.body.studentId) {
     try {
       const CitySelected = await prisma.packagesReview.create({
         data: req.body,
@@ -72,8 +73,8 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 });
 
 //delete Student
-router.delete("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
+router.delete("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
     try {
       const { id } = req.params;
       CitySelected = await prisma.packagesReview.delete({

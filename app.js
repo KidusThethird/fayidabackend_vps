@@ -11,19 +11,7 @@ const app = express();
 
 const telegramRoute = require("./routes/botroute/main.route.js");
 
-//telegram file started
-// const telegramBot = require("node-telegram-bot-api");
-// const TELEGRAMTOKEN = "8050365014:AAFUX3yYC2Op_00G9sCjaANBR2H6NgTs6bw";
 
-// const bot = new telegramBot(TELEGRAMTOKEN, { polling: true });
-
-// bot.on("message", (message) => {
-//   console.log("Message: " + message.text);
-//   console.log("Message Id: " + message.from.id);
-//   bot.sendMessage(message.from.id, "Hello from NodeJs");
-// });
-
-//telegram file end
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -41,7 +29,7 @@ app.use(cors({ credentials: true, origin: true }));
 //app.use(cors({ credentials: true, origin: `${homeWebUrl}` }));
 
 app.use("/", require("./routes/api.route"));
-
+app.use("/newlogin", require("./routes/newlogin.js"))
 app.use("/analysis", require("./routes/analysis.route"));
 app.use("/botquestions", require("./routes/botquestions.route.js"));
 app.use("/agenttransaction", require("./routes/agenttransaction.route"));

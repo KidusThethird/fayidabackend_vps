@@ -12,6 +12,8 @@ const initializePassport = require("../passport-config");
 
 const confirmationSend = require("./helper/confirmationEmail");
 const codeGenerator = require("./helper/codegenerator");
+const authenticateToken = require("./authMiddleware");
+
 
 // initializePassport(
 //   passport,
@@ -252,10 +254,10 @@ router.post("/login", cors(), (req, res, next) => {
 router.get(
   "/sendconfirmation/:email",
   cors(),
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     try {
-      console.log(req.isAuthenticated());
+      console.log(req.user.id);
       console.log(req.params.email);
       console.log(req.user);
       console.log(req.user.id);
@@ -368,7 +370,7 @@ router.post(
 router.post(
   "/check_confirmation",
   // cors(),
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     try {
       console.log("Try is printed");
@@ -706,14 +708,26 @@ router.post("/logoutadmin", function (req, res, next) {
 });
 router.patch(
   "/changepassword/:id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
-    console.log(req.isAuthenticated());
-    if (req.isAuthenticated()) {
-      console.log("first");
+    console.log(req.user.id);
+    if (req.user.id) {
+      console.log("first: "+JSON.stringify(req.user));
+
+const current_pwd_from_db = await prisma.Students.findUnique({
+  where: {
+    id: req.user.id,
+    
+  },
+});
+//res.json(notifications);
+console.log("Pwd from db: "+ current_pwd_from_db)
+if(current_pwd_from_db){
       if (req.user.id == req.params.id) {
         console.log("user id confirmed");
-        if (await bcrypt.compare(req.body.currentPassword, req.user.password)) {
+        console.log("INput pwd: "+ req.body.password)
+        console.log("hashed pwd: "+ req.user.password)
+        if (await bcrypt.compare(req.body.currentPassword, current_pwd_from_db.password)) {
           console.log("correct current password");
           try {
             const { id } = req.params;
@@ -751,7 +765,7 @@ router.patch(
         }
       } else {
         res.json({ error: "not authorized" });
-      }
+      }}
     } else {
       console.log("not logged in");
       res.status(401).json({ message: "not logged in" });

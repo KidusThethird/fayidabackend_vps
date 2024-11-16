@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
 const cors = require("cors");
 
+const authenticateToken = require("./authMiddleware");
+
 router.use(cors({ credentials: true, origin: true }));
 
 //working with students
@@ -67,11 +69,12 @@ router.get("/getexams/:id", checkAuthenticated, async (req, res, next) => {
 
 router.post(
   "/submit-answers/:assessment_id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res) => {
     const { answers } = req.body;
 
     try {
+      if(req.user.id){
       const { id } = req.params;
       const singleAssesment = await prisma.assesment.findUnique({
         where: {
@@ -183,7 +186,7 @@ router.post(
           message: `You have Answered ${exactMatches} out of ${totalquestions} Questions Correctly.`,
           incorrectQuestionNumbers: incorrectQuestionNumbers,
         });
-      }
+      } }
     } catch (error) {
       //next(error);
       console.log(error);

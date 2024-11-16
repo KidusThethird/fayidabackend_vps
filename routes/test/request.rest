@@ -1,0 +1,20 @@
+GET http://localhost:5000/newlogin/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3Yjc4OWUwLTQwOWYtNDNjNS05YzIxLWQ3YTBkZjFkY2QwMSIsImlhdCI6MTczMTcwMzc2OH0.CSNNDZgARkbu70cjDxvL392GYyMyavnDOwp9nngFfNc
+
+###
+POST http://localhost:5000/newlogin/login
+Content-Type: application/json
+
+{
+    "email" :  "cawobab104@adosnan.com",
+    "password" : "masterkid"
+}
+
+###
+POST http://localhost:5000/newlogin/login
+Content-Type: application/json
+
+{
+    "email" :  "fayidamanage@gmail.com",
+    "password" : "F@Y1dA!c@D3my#2024"
+}

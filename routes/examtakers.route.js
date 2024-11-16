@@ -3,6 +3,8 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
+const authenticateToken = require("./authMiddleware");
+
 
 //working with students
 
