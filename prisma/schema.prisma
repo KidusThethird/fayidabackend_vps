@@ -160,10 +160,11 @@ model PackageFolder {
 }
 
 model TransactionIdGenerator {
-  id        Int       @id @default(autoincrement())
-  studentId String?
-  Student   Students? @relation(fields: [studentId], references: [id])
-  createdAt DateTime  @default(now())
+  id          Int       @id @default(autoincrement())
+  studentId   String?
+  Student     Students? @relation(fields: [studentId], references: [id])
+  generatedId String?
+  createdAt   DateTime  @default(now())
 }
 
 model Packages {

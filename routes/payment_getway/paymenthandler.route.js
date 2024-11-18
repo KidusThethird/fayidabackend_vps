@@ -22,13 +22,19 @@ const cancelRedirectUrl = "https://fayidaacademy.com/searchPackages";
 const notifyUrl = "https://api.fayidaacademy.com/inforeciver/notifyme";
 
 
-function generateRandomId(userId) {
+async function  generateRandomId(userId)  {
     // Generate 15 random bytes and convert to base64
     let generatedId= 0;
     console.log("User is sent to generateId: "+userId)
 if(userId){
 
+  try {
+    const student = await prisma.students.create({
+      data: req.body,
+    });
 
+    res.json(student);
+  } catch (error) {}
 
     
      generatedId= crypto.randomBytes(15).toString("base64").slice(0, 15);
@@ -96,7 +102,7 @@ if(UserDetails && PackageDetails){
       try {
         const url = await client.generatePaymentUrl(
          // id,
-         generateRandomId(user.req.id),
+         generateRandomId(req.user.id),
          
          amount, 
          description, 
