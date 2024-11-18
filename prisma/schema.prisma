@@ -30,21 +30,22 @@ model Students {
 
   code String? @default("1136")
 
-  email            String?             @unique
-    agent_email            String?             @unique
+  email       String? @unique
+  agent_email String? @unique
 
-  password         String?
-  phoneNumber      String?
-  profilePicture   String?
-  prefferdLanguage String?
-  Notifications    Notifications[]
-  Conversations    Conversations[]
-  StudentCourse    StudentCourse[]
-  StudentPrize     StudentPrize[]
-  points           String?             @default("0")
-  message          String?             @default("")
-  review           packagesReview[]
-  botquestonanswes BotQuestionAnswer[]
+  password               String?
+  phoneNumber            String?
+  profilePicture         String?
+  prefferdLanguage       String?
+  Notifications          Notifications[]
+  Conversations          Conversations[]
+  StudentCourse          StudentCourse[]
+  StudentPrize           StudentPrize[]
+  points                 String?                  @default("0")
+  message                String?                  @default("")
+  review                 packagesReview[]
+  botquestonanswes       BotQuestionAnswer[]
+  transactionIdGenerated TransactionIdGenerator[]
 
   promocode         String?
   balance           String? @default("0")
@@ -158,6 +159,13 @@ model PackageFolder {
   extra1     String?
 }
 
+model TransactionIdGenerator {
+  id        Int       @id @default(autoincrement())
+  studentId String?
+  Student   Students? @relation(fields: [studentId], references: [id])
+  createdAt DateTime  @default(now())
+}
+
 model Packages {
   id                 String           @id @default(uuid())
   packageName        String?
@@ -207,10 +215,10 @@ model resources {
   id    String  @id @default(uuid())
   title String?
 
-  fileDescription String? @db.Text
+  fileDescription String?  @db.Text
   grade           String?
   location        String?
-  status Boolean? @default(false)
+  status          Boolean? @default(false)
 }
 
 model MockPackage {
@@ -453,18 +461,18 @@ model Questions {
 }
 
 model BotQuestions {
-  id           String              @id @default(uuid())
-  text         String?             @db.Text
-  image        String?
-  period       String?
-  status       String?             @default("down")
-  studentLimit String?
-  createdAt    DateTime            @default(now())
-  activeAt     DateTime?
-  grade        String?
-  answers      BotQuestionAnswer[]
-  choice Boolean?
-  correct_choice String? @default("")
+  id             String              @id @default(uuid())
+  text           String?             @db.Text
+  image          String?
+  period         String?
+  status         String?             @default("down")
+  studentLimit   String?
+  createdAt      DateTime            @default(now())
+  activeAt       DateTime?
+  grade          String?
+  answers        BotQuestionAnswer[]
+  choice         Boolean?
+  correct_choice String?             @default("")
 }
 
 model BotQuestionAnswer {
