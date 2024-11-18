@@ -19,7 +19,7 @@ const GATEWAY_MERCHANT_ID = "9e2dab64-e2bb-4837-9b85-d855dd878d2b";
 const successRedirectUrl = "https://fayidaacademy.com/searchPackages";
 const failureRedirectUrl = "https://fayidaacademy.com/searchPackages";
 const cancelRedirectUrl = "https://fayidaacademy.com/searchPackages";
-const notifyUrl = "https://project-test-route-handler.vercel.app/notifyme";
+const notifyUrl = "https://api.fayidaacademy.com/inforeciver/notifyme";
 
 
 function generateRandomId(userId) {
@@ -27,6 +27,10 @@ function generateRandomId(userId) {
     let generatedId= 0;
     console.log("User is sent to generateId: "+userId)
 if(userId){
+
+
+
+    
      generatedId= crypto.randomBytes(15).toString("base64").slice(0, 15);
 }
 else{
