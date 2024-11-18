@@ -164,6 +164,8 @@ model TransactionIdGenerator {
   studentId   String?
   Student     Students? @relation(fields: [studentId], references: [id])
   generatedId String?
+  packageId   String?
+  Package     Packages? @relation(fields: [packageId], references: [id])
   createdAt   DateTime  @default(now())
 }
 
@@ -181,35 +183,36 @@ model TransactionList {
 }
 
 model Packages {
-  id                 String           @id @default(uuid())
-  packageName        String?
-  price              String?
-  price2             String?
-  price3             String?
-  temporaryPrice     String?
-  temporaryPrice2    String?
-  temporaryPrice3    String?
-  discountStatus     Boolean?         @default(false)
-  discountExpriyDate DateTime?
-  status             Boolean?         @default(false)
-  displayOnHome      Boolean?         @default(false)
-  courses            Courses[]
-  thumbnail          String?
-  trailer            String?
-  createdAt          DateTime         @default(now())
-  packageDescription String?          @db.Text
-  purchaselist       PurchaseList[]
-  suggestedSection   Sections?        @relation(fields: [sectionsId], references: [id])
-  sectionsId         String?
-  studentCourses     StudentCourse[]
-  group              String?
-  group2             String?
-  extra1             String?
-  extra2             String?
-  tag                String?
-  review             packagesReview[]
-  removed            Boolean          @default(false)
-  featured           Boolean          @default(false)
+  id                     String                   @id @default(uuid())
+  packageName            String?
+  price                  String?
+  price2                 String?
+  price3                 String?
+  temporaryPrice         String?
+  temporaryPrice2        String?
+  temporaryPrice3        String?
+  discountStatus         Boolean?                 @default(false)
+  discountExpriyDate     DateTime?
+  status                 Boolean?                 @default(false)
+  displayOnHome          Boolean?                 @default(false)
+  courses                Courses[]
+  thumbnail              String?
+  trailer                String?
+  createdAt              DateTime                 @default(now())
+  packageDescription     String?                  @db.Text
+  purchaselist           PurchaseList[]
+  suggestedSection       Sections?                @relation(fields: [sectionsId], references: [id])
+  sectionsId             String?
+  studentCourses         StudentCourse[]
+  group                  String?
+  group2                 String?
+  extra1                 String?
+  extra2                 String?
+  tag                    String?
+  review                 packagesReview[]
+  transactionIdGenerated TransactionIdGenerator[]
+  removed                Boolean                  @default(false)
+  featured               Boolean                  @default(false)
 
   @@map("package")
 }
