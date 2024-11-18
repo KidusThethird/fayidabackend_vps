@@ -167,6 +167,19 @@ model TransactionIdGenerator {
   createdAt   DateTime  @default(now())
 }
 
+model TransactionList {
+  id            Int      @id @default(autoincrement())
+  createdAt     DateTime @default(now())
+  TransactionId String?
+  amount        String?
+  commission    String?
+  totalAmount   String?
+  currency      String?
+  reason        String?
+  phoneNumber   String?
+  status        String?
+}
+
 model Packages {
   id                 String           @id @default(uuid())
   packageName        String?

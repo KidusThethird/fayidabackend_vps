@@ -22,22 +22,18 @@ const cancelRedirectUrl = "https://fayidaacademy.com/searchPackages";
 const notifyUrl = "https://api.fayidaacademy.com/inforeciver/notifyme";
 
 
-async function  generateRandomId(userId)  {
+  function  generateRandomId(userId)  {
     // Generate 15 random bytes and convert to base64
     let generatedId= 0;
     console.log("User is sent to generateId: "+userId)
 if(userId){
 
-  try {
-    const student = await prisma.students.create({
-      data: req.body,
-    });
+  generatedId= crypto.randomBytes(15).toString("base64").slice(0, 15);
 
-    res.json(student);
-  } catch (error) {}
-
+  
+  updateDb(userId , generatedId)
     
-     generatedId= crypto.randomBytes(15).toString("base64").slice(0, 15);
+    
 }
 else{
      generatedId= 0;
@@ -45,6 +41,18 @@ else{
 
 
     return generatedId;
+  }
+
+async  function updateDb  (userid, generatedid){
+
+    const transaction = await prisma.TransactionIdGenerator.create({
+      data: {
+        studentId: userid,
+        generatedId: generatedid,
+      },
+    });
+
+console.log("Id gen: "+generatedid)
   }
   //const randomId = generateRandomId();
 // Initialize the SDK dynamically
@@ -99,7 +107,17 @@ if(UserDetails && PackageDetails){
     const amount = req.body.price;
 
 
+    
+      
+  
+   
+
+
       try {
+
+        
+
+        console.log("I am printed again")
         const url = await client.generatePaymentUrl(
          // id,
          generateRandomId(req.user.id),

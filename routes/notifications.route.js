@@ -71,7 +71,7 @@ router.get("/count", authenticateToken, async (req, res) => {
       res.json(notifications);
    
   } catch (error) {
-    next(error);
+   // next(error);
   }
 });
 
