@@ -301,7 +301,7 @@ model PurchaseList {
   updatePackageStatus String    @default("off")
   Student             Students  @relation(fields: [studentsId], references: [id])
   Package             Packages  @relation(fields: [packagesId], references: [id])
-  paymentStatus       String?   @default("pending")
+  paymentStatus       String?   @default("active")
   name                String?
   method              String?
   value               String?
