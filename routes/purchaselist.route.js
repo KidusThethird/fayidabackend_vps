@@ -6,6 +6,9 @@ const checkAuthenticated = require("./login_register.route");
 const sendCustomEmail = require("./helper/sendCustomEmail");
 const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 const authenticateToken = require("./authMiddleware");
+const axios = require("axios");
+const { localUrl } = require("../configFIles");
+
 
 
 const cron = require("node-cron");
@@ -234,21 +237,21 @@ if(UserDetails){
 );
 router.patch(
   "/filterPurchase/:id",
-  authenticateToken,
+  
   async (req, res, next) => {
-    if (req.user.id) {
-
+    console.log("Patch update is started")
+console.log("Body to patch update: "+ JSON.stringify(req.body))
 
       const UserDetails = await prisma.Students.findUnique({
  
-        where: { id: req.user.id },
+        where: { id: req.body.studentId },
        
       });
 
-
+console.log("user: "+JSON.stringify(UserDetails))
       if(UserDetails){
 
-      if (UserDetails.accountType == "Admin") {
+      
         try {
           const { id } = req.params;
           console.log("body: " + JSON.stringify(req.body));
@@ -260,77 +263,136 @@ router.patch(
           //  console.log("ExpDate: " + expDate);
 
           const Datetoadd = parseInt(req.body.dateToAdd);
-
+console.log("Date to add: "+ Datetoadd)
           // if (req.body.paymentStatus == "active") {
           //   Datetoadd = parseInt(req.body.dateToAdd);
           // }
 
-          const expiryDate = new Date();
+          // const expiryDate = new Date();
 
-          expiryDate.setDate(expiryDate.getDate() + Datetoadd);
-          console.log("Expriy date now: " + expiryDate);
-          console.log("Expriy date now2: " + expiryDate.toLocaleDateString());
-          console.log("Expriy date now3: " + expiryDate.toString());
+          // expiryDate.setDate(expiryDate.getDate() + Datetoadd);
+          // console.log("Expriy date now: " + expiryDate);
+          // console.log("Expriy date now2: " + expiryDate.toLocaleDateString());
+          // console.log("Expriy date now3: " + expiryDate.toString());
 
-          const updatePurchaselist = await prisma.PurchaseList.update({
+
+
+          const FindMainPurchaseId = await prisma.PurchaseList.findFirst({
             where: {
-              id: id,
+              studentsId: req.body.studentId,
+              packagesId: req.body.packageId,
+              type: "main"
             },
-            // data: req.body,
-            data: {
-              // name: "test",
-              paymentStatus: req.body.paymentStatus,
-              activatedDate: new Date(),
-              expiryDate: expiryDate,
-            },
-          });
+          })
+          let updatePurchaselist;
+          if (FindMainPurchaseId) {
 
-          const packagePrice = req.body.packagePrice;
-
-          const StudentFind = await prisma.students.findUnique({
-            where: { id: req.body.studentId },
-          });
-          if (StudentFind) {
-            const Agent = await prisma.students.findFirst({
+            
+            
+            const existingExpiryDate = new Date(FindMainPurchaseId.expiryDate); 
+            
+           // Ensure it's a Date object
+            const newExpiryDate = new Date(existingExpiryDate); // Create a copy of the existing date
+            newExpiryDate.setDate(existingExpiryDate.getDate() + parseInt(Datetoadd)); // Add 30 days
+          
+            updatePurchaselist  = await prisma.PurchaseList.update({
               where: {
-                accountType: "agent",
-                promocode: StudentFind.promocode,
+                id: FindMainPurchaseId.id,
+              },
+              data: {
+                paymentStatus: "done",
+                activatedDate: new Date(),
+                expiryDate: newExpiryDate, // Set the updated expiry date
               },
             });
-
-            if (Agent) {
-              const commisionPercent = await prisma.configuration.findUnique({
-                where: {
-                  id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
-                },
-              });
-
-              const commisionValue = commisionPercent.agentCommisionRate;
-              console.log("Commision Value: " + commisionValue);
-              console.log("Package Price: " + packagePrice);
-              const ExistingAgentBalance = parseFloat(Agent.balance);
-              const FinalValue =
-                (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
-              const Total = FinalValue + ExistingAgentBalance;
-              const updateAgentValue = await prisma.students.update({
-                where: {
-                  id: Agent.id,
-                },
-                data: {
-                  balance: Total.toString(),
-                },
-              });
-            }
           }
 
-          res.json(updatePurchaselist);
-        } catch (error) {
+          console.log("FIndMainPurchase: "+JSON.stringify(FindMainPurchaseId))
+
+          // const updatePurchaselist = await prisma.PurchaseList.update({
+          //   where: {
+          //     id: id,
+          //   },
+          //   // data: req.body,
+          //   data: {
+          //     // name: "test",
+          //     paymentStatus: "active",
+          //     activatedDate: new Date(),
+          //     expiryDate: expiryDate,
+          //   },
+          // });
+
+
+console.log("Updated: "+ JSON.stringify(updatePurchaselist))
+
+
+// if(1==2){
+// try{
+//   console.log("PackageId :"+ req.body.packageId)
+//   let PackageFetch;
+//  PackageFetch = await prisma.Packages.findUnique({
+ 
+//   where: { id: req.body.packageId},
+ 
+// });
+
+
+// console.log("PackageFetch: "+JSON.stringify(PackageFetch))}catch(e){console.log("Error: "+e)}
+//           const packagePrice = PackageFetch.price;
+// console.log("Price" + packagePrice)
+//           const StudentFind = await prisma.students.findUnique({
+//             where: { id: req.body.studentId },
+//           });
+//           console.log("Student Find: "+StudentFind )
+//           if (StudentFind) {
+//             console.log("Inside studnet" + JSON.stringify(StudentFind))
+//             const Agent  = await prisma.students.findFirst({
+//               where: {
+//                 accountType: "agent",
+//                 promocode: StudentFind.promocode,
+//               },
+//             });
+// console.log("Agent: "+ JSON.stringify(Agent))
+//             if (Agent) {
+//               console.log("Agent is in")
+//               const commisionPercent = await prisma.configuration.findUnique({
+//                 where: {
+//                   id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
+//                 },
+//               });
+
+//               const commisionValue = commisionPercent.agentCommisionRate;
+
+              
+//               console.log("Commision Value: " + commisionValue);
+//              // console.log("Package Price: " + packagePrice);
+//               const ExistingAgentBalance = parseFloat(Agent.balance);
+//               const FinalValue =
+//                 (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
+//               const Total = FinalValue + ExistingAgentBalance;
+//               const updateAgentValue = await prisma.students.update({
+//                 where: {
+//                   id: Agent.id,
+//                 },
+//                 data: {
+//                   balance: Total.toString(),
+//                 },
+//               });
+//             }
+//           }
+        
+//          // res.json(updatePurchaselist);
+//         }
+console.log("End is here")
+res.json({message:"working"});
+      } 
+        
+        catch (error) {
+          console.log("Error from catch: "+ error)
           next(error);
         }
-      } }
-    } else {
-      res.status(401).json({ message: "User not authenticated" });
-    }
+       }
+    
   }
 );
 
@@ -612,7 +674,7 @@ if(UserDetails){
           const paidPackages = await prisma.PurchaseList.findMany({
             where: {
               studentsId: req.user.id,
-              paymentStatus: "active",
+              paymentStatus: "done",
             },
             select: {
               packagesId: true,
@@ -1086,30 +1148,60 @@ router.get("/getpuchasedlist", authenticateToken, async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", authenticateToken, async (req, res, next) => {
-  console.log("first");
-  console.log(req.user.id);
+router.post("/", async (req, res, next) => {
+  console.log("first of post request to purchaselist");
+console.log("Body: "+ JSON.stringify(req.body))
+let StudentId = "000"
+let PackageId = "000"
+
+
+  StudentId=req.body.dataToSend.studentId
+  console.log("First studentId : "+StudentId)
+
+
+  PackageId=req.body.dataToSend.packageId
+  console.log("First packageid : "+PackageId)
+
+
+
+  
   try {
-    if (req.user.id) {
+    if (StudentId) {
 
       const UserDetails = await prisma.Students.findUnique({
  
-        where: { id: req.user.id },
+        where: { id: StudentId },
        
       });
 
   if(UserDetails){
+
+    console.log("First point make: "+JSON.stringify(UserDetails))
       if (UserDetails.studentStatus == "active") {
         console.log("code: " + UserDetails.firstName);
         console.log(req.body);
         const purchaseInfo = {
-          ...req.body,
-          studentsId: req.user.id,
+          //PackageId
+          packagesId: PackageId,
+          name: "x",
+          transaction_id: "x",
+    method: "santimpay",
+    value: "x",
+    timeLength: "x",
+
+          studentsId: StudentId,
+          expiryDate: new Date(),
           type: "main",
         };
         const alreadyPurchasedInfo = {
-          ...req.body,
-          studentsId: req.user.id,
+          packagesId: PackageId,
+          name: "x",
+          transaction_id: "x",
+    method: "santimpay",
+    value: "x",
+    timeLength: "x",
+
+          studentsId: StudentId,
           type: "update",
           updatePackageStatus: "on",
         };
@@ -1117,24 +1209,26 @@ router.post("/", authenticateToken, async (req, res, next) => {
 
         const checkIfPuchasedAlready = await prisma.PurchaseList.findFirst({
           where: {
-            studentsId: req.user.id,
-            packagesId: req.body.packagesId,
+            studentsId: StudentId,
+            packagesId: PackageId,
           },
         });
         //if (checkIfPuchasedAlready) {
         if (!checkIfPuchasedAlready) {
+
+          console.log("Check Point 2: new purchase" )
           const purchaselist = await prisma.PurchaseList.create({
             data: purchaseInfo,
           });
-
+console.log("New Purchase List: "+ JSON.stringify(purchaselist))
           const addNotificationtoAdmin = await prisma.Notifications.create({
             data: {
               type: "0",
 
               //studentsId: req.user.id,
               addressedTo: "admin",
-              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  requested a purchase.`,
-              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has requested a purchase!`,
+              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  paid for a new package.`,
+              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} successfuly paid for new package!`,
               status: "0",
             },
           });
@@ -1142,38 +1236,56 @@ router.post("/", authenticateToken, async (req, res, next) => {
           console.log("FN" + UserDetails.firstName);
           // console.log("ItemName" + req.body.itemName);
           //  console.log("PrizeId" + studentPrizeId);
-          const purchaselistId = purchaselist.id;
-          if (purchaselistId) {
+          console.log("Pre: "+ JSON.stringify(purchaselist))
+
+          let purchaselistId;
+          if(purchaselist){
+           purchaselistId = purchaselist.id;
+console.log("PurchaaseListId: "+purchaselistId)
+
+const response = await axios.patch(`${localUrl}/purchaselist/filterPurchase/${purchaselistId}`, {
+  dateToAdd: 30, // Changed "30" (string) to 30 (number)
+  packageId: PackageId,
+  studentId: StudentId,
+  type: "new",
+});
+        }
+      let package;
+        try{//purchaselistId
+          if (1==1) {
             console.log("purchaseList Recorded: ", purchaselist);
             const returnValue = sendCustomEmail.emailsender(
               UserDetails.email,
               UserDetails.firstName,
-              "You have ordered a package!",
-              `Your purchase id is [${purchaselistId}], `,
-              "We will approve as soon as possible!"
+              "You have bought a package!",
+              `Your purchase id is [${purchaselist.id}], `,
+              
             );
 
             const addNotification = await prisma.Notifications.create({
               data: {
                 type: "0",
-                studentsId: req.user.id,
+                studentsId: StudentId,
                 addressedTo: "s",
                 notiHead: "Purchase Made.",
-                notiFull: `You have successfuly made a purchase request with id [${purchaselistId}]!`,
+                notiFull: `You have successfuly made a purchase with id [${purchaselistId}]!`,
                 status: "0",
               },
             });
           }
 
           console.log("this is also printed");
-          const package = await prisma.Packages.findUnique({
+           package = await prisma.Packages.findUnique({
             where: {
-              id: req.body.packagesId,
+              id: PackageId,
             },
             include: {
               courses: true,
             },
           });
+
+          console.log("Package List one: "+ JSON.stringify(package))
+        
 
           if (package) {
             console.log("here 2");
@@ -1188,7 +1300,7 @@ router.post("/", authenticateToken, async (req, res, next) => {
                 const checkCourseRepeated =
                   await prisma.StudentCourse.findFirst({
                     where: {
-                      studentsId: req.user.id,
+                      studentsId: StudentId,
                       coursesId: courseId,
                     },
                   });
@@ -1196,9 +1308,9 @@ router.post("/", authenticateToken, async (req, res, next) => {
                   const createdStudentCourse =
                     await prisma.StudentCourse.create({
                       data: {
-                        studentsId: req.user.id,
+                        studentsId: StudentId,
                         coursesId: courseId,
-                        packageId: req.body.packagesId,
+                        packageId: PackageId,
                       },
                     });
                 }
@@ -1215,9 +1327,12 @@ router.post("/", authenticateToken, async (req, res, next) => {
           } else {
             console.log("Package not found.");
           }
+        }catch(e){console.log("Error from catch: "+e)}
           // res.json(purchaselist);
           res.status(201).json({ message: "success" });
         } else {
+          console.log("Check Point 3:  purchase" )
+
           const purchaselist = await prisma.PurchaseList.create({
             data: alreadyPurchasedInfo,
           });
@@ -1228,8 +1343,8 @@ router.post("/", authenticateToken, async (req, res, next) => {
 
               //studentsId: req.user.id,
               addressedTo: "admin",
-              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  requested an update in package.`,
-              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has requested an update!`,
+              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  Updated Package.`,
+              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has updated one more month for a package.`,
               status: "0",
             },
           });
@@ -1237,6 +1352,17 @@ router.post("/", authenticateToken, async (req, res, next) => {
           // console.log("ItemName" + req.body.itemName);
           //  console.log("PrizeId" + studentPrizeId);
           const purchaselistId = purchaselist.id;
+          console.log("PurchaseListId: "+purchaselistId)
+        try{  const responsex = await axios.patch(`${localUrl}/purchaselist/filterPurchase/${purchaselistId}`, {
+            dateToAdd: "30", // Changed "30" (string) to 30 (number)
+            packageId: PackageId,
+            studentId: StudentId,
+           
+          }); } catch(error){console.log("Error from catch: "+ error)}
+          
+          
+          
+console.log("Passed")
           if (purchaselistId) {
             //  console.log("purchaseList Recorded: ", purchaselist);
             const returnValue = sendCustomEmail.emailsender(
@@ -1244,16 +1370,16 @@ router.post("/", authenticateToken, async (req, res, next) => {
               UserDetails.firstName,
               "You have ordered an update in a package!",
               `Your purchase id is [${purchaselistId}], `,
-              "We will approve as soon as possible!"
+              ""
             );
 
             const addNotification = await prisma.Notifications.create({
               data: {
                 type: "0",
-                studentsId: req.user.id,
+                studentsId: StudentId,
                 addressedTo: "s",
                 notiHead: "Purchase Made.",
-                notiFull: `You have successfuly made a package update request with id [${purchaselistId}]!`,
+                notiFull: `You have successfuly made a package update with id [${purchaselistId}]!`,
                 status: "0",
               },
             });
@@ -1262,13 +1388,13 @@ router.post("/", authenticateToken, async (req, res, next) => {
           console.log("this is also printed");
           const package = await prisma.Packages.findUnique({
             where: {
-              id: req.body.packagesId,
+              id: PackageId,
             },
             include: {
               courses: true,
             },
           });
-
+          console.log("Package List two: "+ JSON.stringify(package))
           if (package) {
             console.log("here 2");
             // console.log(package);
@@ -1282,7 +1408,7 @@ router.post("/", authenticateToken, async (req, res, next) => {
                 const checkCourseRepeated =
                   await prisma.StudentCourse.findFirst({
                     where: {
-                      studentsId: req.user.id,
+                      studentsId: StudentId,
                       coursesId: courseId,
                     },
                   });
@@ -1290,9 +1416,9 @@ router.post("/", authenticateToken, async (req, res, next) => {
                   const createdStudentCourse =
                     await prisma.StudentCourse.create({
                       data: {
-                        studentsId: req.user.id,
+                        studentsId: StudentId,
                         coursesId: courseId,
-                        packageId: req.body.packagesId,
+                        packageId: PackageId,
                       },
                     });
                 }

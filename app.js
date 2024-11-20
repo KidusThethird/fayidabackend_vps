@@ -32,8 +32,8 @@ app.use("/", require("./routes/api.route"));
 app.use("/newlogin", require("./routes/newlogin.js"))
 app.use("/inforeciver", require("./routes/payment_getway/inforeciver.route.js"))
 app.use("/generateid", require("./routes/payment_getway/generatedIdmanage.route.js"))
-
-app.use("/paymenthandler", require("./routes/payment_getway/paymenthandler.route.js"))
+//update pyament haldler   paymenthandler   paymenthandlermain
+app.use("/paymenthandler", require("./routes/payment_getway/paymenthandlermain.route.js"))
 
 app.use("/analysis", require("./routes/analysis.route"));
 app.use("/botquestions", require("./routes/botquestions.route.js"));

@@ -1,5 +1,9 @@
 const router = require("express").Router();
 const { PrismaClient } = require("@prisma/client");
+const { localUrl } = require("../../configFIles");
+const axios = require("axios");
+
+
 
 const prisma = new PrismaClient();
 //const checkAuthenticated = require("./login_register.route");
@@ -114,7 +118,12 @@ router.post('/notifyme',async (req, res) => {
    // console.log('Received POST request:', req.body); // Log the request body
 
 const response = req.body;
+const acceptedId = req.body.thirdPartyId
 
+console.log("Is ThirdPartyId matching expected value?:", req.body.thirdPartyId == "yq5oSwXBuI4JQGF");
+
+
+console.log("acceptedId: "+ acceptedId)
     for (const [key, value] of Object.entries(response)) {
       console.log(`${key}: ${value}`);
     }
@@ -138,6 +147,8 @@ const response = req.body;
       console.log("The Process is Cancelled!")
     }else if(req.body.Status == "COMPLETED"){
 
+      //restore this
+
       const transaction = await prisma.TransactionList.create({
         data: {
           TransactionId : req.body.thirdPartyId,
@@ -150,13 +161,74 @@ const response = req.body;
   status        :req.body.Status
         },
       });
-      
+
+
+  // const  UserDetails= await prisma.TransactionIdGenerator.findFirst({
+ 
+  //   where: { generatedId: req.body.thirdPartyId },
+   
+  // });
+
+  
+let thirdParty = req.body.thirdPartyId
+
+  
+  const UserDetails = await prisma.TransactionIdGenerator.findFirst({
+    where: {
+      generatedId:thirdParty , // Ensure `req.body.thirdPartyId` exists
+    },
+  });
+  console.log("Working on it...")
+  console.log("UserDetails: "+JSON.stringify(UserDetails))
+ console.log("Generated key: "+req.body.thirdPartyId)
+
+
+
+if(UserDetails){
+
+  console.log("User Fetched: "+ UserDetails);
+
+
+      const dataToSend = {
+        "studentId": UserDetails.studentId,
+        "packageId": UserDetails.packageId
+        
+      };
+
+
+      try {
+
+        const response = await axios.post(`${localUrl}/purchaselist`, {
+          dataToSend,
+        });
+        //console.log("Code: " + x.status);
+
+        // const response = await axios.post(`${localUrl}/purchaselist`, dataToSend);
+       // console.log("Response from /target-route:", response.data);
+    
+        // Send the response back to the client
+        // res.json({
+        //   success: true,
+        //   message: "Request to target-route completed successfully",
+        //   targetResponse: response.data,
+        // });
+        console.log("Resoponse accepted")
+      } catch (error) {
+        console.error("Error during POST request:", error);
+        res.status(500).json({
+          success: false,
+          message: error,
+        });
+      }
+
+
+    }
       console.log("The Process is Completed!")
     }else {
       console.log("The Process is Failed!")
     }
 
 
-    res.status(200).json(req.body); // Send the received JSON data as response
+  //  res.status(200).json(req.body); // Send the received JSON data as response
 });
 module.exports = router;

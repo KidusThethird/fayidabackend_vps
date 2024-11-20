@@ -22,7 +22,7 @@ const cancelRedirectUrl = "https://fayidaacademy.com/searchPackages";
 const notifyUrl = "https://api.fayidaacademy.com/inforeciver/notifyme";
 
 
-  function  generateRandomId(userId)  {
+  function  generateRandomId(userId , packageId)  {
     // Generate 15 random bytes and convert to base64
     let generatedId= 0;
     console.log("User is sent to generateId: "+userId)
@@ -31,7 +31,7 @@ if(userId){
   generatedId= crypto.randomBytes(15).toString("base64").slice(0, 15);
 
   
-  updateDb(userId , generatedId)
+  updateDb(userId , generatedId ,packageId)
     
     
 }
@@ -43,12 +43,13 @@ else{
     return generatedId;
   }
 
-async  function updateDb  (userid, generatedid){
+async  function updateDb  (userid, generatedid , packageId){
 
     const transaction = await prisma.TransactionIdGenerator.create({
       data: {
         studentId: userid,
         generatedId: generatedid,
+        packageId: packageId
       },
     });
 
@@ -120,7 +121,7 @@ if(UserDetails && PackageDetails){
         console.log("I am printed again")
         const url = await client.generatePaymentUrl(
          // id,
-         generateRandomId(req.user.id),
+         generateRandomId(req.user.id , req.body.packageId),
          
          amount, 
          description, 

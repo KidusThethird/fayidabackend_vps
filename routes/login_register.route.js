@@ -373,10 +373,17 @@ router.post(
   authenticateToken,
   async (req, res, next) => {
     try {
+console.log("UserId: "+ req.user.id)
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+
       console.log("Try is printed");
-      console.log(req.body.code);
-      console.log("code: " + req.user.code);
-      if (req.body.code == req.user.code && req.body.code != "1136") {
+      console.log(UserDetails.code);
+      console.log("code: " + UserDetails.code);
+      if (req.body.code == UserDetails.code && req.body.code != "1136") {
         console.log("ok");
         //return res.status(201);
 

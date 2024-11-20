@@ -25,7 +25,7 @@ router.get("/", async (req, res, next) => {
       const { id } = req.params;
       const TransactionId = await prisma.TransactionIdGenerator.findUnique({
         where: {
-          id: id,
+          id: parseInt(req.params.id)
         },
       });
       res.json(TransactionId);

@@ -1,8 +1,25 @@
 GET http://localhost:5000/newlogin/profile
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ3Yjc4OWUwLTQwOWYtNDNjNS05YzIxLWQ3YTBkZjFkY2QwMSIsImlhdCI6MTczMTcwMzc2OH0.CSNNDZgARkbu70cjDxvL392GYyMyavnDOwp9nngFfNc
 
+### 
+
+GET http://localhost:5000/purchaselist/specificStudentCourses/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVkYzA2MjYzLTljZTAtNGYwZS1hNzE2LTg2Y2VlYTY0ZGUyOSIsImlhdCI6MTczMTk2NDc1N30.HUM61fz0XKuJItzbUg5k6FVuxaH_wo5SVjFSrw9a6gI
+### 
+
+GET http://localhost:5000/purchaselist/specificStudentCourses
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQyNWIwZDRjLTg3MTctNDI0OS1hNjUwLWI4NGY1ZDEwNDI1OSIsImlhdCI6MTczMTk1NTgzMn0.8yHgtg2By9-gH6Xj_zOLqAro0YoB89n5wKLr-RYy2PA
+### 
+PATCH  http://localhost:5000/purchaselist/filterPurchase/505b1c29-8513-4eb4-a90c-68855a4c6e3d
+Content-Type: application/json
+
+{
+  "dateToAdd": "30",
+  "packageId": "076684a7-8a2f-4289-afd1-91a14ba4cc5a",
+  "studentId": "aa52a058-66f5-452c-81f9-eef5bd1a5005"
+}
 ###
-POST http://localhost:5000/newlogin/login
+POST http://localhost:5000/purchaselist
 Content-Type: application/json
 
 {
@@ -38,7 +55,7 @@ Content-Type: application/json
   "txnId": "b60b965b-23c6-45c9-b223-43bc81e723cf",
   "created_at": "2024-11-18T03:47:12.153475Z",
   "updated_at": "2024-11-18T03:47:35.307034Z",
-  "thirdPartyId": "ptS3LAZcj6esjr8",
+  "thirdPartyId": "Ym3pBqi5FtsZo/x",
   "transactionType": "",
   "merId": "9e2dab64-e2bb-4837-9b85-d855dd878d2b",
   "merName": "Santimpay Test Company",
@@ -63,8 +80,44 @@ Content-Type: application/json
   "lotteryTax": "87.75",
   "message": "",
   "updateType": "",
-  "Status": "CANCELLED",
+  //"Status": "CANCELLED",
+  "Status": "COMPLETED",
   "StatusReason": "",
   "ReceiverWalletID": ""
 }
 
+###
+
+POST http://localhost:5000/comments
+Content-Type: application/json
+
+{
+  "txnId": "b60b965b-23c6-45c9-b223-43bc81e723cf",
+ 
+}
+
+###
+
+POST https://project-test-route-handler.vercel.app/notifyme
+Content-Type: application/json
+
+{
+  "txnId": "b60b965b-23c6-45c9-b223-43bc81e723cf",
+  "created_at": "2024-11-18T03:47:12.153475Z",
+ 
+}
+
+###
+
+PATCH  http://localhost:5000/purchaselist/filterPurchase/505b1c29-8513-4eb4-a90c-68855a4c6e3d
+Content-Type: application/json
+
+{
+   "dateToAdd": "30",
+            "packageId": "076684a7-8a2f-4289-afd1-91a14ba4cc5a",
+            "studentId": "716d3050-2916-447a-88a2-c4316ce4a2a1",
+           
+ 
+}
+
+//505b1c29-8513-4eb4-a90c-68855a4c6e3d
