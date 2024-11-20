@@ -6,6 +6,8 @@ const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 
 const { PrismaClient } = require("@prisma/client");
 const multer = require("multer");
+const authenticateToken = require("./authMiddleware");
+
 //const { Storage } = require("@google-cloud/storage");
 //const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 //const sendCustomEmail = require("./helper/sendCustomEmail");
@@ -122,9 +124,16 @@ router.post(
 }
 
 //Get all student
-router.get("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.get("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+    if (UserDetails.accountType == "Admin") {
       try {
         const Questions = await prisma.BotQuestions.findMany({
           orderBy: {
@@ -249,9 +258,15 @@ router.get("/:id", async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.post("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+    if (UserDetails.accountType == "Admin") {
       console.log("Body: " + JSON.stringify(req.body));
       try {
         const package = await prisma.BotQuestions.create({

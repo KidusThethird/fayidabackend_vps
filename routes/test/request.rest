@@ -48,14 +48,14 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:5000/inforeciver/notifyme
+POST https://api.fayidaacademy.com/inforeciver/notifyme
 Content-Type: application/json
 
 {
   "txnId": "b60b965b-23c6-45c9-b223-43bc81e723cf",
   "created_at": "2024-11-18T03:47:12.153475Z",
   "updated_at": "2024-11-18T03:47:35.307034Z",
-  "thirdPartyId": "Ym3pBqi5FtsZo/x",
+  "thirdPartyId": "gnEMjklttCe+0Cl",
   "transactionType": "",
   "merId": "9e2dab64-e2bb-4837-9b85-d855dd878d2b",
   "merName": "Santimpay Test Company",

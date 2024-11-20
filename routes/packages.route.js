@@ -6,6 +6,8 @@ const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 
 const { PrismaClient } = require("@prisma/client");
 const multer = require("multer");
+const authenticateToken = require("./authMiddleware");
+
 //const { Storage } = require("@google-cloud/storage");
 //const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 //const sendCustomEmail = require("./helper/sendCustomEmail");
@@ -40,6 +42,8 @@ router.post(
   "/upload_package_thumbnail/:id",
   upload.single("package_image"),
   async (req, res) => {
+
+    try{}catch(error){console.log("Error from catch: "+error)}
     const file = req.file;
     if (!file) {
       res.status(400).send("No file uploaded");
@@ -59,6 +63,7 @@ router.post(
         singlePackage.thumbnail != null ||
         singlePackage.thumbnail != ""
       ) {
+       
         olderFileName = singlePackage.thumbnail;
         console.log("OlderFileName: " + olderFileName);
 
@@ -76,18 +81,20 @@ router.post(
         console.log("New file");
       }
     }
-
+    
     const fileName = Date.now() + "-" + file.originalname;
     const filePath = `package_thumbnails/${fileName}`;
     // convert to a blob
-
+    
     const blob = bucket.file(filePath);
     const blobStream = blob.createWriteStream({
       metadata: {
         contentType: file.mimetype,
       },
     });
+    console.log("Printed 001")
     blobStream.on("error", (err) => {
+      console.log("Error message: "+err)
       res.status(500).send(err);
     });
     blobStream.on("finish", async () => {
@@ -125,9 +132,17 @@ router.post(
 }
 
 //Get all student
-router.get("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.get("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+    if (UserDetails.accountType == "Admin") {
       try {
         const packages = await prisma.packages.findMany({
           include: { courses: true },
@@ -425,9 +440,16 @@ router.get("/:id", async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.post("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+    if (UserDetails.accountType == "Admin") {
       try {
         const package = await prisma.packages.create({
           data: req.body,

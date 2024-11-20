@@ -11,9 +11,11 @@ const authenticateToken = require("./authMiddleware");
 //working with students
 
 //Get all student
-router.get("/", checkAuthenticated, async (req, res, next) => {
+router.get("/", authenticateToken, async (req, res, next) => {
   try {
-    if (req.isAuthenticated()) {
+    if (req.user.id) {
+
+     
       const notifications = await prisma.notifications.findMany({
         where: {
           studentsId: req.user.id,
@@ -102,8 +104,8 @@ if(UserDetails){
 });
 
 //Get one student
-router.get("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
+router.get("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
     try {
       const { id } = req.params;
       const singleNotification = await prisma.notifications.findUnique({
@@ -135,10 +137,10 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 //Update Student
 router.get(
   "/notification_read/:notification_id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     try {
-      if (req.isAuthenticated()) {
+      if (req.user.id) {
         //  const { id } = req.params;
         console.log("first");
         const updateNotification = await prisma.notifications.update({
@@ -162,10 +164,10 @@ router.get(
 
 router.get(
   "/notification_admin_read/:notification_id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
     try {
-      if (req.isAuthenticated()) {
+      if (req.user.id) {
         //  const { id } = req.params;
         console.log("first");
         const updateNotification = await prisma.notifications.update({

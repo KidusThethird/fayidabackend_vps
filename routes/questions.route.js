@@ -3,13 +3,19 @@ const { PrismaClient } = require("@prisma/client");
 const checkAuthenticated = require("./login_register.route");
 const prisma = new PrismaClient();
 const { generateSignedUrl } = require("./helper/bucketurlgenerator");
+const authenticateToken = require("./authMiddleware");
 
 //working with students
 
 //Get all student
-router.get("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+router.get("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
       try {
         const questions = await prisma.questions.findMany({});
         res.json(questions);
@@ -25,12 +31,17 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
 });
 
 //Get one student
-router.get("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
+router.get("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
     if (
-      req.user.accountType == "Admin" ||
-      req.user.accountType == "Student" ||
-      req.user.accountType == "SubAdmin"
+      UserDetails.accountType == "Admin" ||
+      UserDetails.accountType == "Student" ||
+      UserDetails.accountType == "SubAdmin"
     ) {
       try {
         const { id } = req.params;
@@ -109,9 +120,15 @@ router.get("/accessquestions/:id", async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+router.post("/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
       try {
         const question = await prisma.questions.create({
           data: req.body,
@@ -127,9 +144,17 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 });
 
 //Update Student
-router.patch("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+router.patch("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         const updateQuestions = await prisma.questions.update({
@@ -151,9 +176,15 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 });
 
 //delete Student
-router.delete("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+router.delete("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
       try {
         const { id } = req.params;
         deleteQuestions = await prisma.questions.delete({
