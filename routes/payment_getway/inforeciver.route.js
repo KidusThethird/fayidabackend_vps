@@ -21,8 +21,24 @@ router.get("/transactionlist", async (req, res, next) => {
   try {
     const blogs = await prisma.TransactionList.findMany({
       orderBy: {
-        createdAt: "asc", // Replace 'asc' with 'desc' if you want to sort in descending order
+        createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
       },
+    });
+    res.json(blogs);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/transactionlist_completed", async (req, res, next) => {
+  try {
+    const blogs = await prisma.TransactionList.findMany({
+      orderBy: {
+        createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
+      },
+      where:{
+        status: "COMPLETED"
+      }
     });
     res.json(blogs);
   } catch (error) {
@@ -73,9 +89,7 @@ router.get("/transactionlist/:id", async (req, res, next) => {
       where: {
         id: parseInt(req.params.id),
       },
-      orderBy: {
-        createdAt: "asc", // Sort transactions
-      },
+      
     });
 
     // Collect TransactionId values from TransactionList
