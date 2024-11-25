@@ -52,6 +52,8 @@ model Students {
   bankaccounttype   String?
   backaccountnumber String?
 
+  visiblity String? @default("true")
+
   extra1 String?
   extra2 String?
 
