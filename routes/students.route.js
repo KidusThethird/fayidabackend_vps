@@ -55,6 +55,49 @@ if(UserDetails){
   // }
 });
 
+router.get("/list", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+   // console.log("User logged in:", req.user.accountType);
+    // Access the logged-in user's information from req.user
+
+
+    const students = await prisma.Students.findMany({
+      //  include: { sections: true },
+      orderBy: {
+        firstName: "desc", // Replace 'score' with the actual column name you want to sort by
+      },
+      where: { visiblity: "true" },
+    });
+    //Student Admin
+
+if(UserDetails){
+    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
+      res.json(students);
+    } else {
+      res.json({ Error: "You dont have access" });
+    }}
+  } else {
+    res.status(401).json({ message: "User not authenticated" });
+  }
+  // try {
+  //   const students = await prisma.students.findMany({
+  //     include: { sections: true },
+  //   });
+  //   res.json(students);
+  // } catch (error) {
+  //   next(error);
+  // }
+});
+
 router.get(
   "/checkpackageexpirydate/",
   checkAuthenticated,
