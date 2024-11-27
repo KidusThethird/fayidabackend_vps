@@ -3,8 +3,13 @@ const axios = require("axios");
 const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
 const { localUrl } = require("../../../configFIles");
+const tokenStore = require("../tokenInfo"); 
+
 
 const editBankAccountNumber = (bot, chatId, userCookieJars) => {
+  const token = tokenStore.getToken(chatId);
+  console.log("Token: "+ token)
+  console.log("chatId: "+ chatId)
   bot.sendMessage(chatId, "Please enter your new bank account number:");
 
   // Listen for the next message (new bank account number)
@@ -16,6 +21,9 @@ const editBankAccountNumber = (bot, chatId, userCookieJars) => {
       const axiosInstance = wrapper(
         axios.create({
           jar: cookieJar,
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the Bearer token in the headers
+          },
           withCredentials: true,
         })
       );
@@ -27,7 +35,7 @@ const editBankAccountNumber = (bot, chatId, userCookieJars) => {
           const userId = profileResponse.data.id; // Extract the user ID from the profile response
 
           // Send a request to update the bank account number with user ID
-          return axiosInstance.patch(`${localUrl}/students/${userId}`, {
+          return axiosInstance.patch(`${localUrl}/students/patchagent/${userId}`, {
             backaccountnumber: newBankAccountNumber,
             // Use lowercase here
           });

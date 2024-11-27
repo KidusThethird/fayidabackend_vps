@@ -84,12 +84,20 @@ router.get("/config/commison", async (req, res, next) => {
 
 router.patch(
   "/config/commison/:id",
-  checkAuthenticated,
+  authenticateToken,
   async (req, res, next) => {
-    if (req.isAuthenticated()) {
+    if (req.user.id) {
+
+      const UserDetails = await prisma.Students.findUnique({
+ 
+        where: { id: req.user.id },
+       
+      });
+
+
       if (
-        req.user.accountType == "Admin" ||
-        req.user.accountType == "SubAdmin"
+        UserDetails.accountType == "Admin" ||
+        UserDetails.accountType == "SubAdmin"
       ) {
         try {
           const { id } = req.params;

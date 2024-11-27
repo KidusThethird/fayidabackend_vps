@@ -3,21 +3,26 @@ const { wrapper } = require("axios-cookiejar-support");
 const axios = require("axios");
 const { localUrl } = require("../../configFIles");
 const languages = require("./languages"); // Import languages module
+const tokenStore = require("./tokenInfo"); 
+
 
 function sendResourcesMessage(bot, chatId, userCookieJars) {
-  const cookieJar = userCookieJars.get(chatId);
-
-  if (cookieJar) {
+ // const cookieJar = userCookieJars.get(chatId);
+ const token = tokenStore.getToken(chatId);
+ console.log("token from rs: " + token)
+  if (token) {
     const axiosInstance = wrapper(
       axios.create({
-        jar: cookieJar,
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the Bearer token in the headers
+        },
         withCredentials: true,
       })
     );
 
     // Fetch the user's profile
     axiosInstance
-      .get(`${localUrl}/login_register/profile`)
+      .get(`${localUrl}/newlogin/profile`)
       .then((profileResponse) => {
         const { firstName, lastName, gread } = profileResponse.data;
         const language = languages.getUserLanguage(chatId);

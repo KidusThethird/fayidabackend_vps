@@ -2,23 +2,41 @@ const { CookieJar } = require("tough-cookie");
 const { wrapper } = require("axios-cookiejar-support");
 const axios = require("axios");
 const { localUrl } = require("../../configFIles");
-const languages = require("./languages"); // Import the languages module
+const languages = require("./languages"); 
+const tokenStore = require("./tokenInfo"); 
 
+// Import the languages module
 module.exports = {
   fetchQuestionsForGrade: (bot, chatId, userCookieJars) => {
-    const cookieJar = userCookieJars.get(chatId);
+   // const token = userTokens.get(chatId);
+console.log("Hello from question")
 
-    if (cookieJar) {
+//console.log("Shared: "+ token)
+
+const token = tokenStore.getToken(chatId);
+
+    console.log("questions is started " + token)
+   // const cookieJar = userCookieJars.get(chatId);
+
+    if (token) {
+    
+       
+ console.log("there is a token :" + token)
       const axiosInstance = wrapper(
         axios.create({
-          jar: cookieJar,
+          
           withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the Bearer token in the headers
+          },
         })
       );
 
       // Fetch user profile to get the Grade
       axiosInstance
-        .get(`${localUrl}/login_register/profile`)
+        .get(`${localUrl}/newlogin/profile` , {
+         
+        })
         .then((profileResponse) => {
           const {
             firstName,
@@ -28,6 +46,10 @@ module.exports = {
           } = profileResponse.data; // Added userId
 
           // Get the user's language preference
+
+          console.log("We are here 2")
+        //  console.log("log: "+JSON.stringify(profileResponse))
+          console.log("not here")
           const language = languages.getUserLanguage(chatId);
 
           // Define translation messages
@@ -132,6 +154,7 @@ module.exports = {
                         );
                       })
                       .catch((error) => {
+                        console.log("error catched: "+error)
                         bot.sendMessage(
                           chatId,
                           messages[language].submitError,
@@ -167,6 +190,9 @@ module.exports = {
             mainMenuButton
           );
         });
+    } else if (!token) {
+      bot.sendMessage(chatId, "You need to log in first!");
+      return;
     } else {
       bot.sendMessage(chatId, messages[language].loginRequired, mainMenuButton);
     }

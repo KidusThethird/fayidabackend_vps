@@ -202,6 +202,29 @@ router.post("/", async (req, res, next) => {
   } catch (error) {}
 });
 
+//update for agent
+router.patch("/patchagent/:id", checkAuthenticated, async (req, res, next) => {
+  if (req.isAuthenticated()) {
+ console.log("req: "+ JSON.stringify(req.body))
+      try {
+        const { id } = req.params;
+        const RegionSelected = await prisma.Students.update({
+          where: {
+            id: req.params.id,
+          },
+          data: req.body,
+        });
+        res.json(RegionSelected);
+      } catch (error) {
+        next(error);
+      }
+    
+  } else {
+    res.json({ Error: "You dont have access" });
+  }
+});
+
+
 //Update Student
 router.patch("/:id", authenticateToken, async (req, res, next) => {
  // console.log(req.isAuthenticated());

@@ -27,7 +27,7 @@ const editGrandName = (bot, chatId, userCookieJars) => {
           const userId = profileResponse.data.id; // Extract the user ID from the profile response
 
           // Send a request to update the grand name with user ID
-          return axiosInstance.patch(`${localUrl}/students/${userId}`, {
+          return axiosInstance.patch(`${localUrl}/students/patchagent/${userId}`, {
             grandName: newGrandName,
           });
         })

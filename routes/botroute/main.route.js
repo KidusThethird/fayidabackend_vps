@@ -34,6 +34,7 @@ const { postAgentComment } = require("./agent_commnet");
 const languages = require("./languages");
 const agentLanguages = require("./agent_language");
 const { sendBotInfo } = require("./get_info");
+const tokenStore = require("./tokenInfo"); 
 //const sendWelcomeMessage = require("./welcomeRoute");
 //sendWelcomeMessage
 const router = express.Router();
@@ -44,6 +45,14 @@ const bot = new telegramBot(TELEGRAMTOKEN, { polling: true });
 
 // Create a Map to store cookie jars for each user
 const userCookieJars = new Map();
+
+const userTokens = new Map();
+
+
+router.get("/fetchtoken", (req, res, next) => {
+  req.sharedData = "This is shared data from Router 1"; // Attach the variable to `req`
+  next(); // Pass control to the next middleware or router
+});
 
 // Handle incoming messages
 bot.on("message", (message) => {
@@ -63,52 +72,48 @@ bot.on("callback_query", (callbackQuery) => {
   const chatId = callbackQuery.from.id;
   const callbackData = callbackQuery.data;
 
-  if (callbackData === "login_student") {
-    // Ask for email
-    bot.sendMessage(chatId, "Please enter your email:");
+  
+if (callbackData === "login_student") {
+  // Ask for email
+  bot.sendMessage(chatId, "Please enter your email:");
 
-    // Listen for the next message (email)
-    bot.once("message", (emailMessage) => {
-      const email = emailMessage.text;
-      bot.sendMessage(chatId, "Please enter your password:");
+  // Listen for the next message (email)
+  bot.once("message", (emailMessage) => {
+    const email = emailMessage.text.trim();
+    bot.sendMessage(chatId, "Please enter your password:");
 
-      // Listen for the next message (password)
-      bot.once("message", (passwordMessage) => {
-        const password = passwordMessage.text;
+    // Listen for the next message (password)
+    bot.once("message", (passwordMessage) => {
+      const password = passwordMessage.text.trim();
 
-        // Create a new cookie jar for the user
-        const cookieJar = new CookieJar();
-        userCookieJars.set(chatId, cookieJar);
-        const axiosInstance = wrapper(
-          axios.create({
-            jar: cookieJar, // Use the user's cookie jar
-            withCredentials: true,
-          })
-        );
+      // Send a request to the login endpoint
+      axios
+        .post(`${localUrl}/newlogin/login`, {
+          email,
+          password,
+        })
+        .then((response) => {
+          if (response.data.accessToken) {
+            // Save the token with the user's chatId
+            const token = response.data.accessToken;
+            tokenStore.setToken(chatId, token);
+            userTokens.set(chatId, token);
 
-        // Send a request to the login endpoint
-        axiosInstance
-          .post(`${localUrl}/login_register/loginss`, {
-            email,
-            password,
-          })
-          .then((response) => {
-            if (response.data.message === "Login successful") {
-              bot.sendMessage(chatId, "Login successful! 🎉");
-              sendPostLoginOptions(bot, chatId); // Show post-login options
-            } else {
-              bot.sendMessage(chatId, "Login failed: " + response.data.message);
-            }
-          })
-          .catch((error) => {
-            bot.sendMessage(
-              chatId,
-              "An error occurred during login: " + error.message
-            );
-          });
-      });
+            bot.sendMessage(chatId, "Login successful! 🎉");
+            sendPostLoginOptions(bot, chatId); // Show post-login options
+          } else {
+            bot.sendMessage(chatId, "Login failed: Invalid credentials.");
+          }
+        })
+        .catch((error) => {
+          bot.sendMessage(
+            chatId,
+            "An error occurred during login: " + error.message
+          );
+        });
     });
-  } //change_language_agent
+  });
+}//change_language_agent
   else if (callbackData === "change_language") {
     languages.sendLanguageOptions(bot, chatId, "student");
   } else if (callbackData === "change_language_agent") {
@@ -211,54 +216,65 @@ bot.on("callback_query", (callbackQuery) => {
   if (callbackData === "agent_main_menu") {
     // Call sendPostLoginOptions from choice02.js
     showAgentMenu(bot, chatId);
-  } else if (callbackData === "view_profile") {
-    // Handle 'View Profile' option
-    const cookieJar = userCookieJars.get(chatId);
-    if (cookieJar) {
-      const axiosInstance = wrapper(
-        axios.create({
-          jar: cookieJar,
-          withCredentials: true,
-        })
-      );
-
+  } 
+  
+  
+  
+  else if (callbackData === "view_profile") {
+    // Retrieve the token for the user
+    const token = userTokens.get(chatId); // Replace with your token storage mechanism
+  
+    if (token) {
+      // Set up Axios with Bearer token
+      const axiosInstance = axios.create({
+        headers: {
+          Authorization: `Bearer ${token}`, // Send token in the Authorization header
+        },
+      });
+  
       // Fetch user profile
       axiosInstance
-        .get(`${localUrl}/login_register/profile`)
+        .get(`${localUrl}/newlogin/profile`)
         .then((profileResponse) => {
-          const { firstName, lastName, gread } = profileResponse.data;
-          const fullName = `${firstName} ${lastName}`;
-
-          // Prepare the message and the inline keyboard
-          const profileMessage = `Profile Information:\nName: ${fullName}\nGrade: ${gread}`;
-
-          const language = languages.getUserLanguage(chatId);
-
-          const messages = {
-            en: {
-              prompt: "Back To Main Menu:",
-            },
-            am: {
-              prompt: "ወደ ዋናው ምርጫ",
-            },
-          };
-
-          // Create an inline keyboard with a button leading to "main_menu"
-          const options = {
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: `${messages[language].prompt}`,
-                    callback_data: "student_main_menu", // Callback data for the button
-                  },
+          // Check if the response includes an "id" attribute
+          if (profileResponse.data.id) {
+            const { firstName, lastName, gread } = profileResponse.data;
+            const fullName = `${firstName} ${lastName}`;
+  
+            // Prepare the message and the inline keyboard
+            const profileMessage = `Profile Information:\nName: ${fullName}\nGrade: ${gread}`;
+  
+            const language = languages.getUserLanguage(chatId);
+  
+            const messages = {
+              en: {
+                prompt: "Back To Main Menu:",
+              },
+              am: {
+                prompt: "ወደ ዋናው ምርጫ",
+              },
+            };
+  
+            // Create an inline keyboard with a button leading to "main_menu"
+            const options = {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: `${messages[language].prompt}`,
+                      callback_data: "student_main_menu", // Callback data for the button
+                    },
+                  ],
                 ],
-              ],
-            },
-          };
-
-          // Send the profile information with the button
-          bot.sendMessage(chatId, profileMessage, options);
+              },
+            };
+  
+            // Send the profile information with the button
+            bot.sendMessage(chatId, profileMessage, options);
+          } else {
+            // If "id" is missing in the response, prompt user to log in
+            bot.sendMessage(chatId, "You need to log in first!");
+          }
         })
         .catch((error) => {
           bot.sendMessage(
@@ -267,9 +283,16 @@ bot.on("callback_query", (callbackQuery) => {
           );
         });
     } else {
+      // If no token is found for the user
       bot.sendMessage(chatId, "You need to log in first!");
     }
-  } else if (callbackData === "edit_profile") {
+  }
+  
+  
+  
+  
+  
+  else if (callbackData === "edit_profile") {
     editProfile(bot, chatId); // Call editProfile method to display editing options
   } else if (callbackData === "edit_first_name") {
     editFirstName(bot, chatId, userCookieJars); // Call the function to edit the first name
@@ -410,5 +433,5 @@ bot.on("callback_query", (callbackQuery) => {
   // Acknowledge the callback query to remove the loading state
   bot.answerCallbackQuery(callbackQuery.id);
 });
-
-module.exports = router;
+const good= "good"
+module.exports = {router};
