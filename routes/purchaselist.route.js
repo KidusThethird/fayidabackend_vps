@@ -1151,6 +1151,17 @@ router.get("/getpuchasedlist", authenticateToken, async (req, res, next) => {
 router.post("/", async (req, res, next) => {
   console.log("first of post request to purchaselist");
 console.log("Body: "+ JSON.stringify(req.body))
+
+
+
+const AgentConfigFetch = await prisma.Configuration.findUnique({
+ 
+  where: { id: "53962976-afd5-4c1a-b612-decb5fd1eeeb" },
+ 
+});
+const agentCommisionPercent = parseFloat(AgentConfigFetch.agentCommisionRate);
+console.log("Commision in percent: "+ agentCommisionPercent)
+
 let StudentId = "000"
 let PackageId = "000"
 
@@ -1161,10 +1172,34 @@ let PackageId = "000"
 
   PackageId=req.body.dataToSend.packageId
   console.log("First packageid : "+PackageId)
+const PayedAmount = req.body.dataToSend.amount;
+const PromoCode = req.body.dataToSend.promocode;
+
+console.log("amount payed: " + req.body.dataToSend.amount)
+const paymentForAgent = ((parseFloat(PayedAmount) * agentCommisionPercent) /100);
+  console.log("Payment for Agent: "+paymentForAgent)
 
 
-
+const UserDetails = await prisma.Students.findFirst({
+ 
+  where: { accountType:"Agent" , promocode: PromoCode},
+ 
+});
+if(UserDetails.id){
+const UpdateAgentPayment = await prisma.Students.update({
+  where: {
+    id: UserDetails.id,
+  },
+  data: {
+    balance : (parseFloat(UserDetails.balance)+paymentForAgent).toString()
+  },
   
+});
+console.log("Successfuly added money to agent");
+} else{console.log("No Agent Found")}
+
+
+
   try {
     if (StudentId) {
 

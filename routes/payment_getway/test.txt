@@ -2,7 +2,7 @@
   txnId: 'b60b965b-23c6-45c9-b223-43bc81e723cf',
   created_at: '2024-11-18T03:47:12.153475Z',
   updated_at: '2024-11-18T03:47:35.307034Z',
-  thirdPartyId: 'ptS3LAZcj6esjr8',
+  thirdPartyId: 'XY+oVZYJP8PGXmX',
   transactionType: '',
   merId: '9e2dab64-e2bb-4837-9b85-d855dd878d2b',
   merName: 'Santimpay Test Company',

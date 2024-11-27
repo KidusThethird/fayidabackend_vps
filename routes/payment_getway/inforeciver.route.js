@@ -197,16 +197,24 @@ let thirdParty = req.body.thirdPartyId
  console.log("Generated key: "+req.body.thirdPartyId)
 
 
-
 if(UserDetails){
 
   console.log("User Fetched: "+ UserDetails);
 
+  const UserData = await prisma.Students.findUnique({
+ 
+    where: { id: UserDetails.studentId},
+   
+  });
+     
+if(UserData){
 
       const dataToSend = {
         "studentId": UserDetails.studentId,
-        "packageId": UserDetails.packageId
-        
+        "packageId": UserDetails.packageId,
+        "amount": req.body.totalAmount,
+        "promocode": UserData.promocode
+       
       };
 
 
@@ -233,7 +241,7 @@ if(UserDetails){
           success: false,
           message: error,
         });
-      }
+      } }
 
 
     }

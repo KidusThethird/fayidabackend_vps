@@ -108,7 +108,19 @@ if (callbackData === "login_student") {
         .catch((error) => {
           bot.sendMessage(
             chatId,
-            "An error occurred during login: " + error.message
+            "Log in failed. Please check your credentials and try again. ",
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: "Try Again",
+                      callback_data: "log_out_page", // Retry login
+                    },
+                  ],
+                ],
+              },
+            }
           );
         });
     });
