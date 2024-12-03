@@ -674,7 +674,10 @@ if(UserDetails){
           const paidPackages = await prisma.PurchaseList.findMany({
             where: {
               studentsId: req.user.id,
-              paymentStatus: "active",
+              OR: [
+                { paymentStatus: "active" },
+                { paymentStatus: "done" },
+              ],
             },
             select: {
               packagesId: true,
