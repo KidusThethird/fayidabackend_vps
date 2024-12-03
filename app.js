@@ -30,6 +30,8 @@ app.use(cors({ credentials: true, origin: true }));
 
 app.use("/", require("./routes/api.route"));
 app.use("/newlogin", require("./routes/newlogin.js"))
+app.use("/download", require("./routes/downloadfile.route.js"))
+
 app.use("/inforeciver", require("./routes/payment_getway/inforeciver.route.js"))
 app.use("/generateid", require("./routes/payment_getway/generatedIdmanage.route.js"))
 //update pyament haldler   paymenthandler   paymenthandlermain
