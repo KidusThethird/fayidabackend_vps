@@ -4,6 +4,8 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const checkAuthenticated = require("./login_register.route");
 const sendCustomEmail = require("./helper/sendCustomEmail");
+const authenticateToken = require("./authMiddleware");
+
 
 //working with students
 
@@ -41,20 +43,27 @@ router.get("/prizeDetail/:id", async (req, res, next) => {
   }
 });
 
-router.get("/prizehistory/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
+router.get("/prizehistory/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
     try {
-      const { id } = req.params;
+      //const { id } = req.params;
       const studentPrize = await prisma.StudentPrize.findMany({
         where: {
-          studentsId: req.user.id,
+          studentsId: UserDetails.id,
         },
         orderBy: {
           createdAt: "desc",
         },
         include: { Prize: true },
       });
-
+console.log("Print: "+studentPrize)
       res.json(studentPrize);
     } catch (error) {
       next(error);
@@ -65,24 +74,30 @@ router.get("/prizehistory/", checkAuthenticated, async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
+router.post("/", authenticateToken, async (req, res, next) => {
   console.log("prizeId: " + req.body.prizeId);
   console.log("prizePoints: " + req.body.prizePoint);
-  if (req.isAuthenticated()) {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
     // console.log("autenticated true");
     try {
-      if (parseFloat(req.user.points) >= parseFloat(req.body.prizePoint)) {
+      if (parseFloat(UserDetails.points) >= parseFloat(req.body.prizePoint)) {
         const studentPrize = await prisma.StudentPrize.create({
           data: {
             //  ...req.body, // Include data from the request
             prizeId: req.body.prizeId,
-            studentsId: req.user.id, // Example of custom field
+            studentsId: UserDetails.id, // Example of custom field
             // Example of custom field with a number value
           },
         });
         const updatedUserPoint =
-          parseFloat(req.user.points) - parseFloat(req.body.prizePoint);
-        console.log("frist: " + parseFloat(req.user.points));
+          parseFloat(UserDetails.points) - parseFloat(req.body.prizePoint);
+        console.log("frist: " + parseFloat(UserDetails.points));
         console.log("second: " + parseFloat(req.body.prizePoint));
         console.log("Difference: " + updatedUserPoint);
 
@@ -90,7 +105,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 
         const StudentPointUpdate = await prisma.Students.update({
           where: {
-            id: req.user.id,
+            id: UserDetails.id,
           },
           data: { points: updatedUserPoint.toString() },
         });
@@ -101,7 +116,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
           const addNotification = await prisma.Notifications.create({
             data: {
               type: "0",
-              studentsId: req.user.id,
+              studentsId: UserDetails.id,
               addressedTo: "s",
               notiHead: "Prize Ordered!",
               notiFull: `You have successfuly ordered [${req.body.itemName}] with Prize Order Id  ${studentPrizeId}`,
@@ -115,15 +130,15 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 
               //studentsId: req.user.id,
               addressedTo: "admin",
-              notiHead: `${req.user.firstName} Ordered a Prize!`,
-              notiFull: `${req.user.firstName} ${req.user.lastName} has Ordered a [${req.body.itemName}], Prize!`,
+              notiHead: `${UserDetails.firstName} Ordered a Prize!`,
+              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has Ordered a [${req.body.itemName}], Prize!`,
               status: "0",
             },
           });
 
           const returnValue = sendCustomEmail.emailsender(
-            req.user.email,
-            req.user.firstName,
+            UserDetails.email,
+            UserDetails.firstName,
             "Prize Order Successful!",
             `You have ordered a prize [${req.body.itemName}] with prize order Id [${studentPrizeId}], `,
             "We will reach out to you as soon as possible!"
@@ -140,9 +155,19 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 });
 
 //Update Student
-router.patch("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.patch("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+    if (UserDetails.accountType == "Admin") {
+
+
+
       try {
         // console.log("we are here");
         const { id } = req.params;
@@ -165,9 +190,20 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 });
 
 //delete Student
-router.delete("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.delete("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+    if (UserDetails.accountType == "Admin") {
+
+
       try {
         const { id } = req.params;
         const studentPrize = await prisma.StudentPrize.delete({

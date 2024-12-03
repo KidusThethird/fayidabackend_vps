@@ -6,6 +6,8 @@ const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 
 const { PrismaClient } = require("@prisma/client");
 const multer = require("multer");
+const authenticateToken = require("./authMiddleware");
+
 //const { Storage } = require("@google-cloud/storage");
 //const { generateSignedUrl } = require("./helper/bucketurlgenerator");
 //const sendCustomEmail = require("./helper/sendCustomEmail");
@@ -192,9 +194,16 @@ router.get("/displayhome/", async (req, res, next) => {
   }
 });
 
-router.get("/checkpoints/", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    const userPoints = parseInt(req.user.points);
+router.get("/checkpoints/", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
+
+    const userPoints = parseInt(UserDetails.points);
     try {
       const prize = await prisma.Prize.findMany({
         orderBy: {
@@ -256,11 +265,18 @@ router.get("/:id", async (req, res, next) => {
 });
 
 //Create a Student
-router.post("/", checkAuthenticated, async (req, res, next) => {
+router.post("/", authenticateToken, async (req, res, next) => {
   console.log("Print one");
-  if (req.isAuthenticated()) {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+
     console.log("Print two");
-    if (req.user.accountType == "Admin") {
+    if (UserDetails.accountType == "Admin") {
       console.log("Print three");
       try {
         const prize = await prisma.Prize.create({
@@ -279,7 +295,7 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 });
 
 //Update Student
-router.patch("/:id", checkAuthenticated, async (req, res, next) => {
+router.patch("/:id", authenticateToken, async (req, res, next) => {
   try {
     const { id } = req.params;
     const updatePrize = await prisma.Prize.update({
@@ -295,9 +311,15 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 });
 
 //delete Student
-router.delete("/:id", checkAuthenticated, async (req, res, next) => {
-  if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin") {
+router.delete("/:id", authenticateToken, async (req, res, next) => {
+  if (req.user.id) {
+
+    const UserDetails = await prisma.Students.findUnique({
+ 
+      where: { id: req.user.id },
+     
+    });
+    if (UserDetails.accountType == "Admin") {
       try {
         const { id } = req.params;
         deletePrize = await prisma.Prize.delete({
