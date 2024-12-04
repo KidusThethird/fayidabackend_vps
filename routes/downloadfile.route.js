@@ -11,7 +11,7 @@ router.use(express.static(path.join(__dirname, "public")));
 
 // Optional: Create a custom endpoint for downloading the APK
 router.get("/", (req, res) => {
-  const filePath = path.join(__dirname, "../apk/Fayida_Academy.apk");
+  const filePath = path.join(__dirname, "../apk/fayidaapp.apk");
   res.download(filePath, "Fayida Academy.apk", (err) => {
     if (err) {
       console.error("Error downloading the file:", err);
