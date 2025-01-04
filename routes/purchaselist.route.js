@@ -9,8 +9,6 @@ const authenticateToken = require("./authMiddleware");
 const axios = require("axios");
 const { localUrl } = require("../configFIles");
 
-
-
 const cron = require("node-cron");
 
 // cron.schedule("0 0 * * *", async () => {
@@ -68,34 +66,32 @@ const cron = require("node-cron");
 //Get all student
 router.get("/", authenticateToken, async (req, res, next) => {
   if (req.user.id) {
-console.log("Logged in: "+ req.user.id)
-const UserDetails = await prisma.Students.findUnique({
- 
-  where: { id: req.user.id },
- 
-});
-if(UserDetails){
-
-    if (UserDetails.accountType == "Admin") {
-      console.log("Act type = "+ UserDetails.accountType)
-      try {
-        const purchaselist = await prisma.PurchaseList.findMany({
-          include: {
-            Student: true,
-            Package: true,
-          },
-          where: { type: "main" },
-          orderBy: {
-            createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
-          },
-        });
-        res.json(purchaselist);
-      } catch (error) {
-        next(error);
+    console.log("Logged in: " + req.user.id);
+    const UserDetails = await prisma.Students.findUnique({
+      where: { id: req.user.id },
+    });
+    if (UserDetails) {
+      if (UserDetails.accountType == "Admin") {
+        console.log("Act type = " + UserDetails.accountType);
+        try {
+          const purchaselist = await prisma.PurchaseList.findMany({
+            include: {
+              Student: true,
+              Package: true,
+            },
+            where: { type: "main" },
+            orderBy: {
+              createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
+            },
+          });
+          res.json(purchaselist);
+        } catch (error) {
+          next(error);
+        }
+      } else {
+        res.status(401).json({ message: "User not authenticated" });
       }
-    } else {
-      res.status(401).json({ message: "User not authenticated" });
-    } }
+    }
   } else {
     res.status(401).json({ message: "User not authenticated" });
   }
@@ -104,31 +100,30 @@ if(UserDetails){
 router.get("/update", authenticateToken, async (req, res, next) => {
   if (req.user.id) {
     const UserDetails = await prisma.Students.findUnique({
- 
       where: { id: req.user.id },
-     
     });
 
-if(UserDetails){
-    if (UserDetails.accountType == "Admin") {
-      try {
-        const purchaselist = await prisma.PurchaseList.findMany({
-          include: {
-            Student: true,
-            Package: true,
-          },
-          where: { type: "update" },
-          orderBy: {
-            createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
-          },
-        });
-        res.json(purchaselist);
-      } catch (error) {
-        next(error);
+    if (UserDetails) {
+      if (UserDetails.accountType == "Admin") {
+        try {
+          const purchaselist = await prisma.PurchaseList.findMany({
+            include: {
+              Student: true,
+              Package: true,
+            },
+            where: { type: "update" },
+            orderBy: {
+              createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
+            },
+          });
+          res.json(purchaselist);
+        } catch (error) {
+          next(error);
+        }
+      } else {
+        res.status(401).json({ message: "User not authenticated" });
       }
     } else {
-      res.status(401).json({ message: "User not authenticated" });
-    } }  else {
       res.status(401).json({ message: "User not authenticated" });
     }
   } else {
@@ -141,37 +136,33 @@ router.get(
   authenticateToken,
   async (req, res, next) => {
     if (req.user.id) {
-
-
       const UserDetails = await prisma.Students.findUnique({
- 
         where: { id: req.user.id },
-       
       });
 
-if(UserDetails){
-
-      if (UserDetails.accountType == "Admin") {
-        try {
-          const purchaselist = await prisma.PurchaseList.findMany({
-            where: {
-              studentsId: req.params.studentId,
-            },
-            include: {
-              Student: true,
-              Package: true,
-            },
-            orderBy: {
-              createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
-            },
-          });
-          res.json(purchaselist);
-        } catch (error) {
-          next(error);
+      if (UserDetails) {
+        if (UserDetails.accountType == "Admin") {
+          try {
+            const purchaselist = await prisma.PurchaseList.findMany({
+              where: {
+                studentsId: req.params.studentId,
+              },
+              include: {
+                Student: true,
+                Package: true,
+              },
+              orderBy: {
+                createdAt: "desc", // Replace 'asc' with 'desc' if you want to sort in descending order
+              },
+            });
+            res.json(purchaselist);
+          } catch (error) {
+            next(error);
+          }
+        } else {
+          res.status(401).json({ message: "User not authenticated" });
         }
-      } else {
-        res.status(401).json({ message: "User not authenticated" });
-      }}
+      }
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
@@ -182,217 +173,196 @@ router.get(
   "/filterPurchase/:purchaseid",
   authenticateToken,
   async (req, res, next) => {
+    if (req.user.id) {
+      const UserDetails = await prisma.Students.findUnique({
+        where: { id: req.user.id },
+      });
 
-
-
-if(req.user.id){
-
-
-  const UserDetails = await prisma.Students.findUnique({
- 
-    where: { id: req.user.id },
-   
-  });
-
-if(UserDetails){
-    if (UserDetails.accountType == "Admin") {
-      try {
-        const purchaselist = await prisma.PurchaseList.findUnique({
-          where: {
-            id: req.params.purchaseid,
-          },
-          include: {
-            Student: true,
-            Package: true,
-          },
-        });
-        res.json(purchaselist);
-      } catch (error) {
-        next(error);
-      }
-    } else if (UserDetails.accountType == "Student") {
-      try {
-        const purchaselist = await prisma.PurchaseList.findUnique({
-          where: {
-            id: req.params.purchaseid,
-            studentsId: req.user.id,
-          },
-          include: {
-            Student: true,
-            Package: true,
-          },
-        });
-        res.json(purchaselist);
-      } catch (error) {
-        next(error);
+      if (UserDetails) {
+        if (UserDetails.accountType == "Admin") {
+          try {
+            const purchaselist = await prisma.PurchaseList.findUnique({
+              where: {
+                id: req.params.purchaseid,
+              },
+              include: {
+                Student: true,
+                Package: true,
+              },
+            });
+            res.json(purchaselist);
+          } catch (error) {
+            next(error);
+          }
+        } else if (UserDetails.accountType == "Student") {
+          try {
+            const purchaselist = await prisma.PurchaseList.findUnique({
+              where: {
+                id: req.params.purchaseid,
+                studentsId: req.user.id,
+              },
+              include: {
+                Student: true,
+                Package: true,
+              },
+            });
+            res.json(purchaselist);
+          } catch (error) {
+            next(error);
+          }
+        } else {
+          res.status(401).json({ message: "User not authenticated" });
+        }
       }
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
   }
-  } else {
-    res.status(401).json({ message: "User not authenticated" });
-  }
-  }
 );
 router.patch(
   "/filterPurchase/:id",
-  
+
   async (req, res, next) => {
-    console.log("Patch update is started")
-console.log("Body to patch update: "+ JSON.stringify(req.body))
+    console.log("Patch update is started");
+    console.log("Body to patch update: " + JSON.stringify(req.body));
 
-      const UserDetails = await prisma.Students.findUnique({
- 
-        where: { id: req.body.studentId },
-       
-      });
+    const UserDetails = await prisma.Students.findUnique({
+      where: { id: req.body.studentId },
+    });
 
-console.log("user: "+JSON.stringify(UserDetails))
-      if(UserDetails){
+    console.log("user: " + JSON.stringify(UserDetails));
+    if (UserDetails) {
+      try {
+        const { id } = req.params;
+        console.log("body: " + JSON.stringify(req.body));
+        console.log("date: " + req.body.dateToAdd);
 
-      
-        try {
-          const { id } = req.params;
-          console.log("body: " + JSON.stringify(req.body));
-          console.log("date: " + req.body.dateToAdd);
+        // const currentDate = new Date();
+        // console.log("New Date :" + currentDate());
+        // expDate.setDate(currentDate.getDate() + parseInt(req.body.dateToAdd));
+        //  console.log("ExpDate: " + expDate);
 
-          // const currentDate = new Date();
-          // console.log("New Date :" + currentDate());
-          // expDate.setDate(currentDate.getDate() + parseInt(req.body.dateToAdd));
-          //  console.log("ExpDate: " + expDate);
+        const Datetoadd = parseInt(req.body.dateToAdd);
+        console.log("Date to add: " + Datetoadd);
+        // if (req.body.paymentStatus == "active") {
+        //   Datetoadd = parseInt(req.body.dateToAdd);
+        // }
 
-          const Datetoadd = parseInt(req.body.dateToAdd);
-console.log("Date to add: "+ Datetoadd)
-          // if (req.body.paymentStatus == "active") {
-          //   Datetoadd = parseInt(req.body.dateToAdd);
-          // }
+        // const expiryDate = new Date();
 
-          // const expiryDate = new Date();
+        // expiryDate.setDate(expiryDate.getDate() + Datetoadd);
+        // console.log("Expriy date now: " + expiryDate);
+        // console.log("Expriy date now2: " + expiryDate.toLocaleDateString());
+        // console.log("Expriy date now3: " + expiryDate.toString());
 
-          // expiryDate.setDate(expiryDate.getDate() + Datetoadd);
-          // console.log("Expriy date now: " + expiryDate);
-          // console.log("Expriy date now2: " + expiryDate.toLocaleDateString());
-          // console.log("Expriy date now3: " + expiryDate.toString());
+        const FindMainPurchaseId = await prisma.PurchaseList.findFirst({
+          where: {
+            studentsId: req.body.studentId,
+            packagesId: req.body.packageId,
+            type: "main",
+          },
+        });
+        let updatePurchaselist;
+        if (FindMainPurchaseId) {
+          const existingExpiryDate = new Date(FindMainPurchaseId.expiryDate);
 
+          // Ensure it's a Date object
+          const newExpiryDate = new Date(existingExpiryDate); // Create a copy of the existing date
+          newExpiryDate.setDate(
+            existingExpiryDate.getDate() + parseInt(Datetoadd)
+          ); // Add 30 days
 
-
-          const FindMainPurchaseId = await prisma.PurchaseList.findFirst({
+          updatePurchaselist = await prisma.PurchaseList.update({
             where: {
-              studentsId: req.body.studentId,
-              packagesId: req.body.packageId,
-              type: "main"
+              id: FindMainPurchaseId.id,
             },
-          })
-          let updatePurchaselist;
-          if (FindMainPurchaseId) {
-
-            
-            
-            const existingExpiryDate = new Date(FindMainPurchaseId.expiryDate); 
-            
-           // Ensure it's a Date object
-            const newExpiryDate = new Date(existingExpiryDate); // Create a copy of the existing date
-            newExpiryDate.setDate(existingExpiryDate.getDate() + parseInt(Datetoadd)); // Add 30 days
-          
-            updatePurchaselist  = await prisma.PurchaseList.update({
-              where: {
-                id: FindMainPurchaseId.id,
-              },
-              data: {
-                paymentStatus: "done",
-                activatedDate: new Date(),
-                expiryDate: newExpiryDate, // Set the updated expiry date
-              },
-            });
-          }
-
-          console.log("FIndMainPurchase: "+JSON.stringify(FindMainPurchaseId))
-
-          // const updatePurchaselist = await prisma.PurchaseList.update({
-          //   where: {
-          //     id: id,
-          //   },
-          //   // data: req.body,
-          //   data: {
-          //     // name: "test",
-          //     paymentStatus: "active",
-          //     activatedDate: new Date(),
-          //     expiryDate: expiryDate,
-          //   },
-          // });
-
-
-console.log("Updated: "+ JSON.stringify(updatePurchaselist))
-
-
-// if(1==2){
-// try{
-//   console.log("PackageId :"+ req.body.packageId)
-//   let PackageFetch;
-//  PackageFetch = await prisma.Packages.findUnique({
- 
-//   where: { id: req.body.packageId},
- 
-// });
-
-
-// console.log("PackageFetch: "+JSON.stringify(PackageFetch))}catch(e){console.log("Error: "+e)}
-//           const packagePrice = PackageFetch.price;
-// console.log("Price" + packagePrice)
-//           const StudentFind = await prisma.students.findUnique({
-//             where: { id: req.body.studentId },
-//           });
-//           console.log("Student Find: "+StudentFind )
-//           if (StudentFind) {
-//             console.log("Inside studnet" + JSON.stringify(StudentFind))
-//             const Agent  = await prisma.students.findFirst({
-//               where: {
-//                 accountType: "agent",
-//                 promocode: StudentFind.promocode,
-//               },
-//             });
-// console.log("Agent: "+ JSON.stringify(Agent))
-//             if (Agent) {
-//               console.log("Agent is in")
-//               const commisionPercent = await prisma.configuration.findUnique({
-//                 where: {
-//                   id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
-//                 },
-//               });
-
-//               const commisionValue = commisionPercent.agentCommisionRate;
-
-              
-//               console.log("Commision Value: " + commisionValue);
-//              // console.log("Package Price: " + packagePrice);
-//               const ExistingAgentBalance = parseFloat(Agent.balance);
-//               const FinalValue =
-//                 (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
-//               const Total = FinalValue + ExistingAgentBalance;
-//               const updateAgentValue = await prisma.students.update({
-//                 where: {
-//                   id: Agent.id,
-//                 },
-//                 data: {
-//                   balance: Total.toString(),
-//                 },
-//               });
-//             }
-//           }
-        
-//          // res.json(updatePurchaselist);
-//         }
-console.log("End is here")
-res.json({message:"working"});
-      } 
-        
-        catch (error) {
-          console.log("Error from catch: "+ error)
-          next(error);
+            data: {
+              paymentStatus: "done",
+              activatedDate: new Date(),
+              expiryDate: newExpiryDate, // Set the updated expiry date
+            },
+          });
         }
-       }
-    
+
+        console.log("FIndMainPurchase: " + JSON.stringify(FindMainPurchaseId));
+
+        // const updatePurchaselist = await prisma.PurchaseList.update({
+        //   where: {
+        //     id: id,
+        //   },
+        //   // data: req.body,
+        //   data: {
+        //     // name: "test",
+        //     paymentStatus: "active",
+        //     activatedDate: new Date(),
+        //     expiryDate: expiryDate,
+        //   },
+        // });
+
+        console.log("Updated: " + JSON.stringify(updatePurchaselist));
+
+        // if(1==2){
+        // try{
+        //   console.log("PackageId :"+ req.body.packageId)
+        //   let PackageFetch;
+        //  PackageFetch = await prisma.Packages.findUnique({
+
+        //   where: { id: req.body.packageId},
+
+        // });
+
+        // console.log("PackageFetch: "+JSON.stringify(PackageFetch))}catch(e){console.log("Error: "+e)}
+        //           const packagePrice = PackageFetch.price;
+        // console.log("Price" + packagePrice)
+        //           const StudentFind = await prisma.students.findUnique({
+        //             where: { id: req.body.studentId },
+        //           });
+        //           console.log("Student Find: "+StudentFind )
+        //           if (StudentFind) {
+        //             console.log("Inside studnet" + JSON.stringify(StudentFind))
+        //             const Agent  = await prisma.students.findFirst({
+        //               where: {
+        //                 accountType: "agent",
+        //                 promocode: StudentFind.promocode,
+        //               },
+        //             });
+        // console.log("Agent: "+ JSON.stringify(Agent))
+        //             if (Agent) {
+        //               console.log("Agent is in")
+        //               const commisionPercent = await prisma.configuration.findUnique({
+        //                 where: {
+        //                   id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
+        //                 },
+        //               });
+
+        //               const commisionValue = commisionPercent.agentCommisionRate;
+
+        //               console.log("Commision Value: " + commisionValue);
+        //              // console.log("Package Price: " + packagePrice);
+        //               const ExistingAgentBalance = parseFloat(Agent.balance);
+        //               const FinalValue =
+        //                 (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
+        //               const Total = FinalValue + ExistingAgentBalance;
+        //               const updateAgentValue = await prisma.students.update({
+        //                 where: {
+        //                   id: Agent.id,
+        //                 },
+        //                 data: {
+        //                   balance: Total.toString(),
+        //                 },
+        //               });
+        //             }
+        //           }
+
+        //          // res.json(updatePurchaselist);
+        //         }
+        console.log("End is here");
+        res.json({ message: "working" });
+      } catch (error) {
+        console.log("Error from catch: " + error);
+        next(error);
+      }
+    }
   }
 );
 
@@ -401,49 +371,46 @@ router.patch(
   authenticateToken,
   async (req, res, next) => {
     if (req.user.id) {
-
       const UserDetails = await prisma.Students.findUnique({
- 
         where: { id: req.user.id },
-       
       });
 
-if(UserDetails){
+      if (UserDetails) {
+        if (UserDetails.accountType == "Admin") {
+          try {
+            const { id } = req.params;
+            console.log("body: " + JSON.stringify(req.body));
+            console.log("date: " + req.body.dateToAdd);
 
-      if (UserDetails.accountType == "Admin") {
-        try {
-          const { id } = req.params;
-          console.log("body: " + JSON.stringify(req.body));
-          console.log("date: " + req.body.dateToAdd);
+            // const currentDate = new Date();
+            // console.log("New Date :" + currentDate());
+            // expDate.setDate(currentDate.getDate() + parseInt(req.body.dateToAdd));
+            //  console.log("ExpDate: " + expDate);
 
-          // const currentDate = new Date();
-          // console.log("New Date :" + currentDate());
-          // expDate.setDate(currentDate.getDate() + parseInt(req.body.dateToAdd));
-          //  console.log("ExpDate: " + expDate);
+            //   const Datetoadd = parseInt(req.body.dateToAdd);
 
-          //   const Datetoadd = parseInt(req.body.dateToAdd);
+            // if (req.body.paymentStatus == "active") {
+            //   Datetoadd = parseInt(req.body.dateToAdd);
+            // }
 
-          // if (req.body.paymentStatus == "active") {
-          //   Datetoadd = parseInt(req.body.dateToAdd);
-          // }
-
-          const updatePurchaselist = await prisma.PurchaseList.update({
-            where: {
-              id: id,
-            },
-            // data: req.body,
-            data: {
-              // name: "test",
-              paymentStatus: req.body.paymentStatus,
-              // activatedDate: new Date(),
-              // expiryDate: expiryDate,
-            },
-          });
-          res.json(updatePurchaselist);
-        } catch (error) {
-          next(error);
+            const updatePurchaselist = await prisma.PurchaseList.update({
+              where: {
+                id: id,
+              },
+              // data: req.body,
+              data: {
+                // name: "test",
+                paymentStatus: req.body.paymentStatus,
+                // activatedDate: new Date(),
+                // expiryDate: expiryDate,
+              },
+            });
+            res.json(updatePurchaselist);
+          } catch (error) {
+            next(error);
+          }
         }
-      }}
+      }
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
@@ -455,149 +422,145 @@ router.patch(
   authenticateToken,
   async (req, res, next) => {
     if (req.user.id) {
-
       const UserDetails = await prisma.Students.findUnique({
- 
         where: { id: req.user.id },
-       
       });
 
-if(UserDetails){
+      if (UserDetails) {
+        if (UserDetails.accountType == "Admin") {
+          try {
+            const { id } = req.params;
+            console.log("bodyyyy: " + JSON.stringify(req.body));
+            console.log("date: " + req.body.dateToAdd);
 
+            // const currentDate = new Date();
+            // console.log("New Date :" + currentDate());
+            // expDate.setDate(currentDate.getDate() + parseInt(req.body.dateToAdd));
+            //  console.log("ExpDate: " + expDate);
 
-      if (UserDetails.accountType == "Admin") {
-        try {
-          const { id } = req.params;
-          console.log("bodyyyy: " + JSON.stringify(req.body));
-          console.log("date: " + req.body.dateToAdd);
+            var Datetoadd = parseInt(req.body.dateToAdd);
+            const Today = new Date();
 
-          // const currentDate = new Date();
-          // console.log("New Date :" + currentDate());
-          // expDate.setDate(currentDate.getDate() + parseInt(req.body.dateToAdd));
-          //  console.log("ExpDate: " + expDate);
-
-          var Datetoadd = parseInt(req.body.dateToAdd);
-          const Today = new Date();
-
-          if (Datetoadd >= 0) {
-            console.log("Date to add is positive");
-          } else {
-            console.log("Date to add is negative, so it is set to zero");
-            Datetoadd = 0;
-          }
-          const PackageId = req.body.packageId;
-          console.log("Package ID: " + PackageId);
-          // if (req.body.paymentStatus == "active") {
-          //   Datetoadd = parseInt(req.body.dateToAdd);
-          // }
-          console.log("StudentId: " + req.body.studentId);
-          const FetchMainPurchase = await prisma.PurchaseList.findFirst({
-            where: {
-              studentsId: req.body.studentId,
-              packagesId: PackageId,
-              type: "main",
-            },
-          });
-          console.log("first print");
-          console.log(
-            "FetchMainPurchase: " + JSON.stringify(FetchMainPurchase)
-          );
-          console.log("FetchMainPurchase Id: " + FetchMainPurchase.id);
-
-          if (FetchMainPurchase) {
-            var expiryDate = FetchMainPurchase.expiryDate;
-            console.log("Today: " + Today.toLocaleString());
-
-            var CurrentDate = new Date();
-            var remainingTime = expiryDate.getTime() - CurrentDate.getTime();
-            var remainingDays = Math.ceil(
-              remainingTime / (1000 * 60 * 60 * 24)
-            );
-
-            if (remainingDays > 0) {
-              // The expiry date is already expired
-              console.log("The expiry date has remaining days");
-              expiryDate.setDate(expiryDate.getDate() + Datetoadd);
+            if (Datetoadd >= 0) {
+              console.log("Date to add is positive");
             } else {
-              console.log("No dates left for the expirydate");
-              // The expiry date is not yet expired
-              // expiryDate.setDate(Today + Datetoadd);
-              expiryDate = new Date();
-              expiryDate.setDate(expiryDate.getDate() + Datetoadd);
+              console.log("Date to add is negative, so it is set to zero");
+              Datetoadd = 0;
             }
-            console.log("Second print");
-            const updatePurchaselist = await prisma.PurchaseList.update({
-              where: {
-                id: FetchMainPurchase.id,
-              },
-              // data: req.body,
-              data: {
-                //name: "test",
-                //   paymentStatus: req.body.paymentStatus,
-                activatedDate: new Date(),
-                expiryDate: expiryDate,
-              },
-            });
-            console.log("third print");
-
-            // const packagePrice = req.body.packagePrice;
-
-            // const StudentFind = await prisma.students.findUnique({
-            //   where: { id: req.body.studentId },
-            // });
-            // if (StudentFind) {
-            //   const Agent = await prisma.students.findFirst({
-            //     where: {
-            //       accountType: "agent",
-            //       promocode: StudentFind.promocode,
-            //     },
-            //   });
-
-            //   if (Agent) {
-            //     const commisionPercent = await prisma.configuration.findUnique({
-            //       where: {
-            //         id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
-            //       },
-            //     });
-
-            //     const commisionValue = commisionPercent.agentCommisionRate;
-            //     console.log("Commision Value: " + commisionValue);
-            //     console.log("Package Price: " + packagePrice);
-            //     const ExistingAgentBalance = parseFloat(Agent.balance);
-            //     const FinalValue =
-            //       (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
-            //     const Total = FinalValue + ExistingAgentBalance;
-            //     const updateAgentValue = await prisma.students.update({
-            //       where: {
-            //         id: Agent.id,
-            //       },
-            //       data: {
-            //         balance: Total.toString(),
-            //       },
-            //     });
-            //   }
+            const PackageId = req.body.packageId;
+            console.log("Package ID: " + PackageId);
+            // if (req.body.paymentStatus == "active") {
+            //   Datetoadd = parseInt(req.body.dateToAdd);
             // }
-
-            const updatePurchaselist2 = await prisma.PurchaseList.update({
+            console.log("StudentId: " + req.body.studentId);
+            const FetchMainPurchase = await prisma.PurchaseList.findFirst({
               where: {
-                id: id,
-              },
-              // data: req.body,
-              data: {
-                // name: "test",
-                paymentStatus: "done",
-                activatedDate: new Date(),
-                updatePackageStatus: "done",
-                // expiryDate: expiryDate,
+                studentsId: req.body.studentId,
+                packagesId: PackageId,
+                type: "main",
               },
             });
-            res.json(updatePurchaselist);
+            console.log("first print");
+            console.log(
+              "FetchMainPurchase: " + JSON.stringify(FetchMainPurchase)
+            );
+            console.log("FetchMainPurchase Id: " + FetchMainPurchase.id);
+
+            if (FetchMainPurchase) {
+              var expiryDate = FetchMainPurchase.expiryDate;
+              console.log("Today: " + Today.toLocaleString());
+
+              var CurrentDate = new Date();
+              var remainingTime = expiryDate.getTime() - CurrentDate.getTime();
+              var remainingDays = Math.ceil(
+                remainingTime / (1000 * 60 * 60 * 24)
+              );
+
+              if (remainingDays > 0) {
+                // The expiry date is already expired
+                console.log("The expiry date has remaining days");
+                expiryDate.setDate(expiryDate.getDate() + Datetoadd);
+              } else {
+                console.log("No dates left for the expirydate");
+                // The expiry date is not yet expired
+                // expiryDate.setDate(Today + Datetoadd);
+                expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + Datetoadd);
+              }
+              console.log("Second print");
+              const updatePurchaselist = await prisma.PurchaseList.update({
+                where: {
+                  id: FetchMainPurchase.id,
+                },
+                // data: req.body,
+                data: {
+                  //name: "test",
+                  //   paymentStatus: req.body.paymentStatus,
+                  activatedDate: new Date(),
+                  expiryDate: expiryDate,
+                },
+              });
+              console.log("third print");
+
+              // const packagePrice = req.body.packagePrice;
+
+              // const StudentFind = await prisma.students.findUnique({
+              //   where: { id: req.body.studentId },
+              // });
+              // if (StudentFind) {
+              //   const Agent = await prisma.students.findFirst({
+              //     where: {
+              //       accountType: "agent",
+              //       promocode: StudentFind.promocode,
+              //     },
+              //   });
+
+              //   if (Agent) {
+              //     const commisionPercent = await prisma.configuration.findUnique({
+              //       where: {
+              //         id: "53962976-afd5-4c1a-b612-decb5fd1eeeb",
+              //       },
+              //     });
+
+              //     const commisionValue = commisionPercent.agentCommisionRate;
+              //     console.log("Commision Value: " + commisionValue);
+              //     console.log("Package Price: " + packagePrice);
+              //     const ExistingAgentBalance = parseFloat(Agent.balance);
+              //     const FinalValue =
+              //       (parseFloat(packagePrice) * parseFloat(commisionValue)) / 100;
+              //     const Total = FinalValue + ExistingAgentBalance;
+              //     const updateAgentValue = await prisma.students.update({
+              //       where: {
+              //         id: Agent.id,
+              //       },
+              //       data: {
+              //         balance: Total.toString(),
+              //       },
+              //     });
+              //   }
+              // }
+
+              const updatePurchaselist2 = await prisma.PurchaseList.update({
+                where: {
+                  id: id,
+                },
+                // data: req.body,
+                data: {
+                  // name: "test",
+                  paymentStatus: "done",
+                  activatedDate: new Date(),
+                  updatePackageStatus: "done",
+                  // expiryDate: expiryDate,
+                },
+              });
+              res.json(updatePurchaselist);
+            }
+          } catch (error) {
+            console.log("Error from catch: " + error);
+            next(error);
           }
-        } catch (error) {
-          console.log("Error from catch: " + error);
-          next(error);
         }
-      } }
+      }
     } else {
       res.status(401).json({ message: "User not authenticated" });
     }
@@ -605,34 +568,27 @@ if(UserDetails){
 );
 
 router.get("/studentCourses/", authenticateToken, async (req, res, next) => {
-
-
   if (req.user.id) {
-
     const UserDetails = await prisma.Students.findUnique({
- 
       where: { id: req.user.id },
-     
     });
 
-
-if(UserDetails){
-
-
-    if (UserDetails.accountType == "Admin") {
-      try {
-        const StudentCourses = await prisma.StudentCourse.findMany({
-          include: {
-            Packages: true,
-          },
-        });
-        res.json(StudentCourses);
-      } catch (error) {
-        next(error);
+    if (UserDetails) {
+      if (UserDetails.accountType == "Admin") {
+        try {
+          const StudentCourses = await prisma.StudentCourse.findMany({
+            include: {
+              Packages: true,
+            },
+          });
+          res.json(StudentCourses);
+        } catch (error) {
+          next(error);
+        }
+      } else {
+        res.json({ Error: "You dont have access" });
       }
     } else {
-      res.json({ Error: "You dont have access" });
-    } } else {
       res.json({ Error: "You dont have access" });
     }
   } else {
@@ -663,92 +619,92 @@ router.get(
       console.log("authentication is printed");
 
       const UserDetails = await prisma.Students.findUnique({
- 
         where: { id: req.user.id },
-       
       });
-if(UserDetails){
-      if (UserDetails.accountType == "Student") {
-        console.log("student is in");
-        try {
-          const paidPackages = await prisma.PurchaseList.findMany({
-            where: {
-              studentsId: req.user.id,
-              OR: [
-                { paymentStatus: "active" },
-                { paymentStatus: "done" },
-              ],
-            },
-            select: {
-              packagesId: true,
-            },
-          });
-
-          //  console.log("Paid Packages: " + JSON.stringify(paidPackages));
-          const StudentCourses = await prisma.StudentCourse.findMany({
-            where: {
-              studentsId: req.user.id,
-
-              packageId: {
-                in: paidPackages.map((package) => package.packagesId),
+      if (UserDetails) {
+        if (UserDetails.accountType == "Student") {
+          console.log("student is in");
+          try {
+            const paidPackages = await prisma.PurchaseList.findMany({
+              where: {
+                studentsId: req.user.id,
+                OR: [{ paymentStatus: "active" }, { paymentStatus: "done" }],
               },
-            },
-            include: {
-              Courses: {
-                include: { materials: { include: { StudentMaterial: true } } },
+              select: {
+                packagesId: true,
               },
-              Packages: true,
-            },
-          });
+            });
 
-          const StudentCourseWithPackageUrl = await Promise.all(
-            StudentCourses.map(async (pac) => {
-              const signedUrlforFile = await generateSignedUrl(
-                "generalfilesbucket",
-                "package_thumbnails",
-                pac.Packages.thumbnail
-              );
-              return { ...pac, packageImgUrl: signedUrlforFile };
-            })
-          );
-          //  console.log("Paid Packages 2: " + JSON.stringify(StudentCourses));
+            //  console.log("Paid Packages: " + JSON.stringify(paidPackages));
+            const StudentCourses = await prisma.StudentCourse.findMany({
+              where: {
+                studentsId: req.user.id,
 
-          res.json(StudentCourseWithPackageUrl);
-        } catch (error) {
-          console.log("Error from catch: " + error);
-          next(error);
+                packageId: {
+                  in: paidPackages.map((package) => package.packagesId),
+                },
+              },
+              include: {
+                Courses: {
+                  include: {
+                    materials: { include: { StudentMaterial: true } },
+                  },
+                },
+                Packages: true,
+              },
+            });
+
+            const StudentCourseWithPackageUrl = await Promise.all(
+              StudentCourses.map(async (pac) => {
+                const signedUrlforFile = await generateSignedUrl(
+                  "generalfilesbucket",
+                  "package_thumbnails",
+                  pac.Packages.thumbnail
+                );
+                return { ...pac, packageImgUrl: signedUrlforFile };
+              })
+            );
+            //  console.log("Paid Packages 2: " + JSON.stringify(StudentCourses));
+
+            res.json(StudentCourseWithPackageUrl);
+          } catch (error) {
+            console.log("Error from catch: " + error);
+            next(error);
+          }
+        } else if (UserDetails.accountType == "Admin") {
+          try {
+            const paidPackages = await prisma.PurchaseList.findMany({
+              where: {
+                paymentStatus: "active",
+              },
+              select: {
+                packagesId: true,
+              },
+            });
+            const StudentCourses = await prisma.StudentCourse.findMany({
+              where: {
+                // studentsId: req.user.id,
+
+                packageId: {
+                  in: paidPackages.map((package) => package.packagesId),
+                },
+              },
+              include: {
+                Courses: {
+                  include: {
+                    materials: { include: { StudentMaterial: true } },
+                  },
+                },
+                Packages: true,
+              },
+            });
+
+            res.json(StudentCourses);
+          } catch (error) {
+            next(error);
+          }
         }
-      } else if (UserDetails.accountType == "Admin") {
-        try {
-          const paidPackages = await prisma.PurchaseList.findMany({
-            where: {
-              paymentStatus: "active",
-            },
-            select: {
-              packagesId: true,
-            },
-          });
-          const StudentCourses = await prisma.StudentCourse.findMany({
-            where: {
-              // studentsId: req.user.id,
-
-              packageId: {
-                in: paidPackages.map((package) => package.packagesId),
-              },
-            },
-            include: {
-              Courses: {
-                include: { materials: { include: { StudentMaterial: true } } },
-              },
-              Packages: true,
-            },
-          });
-
-          res.json(StudentCourses);
-        } catch (error) {
-          next(error);
-        }
-      } }
+      }
     } else {
       res.json({ message: "not authenticated" });
     }
@@ -852,9 +808,6 @@ router.get(
   async (req, res, next) => {
     try {
       if (req.user.id) {
-
-
-
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
@@ -865,34 +818,34 @@ router.get(
           },
         });
 
-if(paidPackages){
-
-        const paidCourses = await prisma.StudentCourse.findMany({
-          where: {
-            studentsId: req.user.id,
-            packageId: {
-              in: paidPackages.map((package) => package.packagesId),
+        if (paidPackages) {
+          const paidCourses = await prisma.StudentCourse.findMany({
+            where: {
+              studentsId: req.user.id,
+              packageId: {
+                in: paidPackages.map((package) => package.packagesId),
+              },
             },
-          },
 
-          select: {
-            coursesId: true,
-          },
-        });
-      }
-
-if(paidCourses){
-        const CheckVideo = await prisma.Videos.findMany({
-          where: {
-            id: req.params.videoId,
-
-            course: {
-              in: paidCourses.map((course) => course.coursesId),
+            select: {
+              coursesId: true,
             },
-          },
-        });
+          });
+        }
 
-        res.json(CheckVideo); }
+        if (paidCourses) {
+          const CheckVideo = await prisma.Videos.findMany({
+            where: {
+              id: req.params.videoId,
+
+              course: {
+                in: paidCourses.map((course) => course.coursesId),
+              },
+            },
+          });
+
+          res.json(CheckVideo);
+        }
       } else {
         res.status(401).json({ message: "not authenticated" });
       }
@@ -1153,334 +1106,335 @@ router.get("/getpuchasedlist", authenticateToken, async (req, res, next) => {
 //Create a Student
 router.post("/", async (req, res, next) => {
   console.log("first of post request to purchaselist");
-console.log("Body: "+ JSON.stringify(req.body))
+  console.log("Body: " + JSON.stringify(req.body));
 
+  const AgentConfigFetch = await prisma.Configuration.findUnique({
+    where: { id: "53962976-afd5-4c1a-b612-decb5fd1eeeb" },
+  });
+  const agentCommisionPercent = parseFloat(AgentConfigFetch.agentCommisionRate);
+  console.log("Commision in percent: " + agentCommisionPercent);
 
+  let StudentId = "000";
+  let PackageId = "000";
 
-const AgentConfigFetch = await prisma.Configuration.findUnique({
- 
-  where: { id: "53962976-afd5-4c1a-b612-decb5fd1eeeb" },
- 
-});
-const agentCommisionPercent = parseFloat(AgentConfigFetch.agentCommisionRate);
-console.log("Commision in percent: "+ agentCommisionPercent)
+  StudentId = req.body.dataToSend.studentId;
+  console.log("First studentId : " + StudentId);
 
-let StudentId = "000"
-let PackageId = "000"
+  PackageId = req.body.dataToSend.packageId;
+  console.log("First packageid : " + PackageId);
+  const PayedAmount = req.body.dataToSend.amount;
+  const PromoCode = req.body.dataToSend.promocode;
 
+  console.log("amount payed: " + req.body.dataToSend.amount);
+  const paymentForAgent =
+    (parseFloat(PayedAmount) * agentCommisionPercent) / 100;
+  console.log("Payment for Agent: " + paymentForAgent);
 
-  StudentId=req.body.dataToSend.studentId
-  console.log("First studentId : "+StudentId)
-
-
-  PackageId=req.body.dataToSend.packageId
-  console.log("First packageid : "+PackageId)
-const PayedAmount = req.body.dataToSend.amount;
-const PromoCode = req.body.dataToSend.promocode;
-
-console.log("amount payed: " + req.body.dataToSend.amount)
-const paymentForAgent = ((parseFloat(PayedAmount) * agentCommisionPercent) /100);
-  console.log("Payment for Agent: "+paymentForAgent)
-
-
-const UserDetails = await prisma.Students.findFirst({
- 
-  where: { accountType:"Agent" , promocode: PromoCode},
- 
-});
-if(UserDetails.id){
-const UpdateAgentPayment = await prisma.Students.update({
-  where: {
-    id: UserDetails.id,
-  },
-  data: {
-    balance : (parseFloat(UserDetails.balance)+paymentForAgent).toString()
-  },
-  
-});
-console.log("Successfuly added money to agent");
-} else{console.log("No Agent Found")}
-
-
+  try {
+    const UserDetails = await prisma.Students.findFirst({
+      where: { accountType: "Agent", promocode: PromoCode },
+    });
+    if (UserDetails.id) {
+      const UpdateAgentPayment = await prisma.Students.update({
+        where: {
+          id: UserDetails.id,
+        },
+        data: {
+          balance: (
+            parseFloat(UserDetails.balance) + paymentForAgent
+          ).toString(),
+        },
+      });
+      console.log("Successfuly added money to agent");
+    } else {
+      console.log("No Agent Found");
+    }
+  } catch (e) {
+    console.log("Seems Like no Agent found");
+  }
 
   try {
     if (StudentId) {
-
       const UserDetails = await prisma.Students.findUnique({
- 
         where: { id: StudentId },
-       
       });
 
-  if(UserDetails){
-
-    console.log("First point make: "+JSON.stringify(UserDetails))
-      if (UserDetails.studentStatus == "active") {
-        console.log("code: " + UserDetails.firstName);
-        console.log(req.body);
-        const purchaseInfo = {
-          //PackageId
-          packagesId: PackageId,
-          name: "x",
-          transaction_id: "x",
-    method: "santimpay",
-    value: "x",
-    timeLength: "x",
-
-          studentsId: StudentId,
-          expiryDate: new Date(),
-          type: "main",
-        };
-        const alreadyPurchasedInfo = {
-          packagesId: PackageId,
-          name: "x",
-          transaction_id: "x",
-    method: "santimpay",
-    value: "x",
-    timeLength: "x",
-
-          studentsId: StudentId,
-          type: "update",
-          updatePackageStatus: "on",
-        };
-        // console.log(x);
-
-        const checkIfPuchasedAlready = await prisma.PurchaseList.findFirst({
-          where: {
-            studentsId: StudentId,
+      if (UserDetails) {
+        console.log("First point make: " + JSON.stringify(UserDetails));
+        if (UserDetails.studentStatus == "active") {
+          console.log("code: " + UserDetails.firstName);
+          console.log(req.body);
+          const purchaseInfo = {
+            //PackageId
             packagesId: PackageId,
-          },
-        });
-        //if (checkIfPuchasedAlready) {
-        if (!checkIfPuchasedAlready) {
+            name: "x",
+            transaction_id: "x",
+            method: "santimpay",
+            value: "x",
+            timeLength: "x",
 
-          console.log("Check Point 2: new purchase" )
-          const purchaselist = await prisma.PurchaseList.create({
-            data: purchaseInfo,
-          });
-console.log("New Purchase List: "+ JSON.stringify(purchaselist))
-          const addNotificationtoAdmin = await prisma.Notifications.create({
-            data: {
-              type: "0",
+            studentsId: StudentId,
+            expiryDate: new Date(),
+            type: "main",
+          };
+          const alreadyPurchasedInfo = {
+            packagesId: PackageId,
+            name: "x",
+            transaction_id: "x",
+            method: "santimpay",
+            value: "x",
+            timeLength: "x",
 
-              //studentsId: req.user.id,
-              addressedTo: "admin",
-              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  paid for a new package.`,
-              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} successfuly paid for new package!`,
-              status: "0",
+            studentsId: StudentId,
+            type: "update",
+            updatePackageStatus: "on",
+          };
+          // console.log(x);
+
+          const checkIfPuchasedAlready = await prisma.PurchaseList.findFirst({
+            where: {
+              studentsId: StudentId,
+              packagesId: PackageId,
             },
           });
-          console.log("uem" + UserDetails.email);
-          console.log("FN" + UserDetails.firstName);
-          // console.log("ItemName" + req.body.itemName);
-          //  console.log("PrizeId" + studentPrizeId);
-          console.log("Pre: "+ JSON.stringify(purchaselist))
-
-          let purchaselistId;
-          if(purchaselist){
-           purchaselistId = purchaselist.id;
-console.log("PurchaaseListId: "+purchaselistId)
-
-const response = await axios.patch(`${localUrl}/purchaselist/filterPurchase/${purchaselistId}`, {
-  dateToAdd: 30, // Changed "30" (string) to 30 (number)
-  packageId: PackageId,
-  studentId: StudentId,
-  type: "new",
-});
-        }
-      let package;
-        try{//purchaselistId
-          if (1==1) {
-            console.log("purchaseList Recorded: ", purchaselist);
-            const returnValue = sendCustomEmail.emailsender(
-              UserDetails.email,
-              UserDetails.firstName,
-              "You have bought a package!",
-              `Your purchase id is [${purchaselist.id}], `,
-              
-            );
-
-            const addNotification = await prisma.Notifications.create({
+          //if (checkIfPuchasedAlready) {
+          if (!checkIfPuchasedAlready) {
+            console.log("Check Point 2: new purchase");
+            const purchaselist = await prisma.PurchaseList.create({
+              data: purchaseInfo,
+            });
+            console.log("New Purchase List: " + JSON.stringify(purchaselist));
+            const addNotificationtoAdmin = await prisma.Notifications.create({
               data: {
                 type: "0",
-                studentsId: StudentId,
-                addressedTo: "s",
-                notiHead: "Purchase Made.",
-                notiFull: `You have successfuly made a purchase with id [${purchaselistId}]!`,
+
+                //studentsId: req.user.id,
+                addressedTo: "admin",
+                notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  paid for a new package.`,
+                notiFull: `${UserDetails.firstName} ${UserDetails.lastName} successfuly paid for new package!`,
                 status: "0",
               },
             });
-          }
+            console.log("uem" + UserDetails.email);
+            console.log("FN" + UserDetails.firstName);
+            // console.log("ItemName" + req.body.itemName);
+            //  console.log("PrizeId" + studentPrizeId);
+            console.log("Pre: " + JSON.stringify(purchaselist));
 
-          console.log("this is also printed");
-           package = await prisma.Packages.findUnique({
-            where: {
-              id: PackageId,
-            },
-            include: {
-              courses: true,
-            },
-          });
+            let purchaselistId;
+            if (purchaselist) {
+              purchaselistId = purchaselist.id;
+              console.log("PurchaaseListId: " + purchaselistId);
 
-          console.log("Package List one: "+ JSON.stringify(package))
-        
+              const response = await axios.patch(
+                `${localUrl}/purchaselist/filterPurchase/${purchaselistId}`,
+                {
+                  dateToAdd: 30, // Changed "30" (string) to 30 (number)
+                  packageId: PackageId,
+                  studentId: StudentId,
+                  type: "new",
+                }
+              );
+            }
+            let package;
+            try {
+              //purchaselistId
+              if (1 == 1) {
+                console.log("purchaseList Recorded: ", purchaselist);
+                const returnValue = sendCustomEmail.emailsender(
+                  UserDetails.email,
+                  UserDetails.firstName,
+                  "You have bought a package!",
+                  `Your purchase id is [${purchaselist.id}], `
+                );
 
-          if (package) {
-            console.log("here 2");
-            // console.log(package);
-            const courseIds = package.courses.map(
-              (course) => course.id,
-              console.log("this")
-            );
-            console.log("Course IDs in the package:", courseIds);
-            const createStudentCourses = await Promise.all(
-              courseIds.map(async (courseId) => {
-                const checkCourseRepeated =
-                  await prisma.StudentCourse.findFirst({
-                    where: {
-                      studentsId: StudentId,
-                      coursesId: courseId,
-                    },
-                  });
-                if (!checkCourseRepeated) {
-                  const createdStudentCourse =
-                    await prisma.StudentCourse.create({
-                      data: {
+                const addNotification = await prisma.Notifications.create({
+                  data: {
+                    type: "0",
+                    studentsId: StudentId,
+                    addressedTo: "s",
+                    notiHead: "Purchase Made.",
+                    notiFull: `You have successfuly made a purchase with id [${purchaselistId}]!`,
+                    status: "0",
+                  },
+                });
+              }
+
+              console.log("this is also printed");
+              package = await prisma.Packages.findUnique({
+                where: {
+                  id: PackageId,
+                },
+                include: {
+                  courses: true,
+                },
+              });
+
+              console.log("Package List one: " + JSON.stringify(package));
+
+              if (package) {
+                console.log("here 2");
+                // console.log(package);
+                const courseIds = package.courses.map(
+                  (course) => course.id,
+                  console.log("this")
+                );
+                console.log("Course IDs in the package:", courseIds);
+                const createStudentCourses = await Promise.all(
+                  courseIds.map(async (courseId) => {
+                    const checkCourseRepeated =
+                      await prisma.StudentCourse.findFirst({
+                        where: {
+                          studentsId: StudentId,
+                          coursesId: courseId,
+                        },
+                      });
+                    if (!checkCourseRepeated) {
+                      const createdStudentCourse =
+                        await prisma.StudentCourse.create({
+                          data: {
+                            studentsId: StudentId,
+                            coursesId: courseId,
+                            packageId: PackageId,
+                          },
+                        });
+                    }
+
+                    // console.log("Course: " + courseId);
+                    // return createdStudentCourse;
+                  })
+                );
+
+                // res.json(createStudentCourses);
+                //  await Promise.all(createStudentCourses);
+
+                console.log("Student courses created successfully.");
+              } else {
+                console.log("Package not found.");
+              }
+            } catch (e) {
+              console.log("Error from catch: " + e);
+            }
+            // res.json(purchaselist);
+            res.status(201).json({ message: "success" });
+          } else {
+            console.log("Check Point 3:  purchase");
+
+            const purchaselist = await prisma.PurchaseList.create({
+              data: alreadyPurchasedInfo,
+            });
+
+            const addNotificationtoAdmin = await prisma.Notifications.create({
+              data: {
+                type: "0",
+
+                //studentsId: req.user.id,
+                addressedTo: "admin",
+                notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  Updated Package.`,
+                notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has updated one more month for a package.`,
+                status: "0",
+              },
+            });
+
+            // console.log("ItemName" + req.body.itemName);
+            //  console.log("PrizeId" + studentPrizeId);
+            const purchaselistId = purchaselist.id;
+            console.log("PurchaseListId: " + purchaselistId);
+            try {
+              const responsex = await axios.patch(
+                `${localUrl}/purchaselist/filterPurchase/${purchaselistId}`,
+                {
+                  dateToAdd: "30", // Changed "30" (string) to 30 (number)
+                  packageId: PackageId,
+                  studentId: StudentId,
+                }
+              );
+            } catch (error) {
+              console.log("Error from catch: " + error);
+            }
+
+            console.log("Passed");
+            if (purchaselistId) {
+              //  console.log("purchaseList Recorded: ", purchaselist);
+              const returnValue = sendCustomEmail.emailsender(
+                UserDetails.email,
+                UserDetails.firstName,
+                "You have ordered an update in a package!",
+                `Your purchase id is [${purchaselistId}], `,
+                ""
+              );
+
+              const addNotification = await prisma.Notifications.create({
+                data: {
+                  type: "0",
+                  studentsId: StudentId,
+                  addressedTo: "s",
+                  notiHead: "Purchase Made.",
+                  notiFull: `You have successfuly made a package update with id [${purchaselistId}]!`,
+                  status: "0",
+                },
+              });
+            }
+
+            console.log("this is also printed");
+            const package = await prisma.Packages.findUnique({
+              where: {
+                id: PackageId,
+              },
+              include: {
+                courses: true,
+              },
+            });
+            console.log("Package List two: " + JSON.stringify(package));
+            if (package) {
+              console.log("here 2");
+              // console.log(package);
+              const courseIds = package.courses.map(
+                (course) => course.id,
+                console.log("this")
+              );
+              console.log("Course IDs in the package:", courseIds);
+              const createStudentCourses = await Promise.all(
+                courseIds.map(async (courseId) => {
+                  const checkCourseRepeated =
+                    await prisma.StudentCourse.findFirst({
+                      where: {
                         studentsId: StudentId,
                         coursesId: courseId,
-                        packageId: PackageId,
                       },
                     });
-                }
+                  if (!checkCourseRepeated) {
+                    const createdStudentCourse =
+                      await prisma.StudentCourse.create({
+                        data: {
+                          studentsId: StudentId,
+                          coursesId: courseId,
+                          packageId: PackageId,
+                        },
+                      });
+                  }
 
-                // console.log("Course: " + courseId);
-                // return createdStudentCourse;
-              })
-            );
+                  // console.log("Course: " + courseId);
+                  // return createdStudentCourse;
+                })
+              );
 
-            // res.json(createStudentCourses);
-            //  await Promise.all(createStudentCourses);
+              // res.json(createStudentCourses);
+              //  await Promise.all(createStudentCourses);
 
-            console.log("Student courses created successfully.");
-          } else {
-            console.log("Package not found.");
+              console.log("Student courses created successfully.");
+            } else {
+              console.log("Package not found.");
+            }
+            // res.json(purchaselist);
+            res.status(201).json({ message: "success" });
+
+            res.status(401).json({ message: "already_purchased" });
           }
-        }catch(e){console.log("Error from catch: "+e)}
-          // res.json(purchaselist);
-          res.status(201).json({ message: "success" });
         } else {
-          console.log("Check Point 3:  purchase" )
-
-          const purchaselist = await prisma.PurchaseList.create({
-            data: alreadyPurchasedInfo,
-          });
-
-          const addNotificationtoAdmin = await prisma.Notifications.create({
-            data: {
-              type: "0",
-
-              //studentsId: req.user.id,
-              addressedTo: "admin",
-              notiHead: `${UserDetails.firstName} ${UserDetails.lastName}  Updated Package.`,
-              notiFull: `${UserDetails.firstName} ${UserDetails.lastName} has updated one more month for a package.`,
-              status: "0",
-            },
-          });
-
-          // console.log("ItemName" + req.body.itemName);
-          //  console.log("PrizeId" + studentPrizeId);
-          const purchaselistId = purchaselist.id;
-          console.log("PurchaseListId: "+purchaselistId)
-        try{  const responsex = await axios.patch(`${localUrl}/purchaselist/filterPurchase/${purchaselistId}`, {
-            dateToAdd: "30", // Changed "30" (string) to 30 (number)
-            packageId: PackageId,
-            studentId: StudentId,
-           
-          }); } catch(error){console.log("Error from catch: "+ error)}
-          
-          
-          
-console.log("Passed")
-          if (purchaselistId) {
-            //  console.log("purchaseList Recorded: ", purchaselist);
-            const returnValue = sendCustomEmail.emailsender(
-              UserDetails.email,
-              UserDetails.firstName,
-              "You have ordered an update in a package!",
-              `Your purchase id is [${purchaselistId}], `,
-              ""
-            );
-
-            const addNotification = await prisma.Notifications.create({
-              data: {
-                type: "0",
-                studentsId: StudentId,
-                addressedTo: "s",
-                notiHead: "Purchase Made.",
-                notiFull: `You have successfuly made a package update with id [${purchaselistId}]!`,
-                status: "0",
-              },
-            });
-          }
-
-          console.log("this is also printed");
-          const package = await prisma.Packages.findUnique({
-            where: {
-              id: PackageId,
-            },
-            include: {
-              courses: true,
-            },
-          });
-          console.log("Package List two: "+ JSON.stringify(package))
-          if (package) {
-            console.log("here 2");
-            // console.log(package);
-            const courseIds = package.courses.map(
-              (course) => course.id,
-              console.log("this")
-            );
-            console.log("Course IDs in the package:", courseIds);
-            const createStudentCourses = await Promise.all(
-              courseIds.map(async (courseId) => {
-                const checkCourseRepeated =
-                  await prisma.StudentCourse.findFirst({
-                    where: {
-                      studentsId: StudentId,
-                      coursesId: courseId,
-                    },
-                  });
-                if (!checkCourseRepeated) {
-                  const createdStudentCourse =
-                    await prisma.StudentCourse.create({
-                      data: {
-                        studentsId: StudentId,
-                        coursesId: courseId,
-                        packageId: PackageId,
-                      },
-                    });
-                }
-
-                // console.log("Course: " + courseId);
-                // return createdStudentCourse;
-              })
-            );
-
-            // res.json(createStudentCourses);
-            //  await Promise.all(createStudentCourses);
-
-            console.log("Student courses created successfully.");
-          } else {
-            console.log("Package not found.");
-          }
-          // res.json(purchaselist);
-          res.status(201).json({ message: "success" });
-
-          res.status(401).json({ message: "already_purchased" });
+          res.status(401).json({ message: "inactive" });
         }
-      } else {
-        res.status(401).json({ message: "inactive" });
-      } }
+      }
     } else {
       res.status(401).json({ message: "failed" });
     }
@@ -1492,32 +1446,28 @@ console.log("Passed")
 //Update Student
 router.patch("/:id", authenticateToken, async (req, res, next) => {
   if (req.user.id) {
-
     const UserDetails = await prisma.Students.findUnique({
- 
       where: { id: req.user.id },
-     
     });
 
-if(UserDetails){
-    if (UserDetails.accountType == "Admin") {
-      try {
-        const { id } = req.params;
-        const updatePurchaselist = await prisma.PurchaseList.update({
-          where: {
-            id: id,
-          },
-          data: req.body,
-        });
-        res.json(updatePurchaselist);
-      } catch (error) {
-        next(error);
+    if (UserDetails) {
+      if (UserDetails.accountType == "Admin") {
+        try {
+          const { id } = req.params;
+          const updatePurchaselist = await prisma.PurchaseList.update({
+            where: {
+              id: id,
+            },
+            data: req.body,
+          });
+          res.json(updatePurchaselist);
+        } catch (error) {
+          next(error);
+        }
+      } else {
+        res.json({ Error: "You dont have access" });
       }
-    } else {
-      res.json({ Error: "You dont have access" });
-    } }
-
-
+    }
   } else {
     res.json({ Error: "You dont have access" });
   }
@@ -1526,32 +1476,27 @@ if(UserDetails){
 //delete Student
 router.delete("/:id", authenticateToken, async (req, res, next) => {
   if (req.user.id) {
-
-
-
     const UserDetails = await prisma.Students.findUnique({
- 
       where: { id: req.user.id },
-     
     });
 
-
-if(UserDetails){
-    if (UserDetails.accountType == "Admin") {
-      try {
-        const { id } = req.params;
-        deletePurchaselist = await prisma.PurchaseList.delete({
-          where: {
-            id: id,
-          },
-        });
-        res.json(deletePurchaselist);
-      } catch (error) {
-        next(error);
+    if (UserDetails) {
+      if (UserDetails.accountType == "Admin") {
+        try {
+          const { id } = req.params;
+          deletePurchaselist = await prisma.PurchaseList.delete({
+            where: {
+              id: id,
+            },
+          });
+          res.json(deletePurchaselist);
+        } catch (error) {
+          next(error);
+        }
+      } else {
+        res.json({ Error: "You dont have access" });
       }
     } else {
-      res.json({ Error: "You dont have access" });
-    } } else {
       res.json({ Error: "You dont have access" });
     }
   } else {
