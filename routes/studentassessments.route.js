@@ -76,7 +76,11 @@ router.get("/studentId/:id", async (req, res, next) => {
 //Create a Student
 router.post("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Assistant"
+    ) {
       try {
         const section = await prisma.StudentAssessement.create({
           data: req.body,
@@ -94,7 +98,11 @@ router.post("/", checkAuthenticated, async (req, res, next) => {
 //Update Student
 router.patch("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Assistant"
+    ) {
       try {
         const { id } = req.params;
         const updateSection = await prisma.StudentAssessement.update({
@@ -118,7 +126,11 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Assistant"
+    ) {
       try {
         const { id } = req.params;
         deleteSection = await prisma.StudentAssessement.delete({

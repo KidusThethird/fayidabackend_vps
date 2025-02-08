@@ -16,13 +16,9 @@ router.use(cors({ credentials: true, origin: true }));
 router.get("/", authenticateToken, async (req, res, next) => {
   if (req.user.id) {
     const UserDetails = await prisma.Students.findUnique({
- 
       where: { id: req.user.id },
-     
     });
 
-
-    
     //console.log("User logged in:", req.user.accountType);
     // Access the logged-in user's information from req.user
     const students = await prisma.Students.findMany({
@@ -34,7 +30,11 @@ router.get("/", authenticateToken, async (req, res, next) => {
       },
     });
     //Student Admin
-    if (UserDetails.accountType == "Admin" || UserDetails.accountType == "SubAdmin") {
+    if (
+      UserDetails.accountType == "Admin" ||
+      UserDetails.accountType == "SubAdmin" ||
+      UserDetails.accountType == "Assistant"
+    ) {
       res.json(students);
     } else {
       res.json({ Error: "You dont have access" });
@@ -87,17 +87,14 @@ router.patch(
   authenticateToken,
   async (req, res, next) => {
     if (req.user.id) {
-
       const UserDetails = await prisma.Students.findUnique({
- 
         where: { id: req.user.id },
-       
       });
-
 
       if (
         UserDetails.accountType == "Admin" ||
-        UserDetails.accountType == "SubAdmin"
+        UserDetails.accountType == "SubAdmin" ||
+        UserDetails.accountType == "Assistant"
       ) {
         try {
           const { id } = req.params;
@@ -169,7 +166,11 @@ router.get(
 //Get one student
 router.get("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      UserDetails.accountType == "Assistant"
+    ) {
       try {
         const { id } = req.params;
         const singleStudent = await prisma.students.findUnique({
@@ -224,7 +225,8 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
     if (
       req.user.accountType == "Admin" ||
       req.user.accountType == "SubAdmin" ||
-      req.user.id == req.params.id
+      req.user.id == req.params.id ||
+      UserDetails.accountType == "Assistant"
     ) {
       try {
         const { id } = req.params;
@@ -277,7 +279,8 @@ router.delete("/:id", async (req, res, next) => {
     if (
       req.user.accountType == "Admin" ||
       req.user.accountType == "SubAdmin" ||
-      req.user.id == req.params.id
+      req.user.id == req.params.id ||
+      UserDetails.accountType == "Assistant"
     ) {
       try {
         const { id } = req.params;

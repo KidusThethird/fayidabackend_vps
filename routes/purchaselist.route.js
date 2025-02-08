@@ -71,7 +71,11 @@ router.get("/", authenticateToken, async (req, res, next) => {
       where: { id: req.user.id },
     });
     if (UserDetails) {
-      if (UserDetails.accountType == "Admin") {
+      if (
+        UserDetails.accountType == "Admin" ||
+        UserDetails.accountType == "Assistant" ||
+        UserDetails.accountType == "SubAdmin"
+      ) {
         console.log("Act type = " + UserDetails.accountType);
         try {
           const purchaselist = await prisma.PurchaseList.findMany({
@@ -104,7 +108,11 @@ router.get("/update", authenticateToken, async (req, res, next) => {
     });
 
     if (UserDetails) {
-      if (UserDetails.accountType == "Admin") {
+      if (
+        UserDetails.accountType == "Admin" ||
+        UserDetails.accountType == "Assistant" ||
+        UserDetails.accountType == "SubAdmin"
+      ) {
         try {
           const purchaselist = await prisma.PurchaseList.findMany({
             include: {
@@ -141,7 +149,11 @@ router.get(
       });
 
       if (UserDetails) {
-        if (UserDetails.accountType == "Admin") {
+        if (
+          UserDetails.accountType == "Admin" ||
+          UserDetails.accountType == "Assistant" ||
+          UserDetails.accountType == "SubAdmin"
+        ) {
           try {
             const purchaselist = await prisma.PurchaseList.findMany({
               where: {
@@ -179,7 +191,11 @@ router.get(
       });
 
       if (UserDetails) {
-        if (UserDetails.accountType == "Admin") {
+        if (
+          UserDetails.accountType == "Admin" ||
+          UserDetails.accountType == "Assistant" ||
+          UserDetails.accountType == "SubAdmin"
+        ) {
           try {
             const purchaselist = await prisma.PurchaseList.findUnique({
               where: {
@@ -376,7 +392,11 @@ router.patch(
       });
 
       if (UserDetails) {
-        if (UserDetails.accountType == "Admin") {
+        if (
+          UserDetails.accountType == "Admin" ||
+          UserDetails.accountType == "Assistant" ||
+          UserDetails.accountType == "SubAdmin"
+        ) {
           try {
             const { id } = req.params;
             console.log("body: " + JSON.stringify(req.body));
@@ -427,7 +447,11 @@ router.patch(
       });
 
       if (UserDetails) {
-        if (UserDetails.accountType == "Admin") {
+        if (
+          UserDetails.accountType == "Admin" ||
+          UserDetails.accountType == "Assistant" ||
+          UserDetails.accountType == "SubAdmin"
+        ) {
           try {
             const { id } = req.params;
             console.log("bodyyyy: " + JSON.stringify(req.body));
@@ -574,7 +598,11 @@ router.get("/studentCourses/", authenticateToken, async (req, res, next) => {
     });
 
     if (UserDetails) {
-      if (UserDetails.accountType == "Admin") {
+      if (
+        UserDetails.accountType == "Admin" ||
+        UserDetails.accountType == "Assistant" ||
+        UserDetails.accountType == "SubAdmin"
+      ) {
         try {
           const StudentCourses = await prisma.StudentCourse.findMany({
             include: {
@@ -671,7 +699,11 @@ router.get(
             console.log("Error from catch: " + error);
             next(error);
           }
-        } else if (UserDetails.accountType == "Admin") {
+        } else if (
+          UserDetails.accountType == "Admin" ||
+          UserDetails.accountType == "Assistant" ||
+          UserDetails.accountType == "SubAdmin"
+        ) {
           try {
             const paidPackages = await prisma.PurchaseList.findMany({
               where: {
@@ -1451,7 +1483,11 @@ router.patch("/:id", authenticateToken, async (req, res, next) => {
     });
 
     if (UserDetails) {
-      if (UserDetails.accountType == "Admin") {
+      if (
+        UserDetails.accountType == "Admin" ||
+        UserDetails.accountType == "Assistant" ||
+        UserDetails.accountType == "SubAdmin"
+      ) {
         try {
           const { id } = req.params;
           const updatePurchaselist = await prisma.PurchaseList.update({
@@ -1481,7 +1517,11 @@ router.delete("/:id", authenticateToken, async (req, res, next) => {
     });
 
     if (UserDetails) {
-      if (UserDetails.accountType == "Admin") {
+      if (
+        UserDetails.accountType == "Admin" ||
+        UserDetails.accountType == "SubAdmin" ||
+        UserDetails.accountType == "Assistant"
+      ) {
         try {
           const { id } = req.params;
           deletePurchaselist = await prisma.PurchaseList.delete({

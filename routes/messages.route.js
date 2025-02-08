@@ -10,7 +10,11 @@ const prisma = new PrismaClient();
 //Get all student
 router.get("/", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Assistant"
+    ) {
       try {
         const Messages = await prisma.Messages.findMany({});
         res.json(Messages);
@@ -28,7 +32,11 @@ router.get("/", checkAuthenticated, async (req, res, next) => {
 //Get one student
 router.get("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Assistant"
+    ) {
       try {
         const { id } = req.params;
         const singleMessage = await prisma.Messages.findUnique({
@@ -62,7 +70,11 @@ router.post("/", async (req, res, next) => {
 //Update Student
 router.patch("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Assistant"
+    ) {
       try {
         const { id } = req.params;
         const updateMessage = await prisma.Messages.update({
@@ -86,7 +98,11 @@ router.patch("/:id", checkAuthenticated, async (req, res, next) => {
 //delete Student
 router.delete("/:id", checkAuthenticated, async (req, res, next) => {
   if (req.isAuthenticated()) {
-    if (req.user.accountType == "Admin" || req.user.accountType == "SubAdmin") {
+    if (
+      req.user.accountType == "Admin" ||
+      req.user.accountType == "SubAdmin" ||
+      req.user.accountType == "Assistant"
+    ) {
       try {
         const { id } = req.params;
         dleleteMessage = await prisma.Messages.delete({
