@@ -14,7 +14,6 @@ const confirmationSend = require("./helper/confirmationEmail");
 const codeGenerator = require("./helper/codegenerator");
 const authenticateToken = require("./authMiddleware");
 
-
 // initializePassport(
 //   passport,
 //   async (email) => {
@@ -159,11 +158,19 @@ router.use(passport.session());
 // });
 
 router.post("/register", async (req, res, next) => {
+  console.log("To Register...");
+  console.log("Data: " + JSON.stringify(req.body));
   try {
     req.body.password = await bcrypt.hash(req.body.password, 10);
     const student = await prisma.students.create({
-      data: req.body,
+      // data: req.body,
+
+      data: {
+        ...req.body, // Spread the existing request body
+        studentStatus: "active", // Add new field
+      },
     });
+
     const addNotificationtoAdmin = await prisma.Notifications.create({
       data: {
         type: "1",
@@ -373,11 +380,9 @@ router.post(
   authenticateToken,
   async (req, res, next) => {
     try {
-console.log("UserId: "+ req.user.id)
+      console.log("UserId: " + req.user.id);
       const UserDetails = await prisma.Students.findUnique({
- 
         where: { id: req.user.id },
-       
       });
 
       console.log("Try is printed");
@@ -719,60 +724,65 @@ router.patch(
   async (req, res, next) => {
     console.log(req.user.id);
     if (req.user.id) {
-      console.log("first: "+JSON.stringify(req.user));
+      console.log("first: " + JSON.stringify(req.user));
 
-const current_pwd_from_db = await prisma.Students.findUnique({
-  where: {
-    id: req.user.id,
-    
-  },
-});
-//res.json(notifications);
-console.log("Pwd from db: "+ current_pwd_from_db)
-if(current_pwd_from_db){
-      if (req.user.id == req.params.id) {
-        console.log("user id confirmed");
-        console.log("INput pwd: "+ req.body.password)
-        console.log("hashed pwd: "+ req.user.password)
-        if (await bcrypt.compare(req.body.currentPassword, current_pwd_from_db.password)) {
-          console.log("correct current password");
-          try {
-            const { id } = req.params;
-            console.log(req.params.id);
-            console.log("Sent File " + req.body.currentPassword);
-            console.log("" + req.params.id + "  " + req.user.password);
-            const updateStudent = await prisma.students.update({
-              where: {
-                id: id,
-              },
-              // data: req.body,
-              data: {
-                //password: req.body.newPassword,
-                password: await bcrypt.hash(req.body.newPassword, 10),
-              },
-            });
-            const addNotification = await prisma.Notifications.create({
-              data: {
-                type: "0",
-                studentsId: req.user.id,
-                addressedTo: "s",
-                notiHead: "Password Changed.",
-                notiFull: "You have successfuly Changed Your password",
-                status: "0",
-              },
-            });
-            res.status(200).json({ message: "Ok" });
-            // res.json(updateStudent);
-          } catch (error) {
-            next(error);
+      const current_pwd_from_db = await prisma.Students.findUnique({
+        where: {
+          id: req.user.id,
+        },
+      });
+      //res.json(notifications);
+      console.log("Pwd from db: " + current_pwd_from_db);
+      if (current_pwd_from_db) {
+        if (req.user.id == req.params.id) {
+          console.log("user id confirmed");
+          console.log("INput pwd: " + req.body.password);
+          console.log("hashed pwd: " + req.user.password);
+          if (
+            await bcrypt.compare(
+              req.body.currentPassword,
+              current_pwd_from_db.password
+            )
+          ) {
+            console.log("correct current password");
+            try {
+              const { id } = req.params;
+              console.log(req.params.id);
+              console.log("Sent File " + req.body.currentPassword);
+              console.log("" + req.params.id + "  " + req.user.password);
+              const updateStudent = await prisma.students.update({
+                where: {
+                  id: id,
+                },
+                // data: req.body,
+                data: {
+                  //password: req.body.newPassword,
+                  password: await bcrypt.hash(req.body.newPassword, 10),
+                },
+              });
+              const addNotification = await prisma.Notifications.create({
+                data: {
+                  type: "0",
+                  studentsId: req.user.id,
+                  addressedTo: "s",
+                  notiHead: "Password Changed.",
+                  notiFull: "You have successfuly Changed Your password",
+                  status: "0",
+                },
+              });
+              res.status(200).json({ message: "Ok" });
+              // res.json(updateStudent);
+            } catch (error) {
+              next(error);
+            }
+          } else {
+            console.log("incorrect current password");
+            res.status(401).json({ message: "Incorrect current password!" });
           }
         } else {
-          console.log("incorrect current password");
-          res.status(401).json({ message: "Incorrect current password!" });
+          res.json({ error: "not authorized" });
         }
-      } else {
-        res.json({ error: "not authorized" });
-      }}
+      }
     } else {
       console.log("not logged in");
       res.status(401).json({ message: "not logged in" });
