@@ -898,13 +898,14 @@ router.get(
       //req.isAuthenticated();
 
       if (req.user.id) {
+        console.log("User Id: " + req.user.id);
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
             //studentsId: "716d3050-2916-447a-88a2-c4316ce4a2a1",
             //716d3050-2916-447a-88a2-c4316ce4a2a1
             //check
-            paymentStatus: "active",
+            paymentStatus: { in: ["active", "done"] },
           },
           select: {
             packagesId: true,
