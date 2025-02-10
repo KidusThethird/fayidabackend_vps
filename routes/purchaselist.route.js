@@ -755,7 +755,7 @@ router.get(
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
-            paymentStatus: { in: ["done"] }, // Matches either "active" or "done"
+            paymentStatus: { in: ["active", "done"] }, // Matches either "active" or "done"
           },
           select: {
             packagesId: true,
