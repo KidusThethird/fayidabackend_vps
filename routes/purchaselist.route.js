@@ -749,16 +749,19 @@ router.get(
   authenticateToken,
   async (req, res, next) => {
     try {
+      console.log("trying to render courses");
       if (req.user.id) {
+        console.log("UserId: " + req.user.id);
         const paidPackages = await prisma.PurchaseList.findMany({
           where: {
             studentsId: req.user.id,
-            paymentStatus: "active",
+            paymentStatus: { in: ["done"] }, // Matches either "active" or "done"
           },
           select: {
             packagesId: true,
           },
         });
+        console.log("PaidPackages: " + JSON.stringify(paidPackages));
 
         const FilterUnits = await prisma.CourseUnits.findMany({
           where: {
