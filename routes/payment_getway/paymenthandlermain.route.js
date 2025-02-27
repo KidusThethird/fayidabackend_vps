@@ -60,8 +60,8 @@ function generateSignedToken(amount, paymentReason) {
       time
   );
   const payload = {
-    //amount,
-    amount: "1", // Ensure consistent formatting
+    amount,
+    // amount: "1", // Ensure consistent formatting
     paymentReason, // Ensure consistent casing
     merchantId: GATEWAY_MERCHANT_ID, // Use the correct merchantId
     generated: time,
