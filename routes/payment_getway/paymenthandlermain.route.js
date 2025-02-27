@@ -60,8 +60,8 @@ function generateSignedToken(amount, paymentReason) {
       time
   );
   const payload = {
-    amount: amount,
-    // amount: "1", // Ensure consistent formatting
+    amount,
+    // amount: "10", // Ensure consistent formatting
     paymentReason, // Ensure consistent casing
     merchantId: GATEWAY_MERCHANT_ID, // Use the correct merchantId
     generated: time,
@@ -115,8 +115,8 @@ router.post("/checkout", authenticateToken, async (req, res) => {
           const payload = {
             id: generateRandomId(req.user.id, req.body.packageId),
             reason: description,
-            amount: "1",
-            //amount: amount,
+            //  amount: "1",
+            amount: amount,
             merchantId: GATEWAY_MERCHANT_ID,
             //signedToken: generateSignedToken("1", description),
             signedToken: generateSignedToken(amount, description),
