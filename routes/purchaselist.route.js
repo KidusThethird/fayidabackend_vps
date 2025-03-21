@@ -1236,6 +1236,7 @@ router.post("/", async (req, res, next) => {
           //if (checkIfPuchasedAlready) {
           if (!checkIfPuchasedAlready) {
             console.log("Check Point 2: new purchase");
+            console.log("my object 001: " + JSON.stringify(purchaseInfo));
             const purchaselist = await prisma.PurchaseList.create({
               data: purchaseInfo,
             });
@@ -1313,8 +1314,11 @@ router.post("/", async (req, res, next) => {
                 // console.log(package);
                 const courseIds = package.courses.map(
                   (course) => course.id,
-                  console.log("this")
+                  console.log("this"),
+                  console.log("Course Item : " + course.id + " " + course.name)
                 );
+
+                /////////////////////
                 console.log("Course IDs in the package:", courseIds);
                 const createStudentCourses = await Promise.all(
                   courseIds.map(async (courseId) => {
