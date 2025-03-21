@@ -1315,11 +1315,16 @@ router.post("/", async (req, res, next) => {
                   "Course Ids: " + package.courses.map((course) => course.id)
                 );
                 // console.log(package);
-                const courseIds = package.courses.map(
-                  (course) => course.id,
-                  console.log("this"),
-                  console.log("Course Item : " + course.id + " " + course.name)
-                );
+                // const courseIds = package.courses.map(
+                //   (course) => course.id,
+                //   console.log("this"),
+                //   console.log("Course Item : " + course.id + " " + course.name)
+                // );
+                const courseIds = package.courses.map((course) => {
+                  console.log("this");
+                  console.log("Course Item : " + course.id + " " + course.name);
+                  return course.id;
+                });
 
                 /////////////////////
                 console.log("Course IDs in the package:", courseIds);
