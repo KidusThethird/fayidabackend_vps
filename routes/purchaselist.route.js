@@ -1311,6 +1311,9 @@ router.post("/", async (req, res, next) => {
 
               if (package) {
                 console.log("here 2");
+                console.log(
+                  "Course Ids: " + package.courses.map((course) => course.id)
+                );
                 // console.log(package);
                 const courseIds = package.courses.map(
                   (course) => course.id,
